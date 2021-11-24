@@ -9,7 +9,7 @@ class STab {
   /// The current route to be displayed
   ///
   ///
-  /// If this is null, the current route will be the last route that have been
+  /// If this is null, the current route will be the last route that has been
   /// used in this tab
   /// If this tab is new (and therefore there is no "last used route")
   /// [initialSRoute] will be used

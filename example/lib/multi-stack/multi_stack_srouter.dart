@@ -30,13 +30,15 @@ class MyApp extends StatelessWidget {
               pathSegments: [tabName[route.tabItem]!, 'settings'],
             ),
           ),
-          STabbedRouteTranslator<AppSRoute, TabItem, SPushable>(
-            tabsRouteToSTabbedRoute: (_, __, tabsRoute) {
+          STabbedRouteTranslator<AppSRoute, TabItem, SPushable>.static(
+            matchToRoute: (_, tabsRoute) {
+              if (!tabsRoute.entries.any((e) => e.value != null)) return null;
+
               final activeTabRoute = tabsRoute.entries.firstWhere((e) => e.value != null);
 
-              return AppSRoute(
+              return AppSRoute.toTab(
                 activeTab: activeTabRoute.key,
-                updatedSRoute: activeTabRoute.value!,
+                newTabRoute: activeTabRoute.value!,
               );
             },
             tabTranslators: {
@@ -111,10 +113,7 @@ class App extends StatelessWidget {
     if (tabItem == activeTab) {
       // pop to first route
       context.sRouter.push(
-        AppSRoute(
-          activeTab: tabItem,
-          updatedSRoute: AppSRoute.initialTabsRoute[tabItem]!,
-        ),
+        AppSRoute.toTab(activeTab: tabItem, newTabRoute: AppSRoute.initialTabsRoute[tabItem]!),
       );
     } else {
       context.sRouter.push(AppSRoute(activeTab: tabItem));

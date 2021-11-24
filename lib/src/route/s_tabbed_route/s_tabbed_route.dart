@@ -13,8 +13,18 @@ import 's_tab.dart';
 import 's_tabbed_route_state.dart';
 
 abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
-  // TODO: add doc
-  // ignore: public_member_api_docs
+
+  /// [STabbedRoute] must have [sTabs] which is a mapping between:
+  ///   - Indexes of type [T]
+  ///   - [STab]s
+  /// [STab] :
+  ///   - must contain initial [SRouteInterface] in [STab.initialSRoute]
+  ///   - can contain a non-null [STab.currentSRoute] to overwrite the currently
+  ///   ^ used route for the associated tab
+  /// If [STab.currentSRoute] is null: the current route will be the last route
+  /// that has been used in this tab.
+  ///
+  /// The size of [sTabs] will determine the number of tabs
   STabbedRoute({required this.sTabs});
 
   /// The list of the different tabs
@@ -34,6 +44,7 @@ abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
   ///
   /// If you DO want to pop, return an instance of this [STabbedRoute], and
   /// typically update the [activeTab] with [activeTabSRouteBellow]
+  ///
   /// If you DON'T want to pop, return null
   STabbedRoute<T, P>? onTabPop(
     BuildContext context,

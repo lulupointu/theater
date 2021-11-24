@@ -34,14 +34,38 @@ class AppSRoute extends STabbedRoute<TabItem, SPushable> {
 
   AppSRoute({
     required this.activeTab,
-    SRouteInterface<NonSPushable>? updatedSRoute,
-  }) : super(sTabs: {
-          for (final tabItem in TabItem.values)
-            tabItem: STab(
-              initialSRoute: initialTabsRoute[tabItem]!,
-              currentSRoute: activeTab == tabItem ? updatedSRoute : null,
+    SRouteInterface<NonSPushable>? tabRedRoute,
+    SRouteInterface<NonSPushable>? tabGreenRoute,
+    SRouteInterface<NonSPushable>? tabBlueRoute,
+  }) : super(
+          sTabs: {
+            TabItem.red: STab(
+              initialSRoute: initialTabsRoute[TabItem.red]!,
+              currentSRoute: tabRedRoute,
             ),
-        });
+            TabItem.green: STab(
+              initialSRoute: initialTabsRoute[TabItem.green]!,
+              currentSRoute: tabGreenRoute,
+            ),
+            TabItem.blue: STab(
+              initialSRoute: initialTabsRoute[TabItem.blue]!,
+              currentSRoute: tabBlueRoute,
+            ),
+          },
+        );
+
+  // This factory is used in [onTabPop] and may used in the [STabbedTranslator]
+  factory AppSRoute.toTab({
+    required TabItem activeTab,
+    SRouteInterface<NonSPushable>? newTabRoute,
+  }) {
+    return AppSRoute(
+      activeTab: activeTab,
+      tabRedRoute: activeTab == TabItem.red ? newTabRoute : null,
+      tabGreenRoute: activeTab == TabItem.green ? newTabRoute : null,
+      tabBlueRoute: activeTab == TabItem.blue ? newTabRoute : null,
+    );
+  }
 
   @override
   final TabItem activeTab;
@@ -54,9 +78,12 @@ class AppSRoute extends STabbedRoute<TabItem, SPushable> {
   @override
   STabbedRoute<TabItem, SPushable>? onTabPop(
     BuildContext context,
-    SRouteInterface<NonSPushable> activeSRouteBellow,
+    SRouteInterface<NonSPushable> activeTabSRouteBellow,
   ) {
-    return AppSRoute(activeTab: activeTab, updatedSRoute: activeSRouteBellow);
+    return AppSRoute.toTab(
+      activeTab: activeTab,
+      newTabRoute: activeTabSRouteBellow,
+    );
   }
 }
 
@@ -84,9 +111,9 @@ abstract class ColoredListSRoute extends SRoute<NonSPushable> {
       color: activeTabColor[tabItem]!,
       title: tabName[tabItem]!,
       onPush: (materialIndex) => context.sRouter.push(
-        AppSRoute(
+        AppSRoute.toTab(
           activeTab: tabItem,
-          updatedSRoute: _detailSRoute(tabItem: tabItem, materialIndex: materialIndex),
+          newTabRoute: _detailSRoute(tabItem: tabItem, materialIndex: materialIndex),
         ),
       ),
     );

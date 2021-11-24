@@ -56,14 +56,14 @@ class MyApp extends StatelessWidget {
           selectedChats: [chats.first],
         ),
         translatorsBuilder: (_) => [
-          STabbedRouteTranslator<TabsWrapperSRoute, MyTab, SPushable>(
-            tabsRouteToSTabbedRoute: (context, webEntry, tabs) {
+          STabbedRouteTranslator<TabsWrapperSRoute, MyTab, SPushable>.static(
+            matchToRoute: (match, tabs) {
               // We should be able to return null from here
 
-              final showMemberDetails = webEntry.historyState['showMemberDetails'] == 'true';
-              final maybeShowLeftTab = webEntry.historyState['maybeShowLeftTab'] == 'true';
+              final showMemberDetails = match.historyState['showMemberDetails'] == 'true';
+              final maybeShowLeftTab = match.historyState['maybeShowLeftTab'] == 'true';
 
-              final selectedChats = webEntry.pathSegments
+              final selectedChats = match.pathSegments
                   .map((id) => chats.firstWhere((chat) => chat.id == id))
                   .toList();
 
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
                 tabLeftRoute: tabs[MyTab.left],
               );
             },
-            tabsMatchToWebEntry: (_, route, tabsWebEntry) {
+            routeToWebEntry: (_, route, tabsWebEntry) {
               return WebEntry(
                 pathSegments: route.selectedChats.map((e) => e.id).toList(),
                 historyState: {

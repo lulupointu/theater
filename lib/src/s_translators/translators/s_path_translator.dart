@@ -53,7 +53,7 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
   final Route Function(WebEntryMatch match) matchToRoute;
 
   @override
-  Route? webEntryToRoute(BuildContext context, WebEntry webEntry) {
+  Route? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
     if (match == null) {
@@ -68,5 +68,5 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
   final WebEntry Function(Route route) _routeToWebEntry;
 
   @override
-  WebEntry routeToWebEntry(BuildContext context, Route route) => _routeToWebEntry(route);
+  WebEntry sRouteToWebEntry(BuildContext context, Route route) => _routeToWebEntry(route);
 }

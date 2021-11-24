@@ -51,7 +51,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
   final WebEntryMatcher _matcher;
 
   @override
-  SRouteInterface<SPushable>? webEntryToRoute(BuildContext context, WebEntry webEntry) {
+  SRouteInterface<SPushable>? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
     // If the web entry does not match, return null
@@ -80,7 +80,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
   Type get routeType => Null;
 
   @override
-  WebEntry routeToWebEntry(BuildContext context, SRouteInterface route) {
+  WebEntry sRouteToWebEntry(BuildContext context, SRouteInterface route) {
     throw 'This should never be called';
   }
 }

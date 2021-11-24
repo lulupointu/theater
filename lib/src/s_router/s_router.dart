@@ -12,7 +12,6 @@ import '../s_translators/s_translators_handler.dart';
 import '../s_translators/translators/universal_web_entry_translator.dart';
 import '../web_entry/web_entry.dart';
 import 's_history_entry.dart';
-import 's_routes_state_manager/s_route_state.dart';
 
 part 's_routes_state_manager/s_routes_state_manager.dart';
 
@@ -54,8 +53,7 @@ class SRouter extends StatefulWidget {
     this.navigatorObservers = const [],
     this.disableSendAppToBackground = false,
     this.disableUniversalTranslator = false,
-  })  :
-        assert(!kIsWeb || translatorsBuilder != null, '''
+  })  : assert(!kIsWeb || translatorsBuilder != null, '''
 You must define [translators] when you are on the web, otherwise SRouter can't know which [SRoute] correspond to which url
 '''),
         super(key: key) {
@@ -145,6 +143,9 @@ main() {
   ///
   /// In a nested [SRouter], we never tries to put the app in the background so
   /// this attribute is useless
+  ///
+  ///
+  /// This is only used on iOS and Android
   ///
   ///
   /// Defaults to false
@@ -363,8 +364,8 @@ class SRouterState extends State<SRouter> {
   ///   ^ it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
-  /// [STranslator]s as using the context in [STranslator.webEntryToRoute] and
-  /// [STranslator.routeToWebEntry] to get this SRouter will be in the
+  /// [STranslator]s as using the context in [STranslator.webEntryToSRoute] and
+  /// [STranslator.sRouteToWebEntry] to get this SRouter will be in the
   /// in-between state described above
   SHistoryEntry? _currentHistoryEntry;
 
@@ -389,7 +390,7 @@ class SRouterState extends State<SRouter> {
     return _pushSHistoryEntry(
       SHistoryEntry(
         webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ??
-            (throw UnknownSRouteException(sRoute: route)),
+            (throw UnknownSRouteError(sRoute: route)),
         route: route,
       ),
     );
@@ -402,7 +403,8 @@ class SRouterState extends State<SRouter> {
   void replace(SRouteInterface<SPushable> route) {
     return _replaceSHistoryEntry(
       SHistoryEntry(
-        webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ?? (throw ''),
+        webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ??
+            (throw UnknownSRouteError(sRoute: route)),
         route: route,
       ),
     );
@@ -417,7 +419,7 @@ class SRouterState extends State<SRouter> {
       SHistoryEntry(
         webEntry: webEntry,
         route: _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
-            (throw UnknownWebEntryException(webEntry: webEntry)),
+            (throw UnknownWebEntryError(webEntry: webEntry)),
       ),
     );
   }
@@ -431,7 +433,7 @@ class SRouterState extends State<SRouter> {
       SHistoryEntry(
         webEntry: webEntry,
         route: _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
-            (throw UnknownWebEntryException(webEntry: webEntry)),
+            (throw UnknownWebEntryError(webEntry: webEntry)),
       ),
     );
   }
@@ -536,12 +538,23 @@ class SRouterState extends State<SRouter> {
 
     // Get the route from the translators
     final route = _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
-        (throw UnknownWebEntryException(webEntry: webEntry));
+        (throw UnknownWebEntryError(webEntry: webEntry));
 
     // Call replace with the route instead of the [WebEntry] because the title
     // might need to be set and this is only accessible by converting the route
     // to a [WebEntry]
     replace(route);
+  }
+
+  /// Returns true if the current platform is android or iOS
+  bool get _isPlatformMobile {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return true;
+      default:
+        return false;
+    }
   }
 
   @override
@@ -597,7 +610,8 @@ class SRouterState extends State<SRouter> {
             sRoute: currentHistoryEntry!.route,
             navigatorKey: widget.navigatorKey,
             navigatorObservers: widget.navigatorObservers,
-            disableSendAppToBackground: isNested || widget.disableSendAppToBackground,
+            disableSendAppToBackground:
+                !_isPlatformMobile || isNested || widget.disableSendAppToBackground,
           );
 
           return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
@@ -643,12 +657,12 @@ class _SRouterProvider extends InheritedWidget {
 /// An exception thrown when the given web entry in
 /// [STranslatorsHandler.getRouteFromWebEntry] could not be matched by any
 /// translator
-class UnknownWebEntryException implements Exception {
+class UnknownWebEntryError implements Exception {
   /// The web entry which could not be converted to an SRoute
   final WebEntry webEntry;
 
   // ignore: public_member_api_docs
-  UnknownWebEntryException({required this.webEntry});
+  UnknownWebEntryError({required this.webEntry});
 
   @override
   String toString() => '''
@@ -663,12 +677,12 @@ If you are NOT on the web, this should never happen, please fill an issue.
 /// An exception thrown when the given [SRouteInterface] in
 /// [STranslatorsHandler.getRouteFromWebEntry] could not be matched by any
 /// translator
-class UnknownSRouteException implements Exception {
+class UnknownSRouteError implements Exception {
   /// The [SRouteInterface] which could not be converted to an [WebEntry]
   final SRouteInterface sRoute;
 
   // ignore: public_member_api_docs
-  UnknownSRouteException({required this.sRoute});
+  UnknownSRouteError({required this.sRoute});
 
   @override
   String toString() => '''

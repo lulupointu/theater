@@ -8,16 +8,46 @@ import '../../s_router/s_router.dart';
 import '../../web_entry/web_entry.dart';
 import '../s_translator.dart';
 import '../s_translators_handler.dart';
+import 'web_entry_matcher/web_entry_match.dart';
+import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// A translator which should be used with a [STabbedRoute]
-class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T, P extends MaybeSPushable>
-    extends STranslator<TabbedRoute, P> {
+class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T,
+    P extends MaybeSPushable> extends STranslator<TabbedRoute, P> {
+  // ignore: public_member_api_docs
+  STabbedRouteTranslator.static({
+    String? path,
+    required this.matchToRoute,
+    this.routeToWebEntry = _defaultTabsMatchToWebEntry,
+    required this.tabTranslators,
+  })  : _matcher = WebEntryMatcher(
+          path: path,
+        ),
+        _sTranslatorsHandlers = {
+          for (var key in tabTranslators.keys)
+            key: STranslatorsHandler(translators: tabTranslators[key]!)
+        };
+
   // ignore: public_member_api_docs
   STabbedRouteTranslator({
-    required this.tabsRouteToSTabbedRoute,
-    this.tabsMatchToWebEntry = _defaultTabsMatchToWebEntry,
+    required String? path,
+    required this.matchToRoute,
+    required this.routeToWebEntry,
+
+    // Functions used to validate the different components of the url
+    final bool Function(Map<String, String> pathParams)? validatePathParams,
+    final bool Function(Map<String, String> queryParams)? validateQueryParams,
+    final bool Function(String fragment)? validateFragment,
+    final bool Function(Map<String, String> historyState)? validateHistoryState,
     required this.tabTranslators,
-  }) : _sTranslatorsHandlers = {
+  })  : _matcher = WebEntryMatcher(
+          path: path,
+          validatePathParams: validatePathParams,
+          validateQueryParams: validateQueryParams,
+          validateFragment: validateFragment,
+          validateHistoryState: validateHistoryState,
+        ),
+        _sTranslatorsHandlers = {
           for (var key in tabTranslators.keys)
             key: STranslatorsHandler(translators: tabTranslators[key]!)
         };
@@ -34,25 +64,28 @@ class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T, P extend
   /// if any
   ///
   ///
+  /// Return [null] if the [WebEntry] should not be converted to the associated
+  /// [STabbedRoute]
+  ///
+  ///
   /// For example, for a 3 tabbed route, a common way to implement this function
   /// would be the following:
   /// ```dart
   /// tabsRouteToWebEntry: (_, __, tabsRoute) {
+  ///   if (!tabsRoute.entries.any((e) => e.value != null)) return null;
+  ///
   ///   final activeTabRoute = tabsRoute.entries.firstWhere((e) => e.value != null);
   ///
-  ///   return MySTabbedRoute(
+  ///   return MySTabbedRoute.toTab(
   ///     activeTab: activeTabRoute.key,
-  ///     routeTab1: (activeTabRoute.key == 1) ? activeTabRoute.value! : null,
-  ///     routeTab2: (activeTabRoute.key == 2) ? activeTabRoute.value! : null,
-  ///     routeTab3: (activeTabRoute.key == 3) ? activeTabRoute.value! : null,
+  ///     newTabRoute: activeTabRoute.value!,
   ///   );
   /// }
   /// ```
-  final TabbedRoute Function(
-    BuildContext context,
-    WebEntry webEntry,
+  final TabbedRoute? Function(
+    WebEntryMatch match,
     Map<T, SRouteInterface<NonSPushable>?> tabsRoute,
-  ) tabsRouteToSTabbedRoute;
+  ) matchToRoute;
 
   /// Returns the web entry to return web the associated [STabbedRoute] is
   /// pushed into [SRouter]
@@ -69,13 +102,16 @@ class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T, P extend
     BuildContext context,
     TabbedRoute route,
     Map<T, WebEntry?> tabsWebEntry,
-  ) tabsMatchToWebEntry;
+  ) routeToWebEntry;
+
+  /// A class which determined whether a given [WebEntry] is valid
+  final WebEntryMatcher _matcher;
 
   /// Map the tab index to the tab [STranslatorHandler]
   final Map<T, STranslatorsHandler<NonSPushable>> _sTranslatorsHandlers;
 
   @override
-  WebEntry routeToWebEntry(BuildContext context, TabbedRoute route) {
+  WebEntry sRouteToWebEntry(BuildContext context, TabbedRoute route) {
     final sRouteState = STabbedRouteState.from(context: context, sTabbedRoute: route);
 
     // Get each web entry returned by each tab, if any
@@ -85,33 +121,39 @@ class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T, P extend
             ?.getWebEntryFromRoute(context, sRouteState.tabsRoute[key]!),
     };
 
-    return tabsMatchToWebEntry(context, route, tabsWebEntry);
+    return routeToWebEntry(context, route, tabsWebEntry);
   }
 
   @override
-  TabbedRoute? webEntryToRoute(BuildContext context, WebEntry webEntry) {
+  TabbedRoute? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
+    final match = _matcher.match(webEntry);
+
+    if (match == null) {
+      return null;
+    }
+
     // Get each route returned by each tab, if any
     final tabsRoute = {
       for (var key in _sTranslatorsHandlers.keys)
         key: _sTranslatorsHandlers[key]!.getRouteFromWebEntry(context, webEntry),
     };
 
-    return tabsRouteToSTabbedRoute(context, webEntry, tabsRoute);
+    return matchToRoute(match, tabsRoute);
   }
 
-  /// A default function for [tabsMatchToWebEntry] which returns the [WebEntry]
+  /// A default function for [sRouteToWebEntry] which returns the [WebEntry]
   /// returned by the [STabbedRoute] activeTab
   ///
   ///
   /// If the translators of the active tab could not translate the given tab,
-  /// a, [UnknownSRouteException] is thrown
+  /// a, [UnknownSRouteError] is thrown
   static WebEntry _defaultTabsMatchToWebEntry(
     BuildContext context,
     STabbedRoute route,
     Map<Object?, WebEntry?> tabsWebEntry,
   ) {
     if (tabsWebEntry[route.activeTab] == null) {
-      throw UnknownSRouteException(sRoute: route);
+      throw UnknownSRouteError(sRoute: route);
     }
 
     return tabsWebEntry[route.activeTab]!;

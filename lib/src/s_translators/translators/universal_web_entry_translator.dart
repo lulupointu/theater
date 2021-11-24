@@ -32,14 +32,14 @@ class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, 
   UniversalNonWebTranslator({required this.initialRoute});
 
   @override
-  WebEntry routeToWebEntry(BuildContext context, SRouteInterface<SPushable> route) {
+  WebEntry sRouteToWebEntry(BuildContext context, SRouteInterface<SPushable> route) {
     // Use SBrowser directly because the currentWebEntry may not be
     // set at this point
     return SBrowser.instance.webEntry;
   }
 
   @override
-  SRouteInterface<SPushable> webEntryToRoute(BuildContext context, WebEntry webEntry) {
+  SRouteInterface<SPushable> webEntryToSRoute(BuildContext context, WebEntry webEntry) {
     final _sRouter = SRouter.of(context, listen: false);
 
     final currentHistoryIndex = SBrowser.instance.historyIndex;

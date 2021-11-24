@@ -25,7 +25,7 @@ class STranslatorsHandler<P extends MaybeSPushable> {
     // We search which translator from [translators] returns a [SRoute]
     // considering the given web entry
     for (var translator in translators) {
-      final route = translator.webEntryToRoute(context, webEntry);
+      final route = translator.webEntryToSRoute(context, webEntry);
       if (route != null) return route;
     }
 
@@ -67,6 +67,6 @@ class STranslatorsHandler<P extends MaybeSPushable> {
           translator.routeType == route.runtimeType || translator.routeType == dynamic,
     );
 
-    return translator.routeToWebEntry(context, route);
+    return translator.sRouteToWebEntry(context, route);
   }
 }

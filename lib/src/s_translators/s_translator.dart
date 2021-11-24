@@ -76,7 +76,7 @@ $translatorType(...)
   ///
   /// This is only called when a new [SRoute] is pushed (or replaced)
   /// in [SRouter]
-  WebEntry routeToWebEntry(BuildContext context, Route route);
+  WebEntry sRouteToWebEntry(BuildContext context, Route route);
 
   /// Converts the given url into the associated [SRoute]
   ///
@@ -86,5 +86,5 @@ $translatorType(...)
   ///
   ///
   /// This can be called as often as needed
-  Route? webEntryToRoute(BuildContext context, WebEntry webEntry);
+  Route? webEntryToSRoute(BuildContext context, WebEntry webEntry);
 }
