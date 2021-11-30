@@ -7,13 +7,76 @@ import '../s_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
-/// An implementation of [STranslator] which makes
-/// it easy determine if a [WebEntry] matches
+/// An implementation of [STranslator] which makes it easy determine if a
+/// [WebEntry] is matched
 class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable>
     extends STranslator<Route, P> {
-  // TODO: add doc
+  /// Converts a static [WebEntry] into a [SRoute]
+  ///
+  ///
+  /// [path] describes the path that should be matched. Wildcards and path
+  /// parameters are accepted but cannot be used to create the [route].
+  ///
+  /// [route] is the [SRoute] of the associated [Route] type that will be used
+  /// in [SRouter] if the path patches the given one
+  ///
+  ///
+  /// # Example
+  /// ```dart
+  /// SPathTranslator<UserSRoute, SPushable>(
+  ///   path: '/user',
+  ///   route: UserSRoute(),
+  /// )
+  /// ```
+  ///
+  ///
+  /// See also:
+  ///   - [SPathTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   SPathTranslator({
-    required String? path,
+    required String path,
+    required Route route,
+    String? title,
+  })  : _routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
+        matchToRoute = ((_) => route),
+        _matcher = WebEntryMatcher(path: path),
+        routeType = Route;
+
+  /// Converts a [WebEntry] to a [SRoute] and vise versa, by parsing dynamic
+  /// element of the [WebEntry] (such as path parameters, query parameters, ...)
+  ///
+  ///
+  /// [path] describes the path that should be matched. Wildcards and path
+  /// parameters are accepted
+  ///
+  /// [matchToRoute] is called when the current path matches [path], and must
+  /// return a [SRoute] of the associated [Route] type.
+  /// Use the given match object to access the different parameters of the
+  /// matched path. See example bellow.
+  ///
+  /// [routeToWebEntry] converts the [SRoute] of the associated [Route] type to
+  /// a [WebEntry] (i.e. a representation of the url)
+  ///
+  ///
+  /// # Example:
+  /// ```dart
+  /// SPathTranslator<UserSRoute, SPushable>.parse(
+  ///   path: '/user/:id',
+  ///   matchToRoute: (match) => UserSRoute(id: match.pathParams['id']),
+  ///   routeToWebEntry: (route) => WebEntry(pathSegments: ['user', route.id]),
+  /// )
+  /// ```
+  ///
+  ///
+  /// [validatePathParams], [validateQueryParams], [validateFragment] and
+  /// [validateHistoryState] are optional parameters and can be used to further
+  /// precise which [WebEntry] to match
+  ///
+  ///
+  /// See also:
+  ///   - [WebEntry] for the different parameters which can be used to form a url
+  ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
+  SPathTranslator.parse({
+    required String path,
     required this.matchToRoute,
     required WebEntry Function(Route route) routeToWebEntry,
 
@@ -32,22 +95,6 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
         ),
         routeType = Route;
 
-  // TODO: add doc
-  SPathTranslator.static({
-    required String path,
-    required Route route,
-    String? title,
-  })  : _routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
-        matchToRoute = ((_) => route),
-        _matcher = WebEntryMatcher(path: path),
-        routeType = Route;
-
-  @override
-  final Type routeType;
-
-  /// A class which determined whether a given [WebEntry] is valid
-  final WebEntryMatcher _matcher;
-
   /// A callback used to convert a [WebEntryMatch] (which is basically
   /// a [WebEntry] with the parsed path parameters) to a [SRoute]
   final Route Function(WebEntryMatch match) matchToRoute;
@@ -62,6 +109,12 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
 
     return matchToRoute(match);
   }
+
+  @override
+  final Type routeType;
+
+  /// A class which determined whether a given [WebEntry] is valid
+  final WebEntryMatcher _matcher;
 
   /// Converts the associated [SRoute] into a string representing
   /// the url

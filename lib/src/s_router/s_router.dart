@@ -12,8 +12,8 @@ import '../s_translators/s_translators_handler.dart';
 import '../s_translators/translators/universal_web_entry_translator.dart';
 import '../web_entry/web_entry.dart';
 import 's_history_entry.dart';
-
-part 's_routes_state_manager/s_routes_state_manager.dart';
+import 's_router_interface.dart';
+import 's_routes_state_manager/s_routes_state_manager.dart';
 
 /// A widget which assembles the different part of the package to
 /// create the greatest routing experience of your life
@@ -27,9 +27,6 @@ part 's_routes_state_manager/s_routes_state_manager.dart';
 ///
 /// The state of this class (using for push and Co) can be accessed using
 /// [SRouter.of] or [content.sRouter]
-///
-///
-/// TODO: Add a note on why we always compute [_translatorsHandler.getWebEntryFromRoute] during upward calls ([push] and co.) whenever possible
 class SRouter extends StatefulWidget {
   /// The [initialRoute] is required but can be null on the web since it won't
   /// be used. It has to be non-null on other platform.
@@ -37,7 +34,7 @@ class SRouter extends StatefulWidget {
   /// [translatorsBuilder] are optional but must be given to support the web platform,
   /// otherwise [SRouter] can't turn the url into [SRoute]s
   ///
-  /// [key] can be useful if you need to use [push] and friends without
+  /// [key] can be useful if you need to use [to] and friends without
   /// a [BuildContext]. In which case you would create
   /// [routerKey = GlobalKey<SRouterState>] and use it to access the [SRouter]
   /// methods using [routerKey.currentState.push]
@@ -165,7 +162,7 @@ main() {
   final bool disableUniversalTranslator;
 
   @override
-  State<SRouter> createState() => SRouterState();
+  State<SRouter> createState() => _SRouterState();
 
   /// A method to access the [SRouter] of the given [context]
   ///
@@ -174,17 +171,17 @@ main() {
   /// exception
   ///
   ///
-  /// If [listen] is true, any change to [SRouterState] will cause a
+  /// If [listen] is true, any change to [_SRouterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf] is true, it won't return try to look at the
   /// [StatefulElement] associated with the [context] and only look at its
   /// parents
   ///
-  /// If [findRoot] is true, it will try to find the root [SRouterState]
+  /// If [findRoot] is true, it will try to find the root [_SRouterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
-  static SRouterState of(
+  static SRouterInterface of(
     BuildContext context, {
     bool listen = true,
     bool ignoreSelf = false,
@@ -207,16 +204,16 @@ main() {
   /// returned
   ///
   ///
-  /// If [listen] is true, any change to [SRouterState] will cause a
+  /// If [listen] is true, any change to [_SRouterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf], it won't return try to look at the [StatefulElement] associated
   /// with the [context] and only look at its parents
   ///
-  /// If [findRoot] is true, it will try to find the root [SRouterState]
+  /// If [findRoot] is true, it will try to find the root [_SRouterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
-  static SRouterState? maybeOf(
+  static SRouterInterface? maybeOf(
     BuildContext context, {
     bool listen = true,
     bool ignoreSelf = false,
@@ -233,9 +230,9 @@ main() {
       return _rootMaybeOf(context, listen: listen);
     }
 
-    late final SRouterState? result;
-    if (!ignoreSelf && context is StatefulElement && context.state is SRouterState) {
-      result = context.state as SRouterState;
+    late final _SRouterState? result;
+    if (!ignoreSelf && context is StatefulElement && context.state is _SRouterState) {
+      result = context.state as _SRouterState;
     } else if (listen) {
       result = context.dependOnInheritedWidgetOfExactType<_SRouterProvider>()?.state;
     } else {
@@ -253,11 +250,11 @@ main() {
   /// external method.
   /// It is used internally to ignore the state of the context during recursive
   /// calls
-  static SRouterState? _rootMaybeOf(
+  static _SRouterState? _rootMaybeOf(
     BuildContext context, {
     required bool listen,
   }) {
-    final maybeCurrentElement = maybeOf(context, listen: false);
+    final maybeCurrentElement = maybeOf(context, listen: false) as _SRouterState?;
 
     // If there are no element in the given context, return null
     if (maybeCurrentElement == null) {
@@ -269,7 +266,7 @@ main() {
       currentElement.context,
       listen: false,
       ignoreSelf: true,
-    );
+    ) as _SRouterState?;
 
     // Continue to go up the tree until there is no element in the context
     while (aboveElement != null) {
@@ -278,7 +275,7 @@ main() {
         currentElement.context,
         listen: false,
         ignoreSelf: true,
-      );
+      ) as _SRouterState?;
     }
 
     // At this point, the [currentElement] contains the root element
@@ -303,7 +300,7 @@ main() {
 ///
 /// A reference to this class can be obtained by calling [SRouter.of] or
 /// [context.sRouter]
-class SRouterState extends State<SRouter> {
+class _SRouterState extends State<SRouter> implements SRouterInterface {
   /// The translator associated with the [SRouter] with is used to
   /// convert a [WebEntry] to a [SRoute] and vise versa
   ///
@@ -314,8 +311,17 @@ class SRouterState extends State<SRouter> {
   STranslatorsHandler<SPushable> get _translatorsHandler => STranslatorsHandler(
         translators: [
           ...widget.translatorsBuilder?.call(context) ?? [],
+
+          // If on non-web platform and [widget.disableUniversalTranslator] is
+          // not true, add [UniversalNonWebTranslator] as the magic translator
+          //
+          // We add it last so that it does not interfere with other potential
+          // translators (since it matches all [WebEntry]s and all [SRoute]s)
           if (!kIsWeb && !widget.disableUniversalTranslator)
-            UniversalNonWebTranslator(initialRoute: widget.initialRoute),
+            UniversalNonWebTranslator(
+              initialRoute: widget.initialRoute,
+              history: history,
+            ),
         ],
       );
 
@@ -339,7 +345,8 @@ class SRouterState extends State<SRouter> {
   /// [SBrowser] updates do NOT cause widget rebuild by itself, therefore if
   /// no parent [SRouter] exist, this [SRouter] will NOT be
   /// rebuilt upon [SBrowser] updates
-  late final bool isNested = SRouter.maybeOf(context, listen: false, ignoreSelf: true) != null;
+  late final bool _isNested =
+      SRouter.maybeOf(context, listen: false, ignoreSelf: true) != null;
 
   /// The history is a map between an history index and a
   /// [SHistoryEntry]
@@ -377,17 +384,20 @@ class SRouterState extends State<SRouter> {
   ///
   /// This is needed because the first url is handled differently since we have
   /// to use the [widget.initialRoute] (if we are not deep-linking)
-  bool initialUrlHandled = false;
+  bool _initialUrlHandled = false;
 
   /// An object which can be used to store the state of a route
-  final _SRoutesStateManager sRoutesStateManager = _SRoutesStateManager();
+  final SRoutesStateManager sRoutesStateManager = SRoutesStateManager();
 
   /// Pushes a new entry with the given route
   ///
   ///
-  /// This will also push in the browser
-  void push(SRouteInterface<SPushable> route) {
-    return _pushSHistoryEntry(
+  /// Set [isReplacement] to true if you want the current history entry to
+  /// be replaced by the newly created one
+  void to(SRouteInterface<SPushable> route, {bool isReplacement = false}) {
+    final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
+
+    return _toCallback(
       SHistoryEntry(
         webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ??
             (throw UnknownSRouteError(sRoute: route)),
@@ -396,40 +406,24 @@ class SRouterState extends State<SRouter> {
     );
   }
 
-  /// Replaces the current entry with the given route
+  /// Pushes a new [WebEntry] which will eventually be converted in its
+  /// corresponding [SRoute]
   ///
   ///
-  /// This will also replace in the browser
-  void replace(SRouteInterface<SPushable> route) {
-    return _replaceSHistoryEntry(
-      SHistoryEntry(
-        webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ??
-            (throw UnknownSRouteError(sRoute: route)),
-        route: route,
-      ),
-    );
-  }
+  /// DO prefer using [to] when possible
+  ///
+  ///
+  /// Set [isReplacement] to true if you want the current history entry to
+  /// be replaced by the newly created one
+  void toWebEntry(WebEntry webEntry, {bool isReplacement = false}) {
+    final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
-  /// Pushes a new entry with the given web entry
-  ///
-  ///
-  /// This will also push in the browser
-  void pushWebEntry(WebEntry webEntry) {
-    return _pushSHistoryEntry(
-      SHistoryEntry(
-        webEntry: webEntry,
-        route: _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
-            (throw UnknownWebEntryError(webEntry: webEntry)),
-      ),
-    );
-  }
-
-  /// Replaces the current entry with the given web entry
-  ///
-  ///
-  /// This will also replace in the browser
-  void replaceWebEntry(WebEntry webEntry) {
-    return _replaceSHistoryEntry(
+    // We must call [_toCallback] instead of just calling [_sBrowser.push]
+    // because calling [_sBrowser.replace] will not cause
+    // [_updateHistoryWithCurrentWebEntry] to be triggered since
+    // [_sBrowser.push] only notify its listener when the browser changes its
+    // state (contrary to when itself changes the state of the browser)
+    return _toCallback(
       SHistoryEntry(
         webEntry: webEntry,
         route: _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
@@ -442,10 +436,6 @@ class SRouterState extends State<SRouter> {
   ///
   ///
   /// This will also push in the browser
-  ///
-  ///
-  /// See "Optimization Remarks" to learn why we update [history] while we
-  /// could simply react to [SBrowserInterface] notifications
   void _pushSHistoryEntry(SHistoryEntry sHistoryEntry) {
     final newHistoryIndex = _sBrowser.historyIndex + 1;
     // Update the history by:
@@ -508,8 +498,10 @@ class SRouterState extends State<SRouter> {
   /// Always returns true or false on non web platforms
   bool? canGo(int delta) => _sBrowser.canGo(delta);
 
-  /// Updates the [history] variable by translating the current [WebEntry]
-  /// of the [SBrowserInterface] to a [SHistoryEntry]
+  /// Converts the current [WebEntry] from [_sBrowser] to a [SRoute]
+  ///
+  ///
+  /// This must be called when [_sBrowser] notify its listeners
   _updateHistoryWithCurrentWebEntry() {
     // Grab the current webEntry using [SBrowserInterface]
     final webEntry = _sBrowser.webEntry;
@@ -519,31 +511,22 @@ class SRouterState extends State<SRouter> {
 
     // If [initialUrlHandled] is false and we are NOT deep-linking, report
     // the url with [widget.initialRoute]
-    if (!initialUrlHandled) {
-      initialUrlHandled = true;
+    if (!_initialUrlHandled) {
+      _initialUrlHandled = true;
 
       if (webEntry == _sBrowser.initialWebEntry && historyIndex == 0) {
-        return replace(widget.initialRoute);
+        return to(widget.initialRoute, isReplacement: true);
       }
     }
-
-    // setState(() {
-    //   final sHistoryEntry = SHistoryEntry(
-    //     webEntry: webEntry,
-    //     route: ,
-    //   );
-    //   _currentHistoryEntry = sHistoryEntry;
-    //   _history = history.add(historyIndex, sHistoryEntry);
-    // });
 
     // Get the route from the translators
     final route = _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
         (throw UnknownWebEntryError(webEntry: webEntry));
 
-    // Call replace with the route instead of the [WebEntry] because the title
-    // might need to be set and this is only accessible by converting the route
-    // to a [WebEntry]
-    replace(route);
+    // Call replace with the route instead of directly storing the corresponding
+    // [SHistoryEntry] because the title might need to be set and this is only
+    // accessible by converting the route to a [WebEntry]
+    to(route, isReplacement: true);
   }
 
   /// Returns true if the current platform is android or iOS
@@ -566,7 +549,7 @@ class SRouterState extends State<SRouter> {
     //
     // We avoid the initialization as well since this would just be a duplicate
     // of the first build call
-    if (!isNested) {
+    if (!_isNested) {
       // Initialize [_history] by syncing it with [SBrowserInterface]
       _updateHistoryWithCurrentWebEntry();
 
@@ -577,7 +560,7 @@ class SRouterState extends State<SRouter> {
   @override
   void didUpdateWidget(covariant SRouter oldWidget) {
     // If we are nested, the update should only happen during the [build] phase
-    if (!isNested) {
+    if (!_isNested) {
       _sBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
       _sBrowser.addListener(_updateHistoryWithCurrentWebEntry);
     }
@@ -586,7 +569,7 @@ class SRouterState extends State<SRouter> {
 
   @override
   void dispose() {
-    if (!isNested) {
+    if (!_isNested) {
       _sBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
     }
     super.dispose();
@@ -596,14 +579,14 @@ class SRouterState extends State<SRouter> {
   Widget build(BuildContext context) {
     // No need to update if we are NOT nested since this will be done on browser
     // update anyway
-    if (isNested) {
+    if (_isNested) {
       _updateHistoryWithCurrentWebEntry();
     }
 
     return _SRouterProvider(
       state: this,
       currentHistoryEntry: currentHistoryEntry!,
-      isNested: isNested,
+      isNested: _isNested,
       child: Builder(
         builder: (context) {
           final navigatorBuilder = RootSFlutterNavigatorBuilder(
@@ -611,7 +594,7 @@ class SRouterState extends State<SRouter> {
             navigatorKey: widget.navigatorKey,
             navigatorObservers: widget.navigatorObservers,
             disableSendAppToBackground:
-                !_isPlatformMobile || isNested || widget.disableSendAppToBackground,
+                !_isPlatformMobile || _isNested || widget.disableSendAppToBackground,
           );
 
           return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
@@ -633,12 +616,12 @@ class _SRouterProvider extends InheritedWidget {
   /// Whether the associated [SRouter] is nested in another one
   final bool isNested;
 
-  /// The [SRouterState] that this [InheritedWidget] provides
+  /// The [_SRouterState] that this [InheritedWidget] provides
   ///
   ///
   /// Do NOT use this in [updateShouldNotify] since this object will mutate
   /// (therefore its reference will be the same)
-  final SRouterState state;
+  final _SRouterState state;
 
   const _SRouterProvider({
     Key? key,

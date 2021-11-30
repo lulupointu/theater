@@ -7,6 +7,7 @@ export 'implementations/non_web/s_browser.dart' if (dart.library.html) 'implemen
 /// A class which interacts with the browser i.e.:
 ///   - Passes information to update the browser
 ///   - Changes its state to reflect the state of the browser
+///   - Notify its listeners when the browser causes a change to its state
 ///
 ///
 /// The implementation is different on the web than on other platform, see:

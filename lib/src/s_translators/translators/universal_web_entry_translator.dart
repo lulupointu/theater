@@ -1,8 +1,10 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../browser/s_browser.dart';
 import '../../route/pushables/pushables.dart';
 import '../../route/s_route_interface.dart';
+import '../../s_router/s_history_entry.dart';
 import '../../s_router/s_router.dart';
 import '../../web_entry/web_entry.dart';
 import '../s_translator.dart';
@@ -28,8 +30,12 @@ class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, 
   /// The initial [SRoute] to display when the [SRouter] is initialized
   final SRouteInterface<SPushable> initialRoute;
 
+  /// The history of the [SRouterState] associating history indexes to
+  /// [SHistoryEntry]
+  final IMap<int, SHistoryEntry> history;
+
   // ignore: public_member_api_docs
-  UniversalNonWebTranslator({required this.initialRoute});
+  UniversalNonWebTranslator({required this.initialRoute, required this.history});
 
   @override
   WebEntry sRouteToWebEntry(BuildContext context, SRouteInterface<SPushable> route) {
@@ -40,19 +46,17 @@ class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, 
 
   @override
   SRouteInterface<SPushable> webEntryToSRoute(BuildContext context, WebEntry webEntry) {
-    final _sRouter = SRouter.of(context, listen: false);
-
     final currentHistoryIndex = SBrowser.instance.historyIndex;
 
     // Try to return the current route
-    final currentRoute = _sRouter.history[currentHistoryIndex]?.route;
+    final currentRoute = history[currentHistoryIndex]?.route;
     if (currentRoute != null) return currentRoute;
 
     // If the current route is null, try to return the previous route
     // This is needed because if nested SRouter push a route, this
     // will be triggered but won't have had the chance to populate
     // its route as it would it it had itself been called
-    final previousRoute = _sRouter.history[currentHistoryIndex - 1]?.route;
+    final previousRoute = history[currentHistoryIndex - 1]?.route;
     if (previousRoute != null) return previousRoute;
 
     // Else return the initial route since if both previous value

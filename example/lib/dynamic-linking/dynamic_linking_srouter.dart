@@ -30,7 +30,7 @@ class _WishlistAppState extends State<WishlistApp> {
 
   void toWishlist(BuildContext context, Wishlist wishlist) {
     _addWishlistIfNotPresent(wishlist);
-    context.sRouter.push(
+    context.sRouter.to(
       WishlistSRoute(wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist),
     );
   }
@@ -46,11 +46,11 @@ class _WishlistAppState extends State<WishlistApp> {
       home: SRouter(
         initialRoute: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
-          SPathTranslator<WishlistListSRoute, SPushable>.static(
+          SPathTranslator<WishlistListSRoute, SPushable>(
             path: '/',
             route: WishlistListSRoute(wishlists: wishlists, toWishlist: toWishlist),
           ),
-          SPathTranslator<WishlistSRoute, SPushable>(
+          SPathTranslator<WishlistSRoute, SPushable>.parse(
             path: '/wishlist/:id',
             matchToRoute: (match) {
               final wishlist = Wishlist(match.pathParams['id']!);
@@ -60,9 +60,9 @@ class _WishlistAppState extends State<WishlistApp> {
             },
             routeToWebEntry: (route) => WebEntry(path: '/wishlist/${route.wishlist.id}'),
           ),
-          SRedirectorTranslator.static(
-            from: '*',
-            to: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
+          SRedirectorTranslator(
+            path: '*',
+            route: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
           ),
         ],
       ),

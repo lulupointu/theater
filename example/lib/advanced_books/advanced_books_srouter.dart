@@ -17,12 +17,12 @@ class MyApp extends StatelessWidget {
       home: SRouter(
         initialRoute: HomeSRoute(),
         translatorsBuilder: (_) => [
-          SPathTranslator<HomeSRoute, SPushable>.static(
+          SPathTranslator<HomeSRoute, SPushable>(
             path: '/',
             route: HomeSRoute(),
             title: 'Home',
           ),
-          SPathTranslator<BooksSRoute, SPushable>(
+          SPathTranslator<BooksSRoute, SPushable>.parse(
             path: '/books',
             matchToRoute: (match) => BooksSRoute(
               books: books,
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>(
+          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
             path: '/books/:bookId',
             matchToRoute: (match) => BookDetailsSRoute(
               books: books,
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookBuySRoute, SPushable>(
+          SPathTranslator<BookBuySRoute, SPushable>.parse(
             path: '/books/:bookId/buy',
             matchToRoute: (match) => BookBuySRoute(
               books: books,
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookGenresSRoute, SPushable>(
+          SPathTranslator<BookGenresSRoute, SPushable>.parse(
             path: '/books/:bookId/genres',
             matchToRoute: (match) => BookGenresSRoute(
               books: books,
@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.push(BooksSRoute(books: books)),
+              onPressed: () => context.sRouter.to(BooksSRoute(books: books)),
               child: Text('See all books'),
             ),
             SizedBox(height: 15),
@@ -103,12 +103,12 @@ class HomeScreen extends StatelessWidget {
                   hintText: 'Search book by title...',
                   suffixIcon: IconButton(
                     icon: Icon(Icons.search),
-                    onPressed: () => context.sRouter.push(
+                    onPressed: () => context.sRouter.to(
                       BooksSRoute(books: books, searchedGenre: booksQueryController.text),
                     ),
                   ),
                 ),
-                onSubmitted: (title) => context.sRouter.push(
+                onSubmitted: (title) => context.sRouter.to(
                   BooksSRoute(books: books, searchedName: title),
                 ),
               ),
@@ -138,7 +138,7 @@ class BooksScreen extends StatelessWidget {
               (book) => ListTile(
                 title: Text(book.title),
                 subtitle: Text(book.author),
-                onTap: () => context.sRouter.push(BookDetailsSRoute(books: books, book: book)),
+                onTap: () => context.sRouter.to(BookDetailsSRoute(books: books, book: book)),
               ),
             )
             .toList(),
@@ -167,12 +167,12 @@ class BookDetailsScreen extends StatelessWidget {
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () =>
-                  context.sRouter.push(BookGenresSRoute(books: books, book: book)),
+                  context.sRouter.to(BookGenresSRoute(books: books, book: book)),
               child: Text('See genres'),
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () => context.sRouter.push(BookBuySRoute(books: books, book: book)),
+              onPressed: () => context.sRouter.to(BookBuySRoute(books: books, book: book)),
               child: Text('Buy'),
             ),
           ],
@@ -221,7 +221,7 @@ class BookGenresScreen extends StatelessWidget {
           children: List<Widget>.from(
             book.genres.map(
               (genre) => ListTile(
-                onTap: () => context.sRouter.push(
+                onTap: () => context.sRouter.to(
                   BooksSRoute(books: books, searchedGenre: genre),
                 ),
                 title: Text(genre),

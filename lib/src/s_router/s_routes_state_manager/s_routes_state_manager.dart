@@ -1,10 +1,12 @@
-part of '../s_router.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+
+import '../../route/s_route_interface.dart';
 
 /// An object which can be used to store the state of a [SRouteInterface]
 ///
 ///
 /// IMPORTANT: The state is associated to the [SRouteInterface] runtimeType
-class _SRoutesStateManager  {
+class SRoutesStateManager {
   /// The map which associated the [SRouteInterface]s runtimeType to the
   /// [SRouteInterface]s state
   var _sRoutesState = IMap<Type, Object>();

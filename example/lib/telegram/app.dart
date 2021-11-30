@@ -56,7 +56,8 @@ class MyApp extends StatelessWidget {
           selectedChats: [chats.first],
         ),
         translatorsBuilder: (_) => [
-          STabbedRouteTranslator<TabsWrapperSRoute, MyTab, SPushable>.static(
+          STabbedRouteTranslator<TabsWrapperSRoute, MyTab, SPushable>.parse(
+            path: '*',
             matchToRoute: (match, tabs) {
               // We should be able to return null from here
 
@@ -88,8 +89,8 @@ class MyApp extends StatelessWidget {
             },
             tabTranslators: {
               MyTab.left: [
-                SPathTranslator<ChatsListSRoute, NonSPushable>(
-                  path: null,
+                SPathTranslator<ChatsListSRoute, NonSPushable>.parse(
+                  path: '*',
                   validateHistoryState: (historyState) =>
                       historyState['showSettings'] != 'true',
                   matchToRoute: (match) => ChatsListSRoute(
@@ -98,8 +99,8 @@ class MyApp extends StatelessWidget {
                   ),
                   routeToWebEntry: (route) => WebEntry(),
                 ),
-                SPathTranslator<SettingsSRoute, NonSPushable>(
-                  path: null,
+                SPathTranslator<SettingsSRoute, NonSPushable>.parse(
+                  path: '*',
                   validateHistoryState: (historyState) =>
                       historyState['showSettings'] == 'true',
                   matchToRoute: (match) => SettingsSRoute(

@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       home: SRouter(
         initialRoute: AppSRoute(activeTab: TabItem.red),
         translatorsBuilder: (_) => [
-          SPathTranslator<SettingsSRoute, SPushable>(
+          SPathTranslator<SettingsSRoute, SPushable>.parse(
             path: '/:color/settings',
             matchToRoute: (match) => SettingsSRoute(
               tabItem: tabName.entries
@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
               pathSegments: [tabName[route.tabItem]!, 'settings'],
             ),
           ),
-          STabbedRouteTranslator<AppSRoute, TabItem, SPushable>.static(
-            matchToRoute: (_, tabsRoute) {
+          STabbedRouteTranslator<AppSRoute, TabItem, SPushable>(
+            routeBuilder: (tabsRoute) {
               if (!tabsRoute.entries.any((e) => e.value != null)) return null;
 
               final activeTabRoute = tabsRoute.entries.firstWhere((e) => e.value != null);
@@ -55,11 +55,11 @@ class MyApp extends StatelessWidget {
     switch (tabItem) {
       case TabItem.red:
         return [
-          SPathTranslator<RedListSRoute, NonSPushable>.static(
+          SPathTranslator<RedListSRoute, NonSPushable>(
             path: '${tabName[tabItem]!}',
             route: RedListSRoute(),
           ),
-          SPathTranslator<RedDetailSRoute, NonSPushable>(
+          SPathTranslator<RedDetailSRoute, NonSPushable>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToRoute: (match) => RedDetailSRoute(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -70,11 +70,11 @@ class MyApp extends StatelessWidget {
         ];
       case TabItem.green:
         return [
-          SPathTranslator<GreenListSRoute, NonSPushable>.static(
+          SPathTranslator<GreenListSRoute, NonSPushable>(
             path: '${tabName[tabItem]!}',
             route: GreenListSRoute(),
           ),
-          SPathTranslator<GreenDetailSRoute, NonSPushable>(
+          SPathTranslator<GreenDetailSRoute, NonSPushable>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToRoute: (match) => GreenDetailSRoute(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -85,11 +85,11 @@ class MyApp extends StatelessWidget {
         ];
       case TabItem.blue:
         return [
-          SPathTranslator<BlueListSRoute, NonSPushable>.static(
+          SPathTranslator<BlueListSRoute, NonSPushable>(
             path: '${tabName[tabItem]!}',
             route: BlueListSRoute(),
           ),
-          SPathTranslator<BlueDetailSRoute, NonSPushable>(
+          SPathTranslator<BlueDetailSRoute, NonSPushable>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToRoute: (match) => BlueDetailSRoute(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -112,11 +112,11 @@ class App extends StatelessWidget {
   void _selectTab(BuildContext context, TabItem tabItem) {
     if (tabItem == activeTab) {
       // pop to first route
-      context.sRouter.push(
+      context.sRouter.to(
         AppSRoute.toTab(activeTab: tabItem, newTabRoute: AppSRoute.initialTabsRoute[tabItem]!),
       );
     } else {
-      context.sRouter.push(AppSRoute(activeTab: tabItem));
+      context.sRouter.to(AppSRoute(activeTab: tabItem));
     }
   }
 
@@ -209,7 +209,7 @@ class ColorDetailScreen extends StatelessWidget {
               (e) => Padding(
                 padding: const EdgeInsets.all(50.0),
                 child: ElevatedButton(
-                  onPressed: () => context.sRouter.push(AppSRoute(activeTab: e)),
+                  onPressed: () => context.sRouter.to(AppSRoute(activeTab: e)),
                   child: Text('Go to ${tabName[e]}'),
                 ),
               ),
@@ -309,7 +309,7 @@ List<Widget> _buildSettingsButtons(BuildContext context, {required TabItem tabIt
               color: activeTabColor[tabItem]!.shade100,
             ),
             child: IconButton(
-              onPressed: () => context.sRouter.push(SettingsSRoute(tabItem: e)),
+              onPressed: () => context.sRouter.to(SettingsSRoute(tabItem: e)),
               icon: Icon(Icons.settings, color: activeTabColor[e]),
             ),
           ),

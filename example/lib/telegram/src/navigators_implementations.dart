@@ -16,7 +16,7 @@ import 'navigators.dart';
 // Left side
 class ChatsListNavigatorImplementation implements ChatsListNavigator {
   void showSettings(BuildContext context, {required ChatsListScreen chatsListScreen}) {
-    context.sRouter.replace(
+    context.sRouter.to(
       TabsWrapperSRoute.from(
         context,
         tabLeftRoute: SettingsSRoute(
@@ -25,22 +25,24 @@ class ChatsListNavigatorImplementation implements ChatsListNavigator {
           chats: chatsListScreen.chats,
         ),
       ),
+      isReplacement: true,
     );
   }
 
   void showChat(BuildContext context, {required Chat chat}) {
-    context.sRouter.push(TabsWrapperSRoute.from(context, selectedChats: [chat]));
+    context.sRouter.to(TabsWrapperSRoute.from(context, selectedChats: [chat]));
   }
 }
 
 class SettingsNavigatorImplementation implements SettingsNavigator {
   @override
   void popSettings(BuildContext context) {
-    context.sRouter.replace(
+    context.sRouter.to(
       TabsWrapperSRoute.from(
         context,
         tabLeftRoute: TabsWrapperSRoute.initialTabSRoutes[MyTab.left],
       ),
+      isReplacement: true,
     );
   }
 }
@@ -48,11 +50,17 @@ class SettingsNavigatorImplementation implements SettingsNavigator {
 // Middle side
 class ChatNavigatorImplementation implements ChatNavigator {
   void showMembersDetails(BuildContext context) {
-    context.sRouter.replace(TabsWrapperSRoute.from(context, showMemberDetails: true));
+    context.sRouter.to(
+      TabsWrapperSRoute.from(context, showMemberDetails: true),
+      isReplacement: true,
+    );
   }
 
   void hideMembersDetails(BuildContext context) {
-    context.sRouter.replace(TabsWrapperSRoute.from(context, showMemberDetails: false));
+    context.sRouter.to(
+      TabsWrapperSRoute.from(context, showMemberDetails: false),
+      isReplacement: true,
+    );
   }
 
   void showContactChat(
@@ -67,17 +75,23 @@ class ChatNavigatorImplementation implements ChatNavigator {
     // Don't change anything if we push the same chat
     selectedChats = selectedChats + (selectedChats.last == newChat ? [] : [newChat]);
 
-    context.sRouter.push(TabsWrapperSRoute.from(context, selectedChats: selectedChats));
+    context.sRouter.to(TabsWrapperSRoute.from(context, selectedChats: selectedChats));
   }
 
   @override
   void showLeftTab(BuildContext context) {
-    context.sRouter.replace(TabsWrapperSRoute.from(context, maybeShowLeftTab: true));
+    context.sRouter.to(
+      TabsWrapperSRoute.from(context, maybeShowLeftTab: true),
+      isReplacement: true,
+    );
   }
 
   @override
   void hideLeftTab(BuildContext context) {
-    context.sRouter.replace(TabsWrapperSRoute.from(context, maybeShowLeftTab: false));
+    context.sRouter.to(
+      TabsWrapperSRoute.from(context, maybeShowLeftTab: false),
+      isReplacement: true,
+    );
   }
 }
 
@@ -95,11 +109,14 @@ class MembersDetailsNavigatorImplementation implements MembersDetailsNavigator {
     // Don't change anything if we push the same chat
     selectedChats = selectedChats + (selectedChats.last == newChat ? [] : [newChat]);
 
-    context.sRouter.push(TabsWrapperSRoute.from(context, selectedChats: selectedChats));
+    context.sRouter.to(TabsWrapperSRoute.from(context, selectedChats: selectedChats));
   }
 
   @override
   void hideMembersDetails(BuildContext context) {
-    context.sRouter.replace(TabsWrapperSRoute.from(context, showMemberDetails: false));
+    context.sRouter.to(
+      TabsWrapperSRoute.from(context, showMemberDetails: false),
+      isReplacement: true,
+    );
   }
 }

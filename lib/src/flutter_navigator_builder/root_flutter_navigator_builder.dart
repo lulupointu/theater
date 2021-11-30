@@ -100,7 +100,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
         return false;
       },
       on: (newSRoute) {
-        context.sRouter.push(newSRoute);
+        context.sRouter.to(newSRoute);
         return true;
       },
       historyGo: (delta) {

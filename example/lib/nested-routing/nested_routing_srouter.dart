@@ -17,73 +17,197 @@ class BooksApp extends StatelessWidget {
     return MaterialApp(
       title: 'Books App',
       home: SRouter(
-        initialRoute: NewBooksSRoute(),
+        initialRoute: ScaffoldSRoute(activeTab: 0),
         translatorsBuilder: (_) => [
-          SPathTranslator<SettingsSRoute, SPushable>.static(path: '/settings', route: SettingsSRoute()),
-          SPathTranslator<NewBooksSRoute, SPushable>.static(path: '/books/new', route: NewBooksSRoute()),
-          SPathTranslator<AllBooksSRoute, SPushable>.static(path: '/books/all', route: AllBooksSRoute()),
-          SRedirectorTranslator.static(from: '*', to: NewBooksSRoute()),
-        ],
-        builder: (context, child) {
-          return Scaffold(
-            body: child,
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex:
-                  SRouter.of(context).currentHistoryEntry!.route is SettingsSRoute
-                      ? 1
-                      : 0,
-              onTap: (idx) =>
-                  context.sRouter.push(idx == 0 ? NewBooksSRoute() : SettingsSRoute()),
-              items: [
-                BottomNavigationBarItem(
-                  label: 'Books',
-                  icon: Icon(Icons.chrome_reader_mode_outlined),
-                ),
-                BottomNavigationBarItem(
-                  label: 'Settings',
-                  icon: Icon(Icons.settings),
+          STabbedRouteTranslator<ScaffoldSRoute, int, SPushable>(
+            routeBuilder: (tabs) {
+              if (!tabs.entries.any((e) => e.value != null)) return null;
+
+              final activeTabRoute = tabs.entries.firstWhere((e) => e.value != null);
+
+              return ScaffoldSRoute._toTab(
+                activeTab: activeTabRoute.key,
+                newTabRoute: activeTabRoute.value,
+              );
+            },
+            tabTranslators: {
+              0: [
+                STabbedRouteTranslator<TabViewSRoute, int, NonSPushable>(
+                  routeBuilder: (tabs) {
+                    if (!tabs.entries.any((e) => e.value != null)) return null;
+
+                    final activeTabRoute = tabs.entries.firstWhere((e) => e.value != null);
+
+                    return TabViewSRoute(activeTab: activeTabRoute.key);
+                  },
+                  tabTranslators: {
+                    0: [
+                      SPathTranslator<NewBooksSRoute, NonSPushable>(
+                        path: '/books/new',
+                        route: NewBooksSRoute(),
+                      ),
+                    ],
+                    1: [
+                      SPathTranslator<AllBooksSRoute, NonSPushable>(
+                        path: '/books/all',
+                        route: AllBooksSRoute(),
+                      ),
+                    ],
+                  },
                 ),
               ],
-            ),
-          );
-        },
+              1: [
+                SPathTranslator<SettingsSRoute, NonSPushable>(
+                  path: '/settings',
+                  route: SettingsSRoute(),
+                ),
+              ],
+            },
+          ),
+          SRedirectorTranslator(path: '*', route: ScaffoldSRoute(activeTab: 0)),
+        ],
       ),
     );
   }
 }
 
-class NewBooksSRoute extends SRoute<SPushable> {
-  @override
-  Page buildPage(BuildContext context, Widget child) =>
-      FadeTransitionPage(key: ValueKey('BooksScreen'), child: child);
+class ScaffoldSRoute extends STabbedRoute<int, SPushable> {
+  static final _initialSRoutes = {
+    0: TabViewSRoute(activeTab: 0),
+    1: SettingsSRoute(),
+  };
+
+  ScaffoldSRoute({required this.activeTab, int? tabViewTab})
+      : super(
+          sTabs: {
+            0: STab(
+              initialSRoute: _initialSRoutes[0]!,
+              currentSRoute: tabViewTab != null ? TabViewSRoute(activeTab: tabViewTab) : null,
+            ),
+            1: STab(initialSRoute: _initialSRoutes[1]!, currentSRoute: null),
+          },
+        );
+
+  // This factory is used in [onTabPop] and may used in the [STabbedTranslator]
+  ScaffoldSRoute._toTab({
+    required this.activeTab,
+    SRouteInterface<NonSPushable>? newTabRoute,
+  }) : super(
+          sTabs: {
+            0: STab(
+              initialSRoute: _initialSRoutes[0]!,
+              currentSRoute: activeTab == 0 ? newTabRoute : null,
+            ),
+            1: STab(
+              initialSRoute: _initialSRoutes[1]!,
+              currentSRoute: activeTab == 1 ? newTabRoute : null,
+            ),
+          },
+        );
 
   @override
-  Widget build(BuildContext context) => BooksScreen(selectedTab: 0);
+  final int activeTab;
+
+  @override
+  Widget tabsBuilder(BuildContext context, Map<int, Widget> tabs) {
+    return ScaffoldScreen(child: tabs[activeTab]!, currentIndex: activeTab);
+  }
+
+  @override
+  STabbedRoute<int, SPushable>? onTabPop(
+    BuildContext context,
+    SRouteInterface<NonSPushable> activeTabSRouteBellow,
+  ) {
+    return ScaffoldSRoute._toTab(
+      activeTab: activeTab,
+      newTabRoute: activeTabSRouteBellow,
+    );
+  }
 }
 
-class AllBooksSRoute extends SRoute<SPushable> {
-  @override
-  Page buildPage(BuildContext context, Widget child) =>
-      FadeTransitionPage(key: ValueKey('BooksScreen'), child: child);
+class TabViewSRoute extends STabbedRoute<int, NonSPushable> {
+  TabViewSRoute({required this.activeTab})
+      : super(
+          sTabs: {
+            0: STab(initialSRoute: NewBooksSRoute(), currentSRoute: null),
+            1: STab(initialSRoute: AllBooksSRoute(), currentSRoute: null),
+          },
+        );
 
   @override
-  Widget build(BuildContext context) => BooksScreen(selectedTab: 1);
+  final int activeTab;
+
+  @override
+  Widget tabsBuilder(BuildContext context, Map<int, Widget> tabs) {
+    return BooksScreen(selectedTab: activeTab, tabs: tabs.values.toList());
+  }
+
+  @override
+  STabbedRoute<int, NonSPushable>? onTabPop(
+    BuildContext context,
+    SRouteInterface<NonSPushable> activeTabSRouteBellow,
+  ) =>
+      TabViewSRoute(activeTab: activeTab);
 }
 
-class SettingsSRoute extends SRoute<SPushable> {
+class NewBooksSRoute extends SRoute<NonSPushable> {
   @override
-  Page buildPage(BuildContext context, Widget child) => FadeTransitionPage(child: child);
+  Widget build(BuildContext context) => NewBooksScreen();
+}
 
+class AllBooksSRoute extends SRoute<NonSPushable> {
+  @override
+  Widget build(BuildContext context) => AllBooksScreen();
+}
+
+class SettingsSRoute extends SRoute<NonSPushable> {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }
 
+class ScaffoldScreen extends StatelessWidget {
+  final Widget child;
+  final int currentIndex;
+
+  const ScaffoldScreen({
+    Key? key,
+    required this.child,
+    required this.currentIndex,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        child: child,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (idx) => context.sRouter.to(ScaffoldSRoute(activeTab: idx)),
+        items: [
+          BottomNavigationBarItem(
+            label: 'Books',
+            icon: Icon(Icons.chrome_reader_mode_outlined),
+          ),
+          BottomNavigationBarItem(
+            label: 'Settings',
+            icon: Icon(Icons.settings),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class BooksScreen extends StatefulWidget {
   final int selectedTab;
+  final List<Widget> tabs;
 
   BooksScreen({
     Key? key,
     required this.selectedTab,
+    required this.tabs,
   }) : super(key: key);
 
   @override
@@ -117,9 +241,8 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
       children: [
         TabBar(
           controller: _tabController,
-          onTap: (value) => context.sRouter.push(
-            value == 0 ? NewBooksSRoute() : AllBooksSRoute(),
-          ),
+          onTap: (value) =>
+              context.sRouter.to(ScaffoldSRoute(activeTab: 0, tabViewTab: value)),
           labelColor: Theme.of(context).primaryColor,
           tabs: [
             Tab(icon: Icon(Icons.bathtub), text: 'New'),
@@ -129,10 +252,7 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: [
-              NewBooksScreen(),
-              AllBooksScreen(),
-            ],
+            children: widget.tabs,
           ),
         ),
       ],
@@ -170,51 +290,5 @@ class NewBooksScreen extends StatelessWidget {
         child: Text('New Books'),
       ),
     );
-  }
-}
-
-class FadeTransitionPage extends Page {
-  final Widget child;
-
-  FadeTransitionPage({LocalKey? key, required this.child}) : super(key: key);
-
-  @override
-  Route createRoute(BuildContext context) {
-    return PageBasedFadeTransitionRoute(this);
-  }
-}
-
-class PageBasedFadeTransitionRoute extends PageRoute {
-  PageBasedFadeTransitionRoute(Page page)
-      : super(
-          settings: page,
-        );
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    var curveTween = CurveTween(curve: Curves.easeIn);
-    return FadeTransition(
-      opacity: animation.drive(curveTween),
-      child: (settings as FadeTransitionPage).child,
-    );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    return child;
   }
 }

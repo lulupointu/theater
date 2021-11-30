@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
       home: SRouter(
         initialRoute: LogInSRoute(),
         translatorsBuilder: (_) => [
-          SPathTranslator<LogInSRoute, SPushable>.static(path: '/', route: LogInSRoute()),
-          SPathTranslator<MainSRoute, SPushable>(
+          SPathTranslator<LogInSRoute, SPushable>(path: '/', route: LogInSRoute()),
+          SPathTranslator<MainSRoute, SPushable>.parse(
             path: '*',
             matchToRoute: (_) => MainSRoute(),
             routeToWebEntry: (_) => WebEntry(path: '/user/0'),
@@ -75,7 +75,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        onPressed: () => context.sRouter.push(MainSRoute()),
+        onPressed: () => context.sRouter.to(MainSRoute()),
         child: Text('Click to log in'),
       ),
     );
@@ -88,18 +88,18 @@ class MainScreen extends StatelessWidget {
     return SRouter(
       initialRoute: UserSRoute(userId: '0'),
       translatorsBuilder: (_) => [
-        SPathTranslator<UserSRoute, SPushable>(
+        SPathTranslator<UserSRoute, SPushable>.parse(
           path: '/user/:id',
           matchToRoute: (match) => UserSRoute(userId: match.pathParams['id']!),
           routeToWebEntry: (route) => WebEntry(path: 'user/${route.userId}'),
         ),
-        SPathTranslator<SettingsSRoute, SPushable>(
+        SPathTranslator<SettingsSRoute, SPushable>.parse(
           path: '/settings',
           matchToRoute: (match) => SettingsSRoute(userId: match.historyState['id'] ?? '0'),
           routeToWebEntry: (route) =>
               WebEntry(path: '/settings', historyState: {'id': route.userId}),
         ),
-        SRedirectorTranslator.static(from: '*', to: UserSRoute(userId: '0')),
+        SRedirectorTranslator(path: '*', route: UserSRoute(userId: '0')),
       ],
       builder: (context, child) {
         return Scaffold(
@@ -110,9 +110,9 @@ class MainScreen extends StatelessWidget {
               final userId =
                   (SRouter.of(context).currentHistoryEntry!.route as SRouteWithUserId).userId;
               if (index == 0) {
-                context.sRouter.push(UserSRoute(userId: userId));
+                context.sRouter.to(UserSRoute(userId: userId));
               } else {
-                context.sRouter.push(SettingsSRoute(userId: userId));
+                context.sRouter.to(SettingsSRoute(userId: userId));
               }
             },
             items: [
@@ -140,12 +140,12 @@ class UserScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.push(SettingsSRoute(userId: userId)),
+              onPressed: () => context.sRouter.to(SettingsSRoute(userId: userId)),
               child: Text('Go to settings'),
             ),
             SizedBox(height: 100),
             ElevatedButton(
-              onPressed: () => SRouter.of(context, findRoot: true).push(LogInSRoute()),
+              onPressed: () => SRouter.of(context, findRoot: true).to(LogInSRoute()),
               child: Text('Go back to login'),
             ),
           ],
@@ -169,13 +169,13 @@ class SettingsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.push(UserSRoute(userId: userId)),
+              onPressed: () => context.sRouter.to(UserSRoute(userId: userId)),
               child: Text('Go to user $userId'),
             ),
             SizedBox(height: 100),
             ElevatedButton(
               onPressed: () =>
-                  context.sRouter.push(SettingsSRoute(userId: '${Random().nextInt(100)}')),
+                  context.sRouter.to(SettingsSRoute(userId: '${Random().nextInt(100)}')),
               child: Text('Change user id'),
             ),
           ],

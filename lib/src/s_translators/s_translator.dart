@@ -44,7 +44,7 @@ The [SRoute] type of $runtimeType could not be resolved.
 This is likely because you did not manually specify the [SRoute]:
 ```
 // GOOD
-$translatorType<YourRouteType>(...)
+$translatorType<YourSRouteType>(...)
 
 // BAD
 $translatorType(...)
@@ -57,25 +57,30 @@ $translatorType(...)
     }());
   }
 
-  // TODO: add description
-  /// Exact match only, no subclass match
+  /// This attributes describe which [SRoute] is associated with this
+  /// [STranslator] :
+  ///   - When this [SRoute] is pushed in [SRouter], the translator with which
+  ///   ^ is is associated will be used to convert it to a [WebEntry]
+  ///   - When a [WebEntry] matches this translator, it is this translator job
+  ///   ^ to convert it to an [SRoute] instance
+  ///
+  /// This type match is exact match only, no subclass match
   ///
   ///
-  /// It can be overwritten to [dynamic] to match any route
-  /// It can be overwritten to [Null] to match no route
+  /// You generally don't want to override this attribute. Exceptions are:
+  ///   - If you want to match every route, overwrite with [dynamic]
+  ///   - If you don't want to match any route, overwrite with [Null]
   ///
   ///
-  /// It should be resolved at runtime (i.e. that it is NOT [SRoute]
-  /// but the name of a route class you created). This is checked by the
-  /// assert in the constructor
+  /// It must be resolved at runtime, this means that if its value is
+  /// [SRouteInterface<MaybeSPushable>], an assertion error will be raised.
+  /// We impose this constraint so that developers don't forget to specify the
+  /// generic type (i.e. use STranslator<MySRoute, ...>(), NOT STranslator())
+  /// This is checked by the assert in this class' constructor
   final Type routeType = Route;
 
   /// Converts the associated [SRoute] into a string representing
   /// the url
-  ///
-  ///
-  /// This is only called when a new [SRoute] is pushed (or replaced)
-  /// in [SRouter]
   WebEntry sRouteToWebEntry(BuildContext context, Route route);
 
   /// Converts the given url into the associated [SRoute]
@@ -83,8 +88,5 @@ $translatorType(...)
   ///
   /// If the returned value is null, it means that the given url can't
   /// be used to create such a route
-  ///
-  ///
-  /// This can be called as often as needed
   Route? webEntryToSRoute(BuildContext context, WebEntry webEntry);
 }

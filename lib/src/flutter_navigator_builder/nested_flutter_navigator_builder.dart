@@ -17,7 +17,8 @@ import 'root_flutter_navigator_builder.dart';
 /// "Nested" refers to the fact that this is created by [SRouteInterface]
 /// inside [SRouter] (since [SRouter] created a navigator, this was is
 /// necessarily nested)
-class NestedSFlutterNavigatorBuilder extends StatefulWidget {
+class NestedSFlutterNavigatorBuilder<T> extends StatefulWidget {
+
   /// The [SRouteInterface] which pages to display in the [Navigator]
   final SRouteInterface sRoute;
 

@@ -9,12 +9,66 @@ import '../s_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
-/// A translator which can be used to redirect from a [path] to a [WebEntry]
+/// A translator which can be used to redirect from a [path] to a [SRoute]
 class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPushable> {
-  // TODO: add doc
+  /// Redirect a static [WebEntry] to a [SRoute]
+  ///
+  ///
+  /// [path] describes the path that should be matched. Wildcards and path
+  /// parameters are accepted but cannot be used to create the [route].
+  ///
+  /// [route] is the [SRoute] of the associated [Route] type that will be used
+  /// in [SRouter] if the path patches the given one
+  ///
+  ///
+  /// # Example
+  /// ```dart
+  /// SRedirectorTranslator(path: '*', route: HomeSRoute())
+  /// ```
+  ///
+  ///
+  /// See also:
+  ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   SRedirectorTranslator({
-    required String from,
-    required this.to,
+    required String path,
+    required SRouteInterface<SPushable> route,
+    this.replace = true,
+  })  : _matcher = WebEntryMatcher(path: path),
+        matchToRoute = ((_, __) => route);
+
+  /// Converts a [WebEntry] to a [SRoute] to redirect to, by parsing dynamic
+  /// element of the [WebEntry] (such as path parameters, query parameters, ...)
+  ///
+  ///
+  /// [path] describes the path that should be matched. Wildcards and path
+  /// parameters are accepted
+  ///
+  /// [matchToRoute] is called when the current path matches [path], and must
+  /// return a [SRoute] which will then be used to create the new [WebEntry].
+  /// Use the given match object to access the different parameters of the
+  /// matched path. See example bellow.
+  ///
+  ///
+  /// # Example:
+  /// ```dart
+  /// SRedirectorTranslator.parse(
+  ///   path: '/user/:id',
+  ///   matchToRoute: (match) => UserSRoute(id: match.pathParams['id']),
+  /// )
+  /// ```
+  ///
+  ///
+  /// [validatePathParams], [validateQueryParams], [validateFragment] and
+  /// [validateHistoryState] are optional parameters and can be used to further
+  /// precise which [WebEntry] to match
+  ///
+  ///
+  /// See also:
+  ///   - [WebEntry] for the different parameters which can be used to form a url
+  ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
+  SRedirectorTranslator.parse({
+    required String path,
+    required this.matchToRoute,
     this.replace = true,
 
     // Functions used to validate the different components of the url
@@ -23,23 +77,16 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
     final bool Function(String fragment)? validateFragment,
     final bool Function(Map<String, String> historyState)? validateHistoryState,
   }) : _matcher = WebEntryMatcher(
-          path: from,
+          path: path,
           validatePathParams: validatePathParams,
           validateQueryParams: validateQueryParams,
           validateFragment: validateFragment,
           validateHistoryState: validateHistoryState,
         );
 
-  // TODO: add doc
-  SRedirectorTranslator.static({
-    required String from,
-    required SRouteInterface<SPushable> to,
-    this.replace = true,
-  })  : _matcher = WebEntryMatcher(path: from),
-        to = ((_, __) => to);
-
-  /// The url to redirect to
-  final SRouteInterface<SPushable> Function(BuildContext context, WebEntryMatch match) to;
+  /// The [SRoute] to redirect to
+  final SRouteInterface<SPushable> Function(BuildContext context, WebEntryMatch match)
+      matchToRoute;
 
   /// Whether the path we navigate to should replace the current history entry
   ///
@@ -59,16 +106,12 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
       return null;
     }
 
-    final destinationSRoute = to(context, match);
+    final destinationSRoute = matchToRoute(context, match);
 
     // We need to wait one frame since this might be called inside
     // [SRouter] build phase
     SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
-      if (replace) {
-        SRouter.of(context, listen: false).replace(destinationSRoute);
-      } else {
-        SRouter.of(context, listen: false).push(destinationSRoute);
-      }
+      SRouter.of(context, listen: false).to(destinationSRoute, isReplacement: replace);
     });
 
     return destinationSRoute;

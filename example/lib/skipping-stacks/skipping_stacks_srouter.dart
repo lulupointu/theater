@@ -35,23 +35,23 @@ class BooksApp extends StatelessWidget {
   List<Author> get authors => books.map<Author>((e) => e.author).toList();
 
   void toBooks(BuildContext context) {
-    context.sRouter.push(BooksListSRoute(books: books, toBook: toBook));
+    context.sRouter.to(BooksListSRoute(books: books, toBook: toBook));
   }
 
   void toBook(BuildContext context, Book book) {
-    context.sRouter.push(
+    context.sRouter.to(
       BookDetailsSRoute(books: books, book: book, toBook: toBook, toAuthor: toAuthor),
     );
   }
 
   void toAuthors(BuildContext context) {
-    context.sRouter.push(
+    context.sRouter.to(
       AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
     );
   }
 
   void toAuthor(BuildContext context, Author author) {
-    context.sRouter.push(
+    context.sRouter.to(
       AuthorDetailsSRoute(
           authors: authors, author: author, toBooks: toBooks, toAuthor: toAuthor),
     );
@@ -64,11 +64,11 @@ class BooksApp extends StatelessWidget {
       home: SRouter(
         initialRoute: BooksListSRoute(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, SPushable>.static(
+          SPathTranslator<BooksListSRoute, SPushable>(
             path: '/',
             route: BooksListSRoute(books: books, toBook: toBook),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>(
+          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
             path: '/book/:id',
             matchToRoute: (match) => BookDetailsSRoute(
               books: books,
@@ -79,11 +79,11 @@ class BooksApp extends StatelessWidget {
             routeToWebEntry: (route) =>
                 WebEntry(path: '/book/${route.books.indexOf(route.book)}'),
           ),
-          SPathTranslator<AuthorsListSRoute, SPushable>.static(
+          SPathTranslator<AuthorsListSRoute, SPushable>(
             path: '/authors',
             route: AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
-          SPathTranslator<AuthorDetailsSRoute, SPushable>(
+          SPathTranslator<AuthorDetailsSRoute, SPushable>.parse(
             path: '/author/:id',
             matchToRoute: (match) => AuthorDetailsSRoute(
               authors: authors,
@@ -94,7 +94,7 @@ class BooksApp extends StatelessWidget {
             routeToWebEntry: (route) =>
                 WebEntry(path: '/author/${authors.indexOf(route.author)}'),
           ),
-          SRedirectorTranslator.static(from: '*', to: BooksListSRoute(books: books, toBook: toBook)),
+          SRedirectorTranslator(path: '*', route: BooksListSRoute(books: books, toBook: toBook)),
         ],
       ),
     );

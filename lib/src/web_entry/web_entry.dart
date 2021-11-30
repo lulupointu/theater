@@ -1,11 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-/// A class representing what is contained in a history
-/// entry
-///
-///
-/// TODO: Add easy copyWith
+/// A class representing what is contained in a browser history entry
 @immutable
 class WebEntry extends Equatable {
   /// The path component

@@ -53,12 +53,12 @@ class WebEntryMatcher {
   /// [path] should always start with '/'. If not, it will be added
   /// automatically
   WebEntryMatcher({
-    String? path,
+    String path = '*',
     this.validatePathParams,
     this.validateQueryParams,
     this.validateHistoryState,
     this.validateFragment,
-  }) : path = (path?.startsWith('/') ?? true)
+  }) : path = path.startsWith('/')
             ? path
             : '/$path'; // If the path does not start with a '/', add it
 

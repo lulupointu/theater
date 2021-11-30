@@ -1,13 +1,11 @@
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:flutter/widgets.dart';
-
-import '../../s_router/s_router.dart';
-import '../pushables/pushables.dart';
-import '../s_route_interface.dart';
-import 's_tabbed_route.dart';
+part of 's_tabbed_route.dart';
 
 /// A representation of the state of a [STabbedRoute], it will be stored in the
 /// [SRouter]
+/// 
+/// 
+/// This should never be used directly and is instead only used inside 
+/// [STabbedRoute]
 class STabbedRouteState<T, P extends MaybeSPushable> {
   /// Builds the new state of the given [sTabbedRoute] by using its attributes
   /// and (if any), it's previously stored state
@@ -19,7 +17,7 @@ class STabbedRouteState<T, P extends MaybeSPushable> {
         .sRoutesStateManager
         .getSRouteState(sRouteInterface: sTabbedRoute) as STabbedRouteState<T, P>?;
 
-    final sTabs = sTabbedRoute.sTabs;
+    final sTabs = sTabbedRoute._sTabs;
 
     tabsRoute = {
       for (final key in sTabs.keys)

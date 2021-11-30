@@ -36,7 +36,7 @@ class BooksApp extends StatelessWidget {
           filter: null,
         ),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, SPushable>(
+          SPathTranslator<BooksListSRoute, SPushable>.parse(
             path: '/',
             matchToRoute: (match) => BooksListSRoute(
               books: books,
@@ -54,7 +54,7 @@ class BooksApp extends StatelessWidget {
   }
 
   void onFilterChanged(BuildContext context, String filter) {
-    context.sRouter.push(BooksListSRoute(
+    context.sRouter.to(BooksListSRoute(
       books: books,
       onFilterChanged: onFilterChanged,
       filter: filter.isEmpty ? null : filter,

@@ -33,11 +33,11 @@ class BooksApp extends StatelessWidget {
       home: SRouter(
         initialRoute: BooksListScreenSRoute(books: _books),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListScreenSRoute, SPushable>.static(
+          SPathTranslator<BooksListScreenSRoute, SPushable>(
             path: '/',
             route: BooksListScreenSRoute(books: _books),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>(
+          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
             path: '/book/:id',
             matchToRoute: (match) => BookDetailsSRoute(
               books: _books,
@@ -45,7 +45,7 @@ class BooksApp extends StatelessWidget {
             ),
             routeToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
           ),
-          SRedirectorTranslator.static(from: '*', to: BooksListScreenSRoute(books: _books)),
+          SRedirectorTranslator(path: '*', route: BooksListScreenSRoute(books: _books)),
         ],
       ),
     );
@@ -93,7 +93,7 @@ class BooksListScreen extends StatelessWidget {
             ListTile(
               title: Text(book.title),
               subtitle: Text(book.author),
-              onTap: () => context.sRouter.push(
+              onTap: () => context.sRouter.to(
                 BookDetailsSRoute(books: books, selectedBook: books.indexOf(book)),
               ),
             ),

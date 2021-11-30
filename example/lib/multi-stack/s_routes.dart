@@ -110,7 +110,7 @@ abstract class ColoredListSRoute extends SRoute<NonSPushable> {
       tabItem: tabItem,
       color: activeTabColor[tabItem]!,
       title: tabName[tabItem]!,
-      onPush: (materialIndex) => context.sRouter.push(
+      onPush: (materialIndex) => context.sRouter.to(
         AppSRoute.toTab(
           activeTab: tabItem,
           newTabRoute: _detailSRoute(tabItem: tabItem, materialIndex: materialIndex),

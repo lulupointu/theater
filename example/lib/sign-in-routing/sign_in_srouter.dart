@@ -82,27 +82,27 @@ class _BooksAppState extends State<BooksApp> {
         translatorsBuilder: (_) => [
           ...authState.isSignedIn
               ? [
-                  SPathTranslator<HomeSRoute, SPushable>.static(
+                  SPathTranslator<HomeSRoute, SPushable>(
                     path: '/',
                     route: HomeSRoute(onSignOut: authState.signOut),
                   ),
-                  SPathTranslator<BooksListSRoute, SPushable>.static(
+                  SPathTranslator<BooksListSRoute, SPushable>(
                     path: '/books',
                     route: BooksListSRoute(onSignOut: authState.signOut),
                   ),
-                  SRedirectorTranslator.static(
-                    from: '*',
-                    to: HomeSRoute(onSignOut: authState.signOut),
+                  SRedirectorTranslator(
+                    path: '*',
+                    route: HomeSRoute(onSignOut: authState.signOut),
                   ),
                 ]
               : [
-                  SPathTranslator<SignInSRoute, SPushable>.static(
+                  SPathTranslator<SignInSRoute, SPushable>(
                     path: '/signin',
                     route: SignInSRoute(onSignedIn: authState.signIn),
                   ),
-                  SRedirectorTranslator.static(
-                    from: '*',
-                    to: SignInSRoute(onSignedIn: authState.signIn),
+                  SRedirectorTranslator(
+                    path: '*',
+                    route: SignInSRoute(onSignedIn: authState.signIn),
                   ),
                 ],
         ],
@@ -123,11 +123,11 @@ class AuthStateUpdateHandler extends StatefulWidget {
 
 class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   void _onAuthStateChange() {
-    if (widget.authState.isSignedIn) {
-      context.sRouter.push(HomeSRoute(onSignOut: widget.authState.signOut));
-    } else {
-      context.sRouter.push(SignInSRoute(onSignedIn: widget.authState.signIn));
-    }
+    context.sRouter.to(
+      widget.authState.isSignedIn
+          ? HomeSRoute(onSignOut: widget.authState.signOut)
+          : SignInSRoute(onSignedIn: widget.authState.signIn),
+    );
   }
 
   @override
@@ -173,7 +173,8 @@ class BooksListSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => BooksListScreen();
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) => HomeSRoute(onSignOut: onSignOut);
+  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) =>
+      HomeSRoute(onSignOut: onSignOut);
 }
 
 class HomeScreen extends StatelessWidget {
@@ -189,7 +190,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.push(BooksListSRoute(onSignOut: onSignOut)),
+              onPressed: () => context.sRouter.to(BooksListSRoute(onSignOut: onSignOut)),
               child: Text('View my bookshelf'),
             ),
             ElevatedButton(

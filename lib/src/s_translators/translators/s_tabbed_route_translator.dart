@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import '../../route/pushables/pushables.dart';
 import '../../route/s_route_interface.dart';
 import '../../route/s_tabbed_route/s_tabbed_route.dart';
-import '../../route/s_tabbed_route/s_tabbed_route_state.dart';
 import '../../s_router/s_router.dart';
 import '../../web_entry/web_entry.dart';
 import '../s_translator.dart';
@@ -15,22 +14,22 @@ import 'web_entry_matcher/web_entry_matcher.dart';
 class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T,
     P extends MaybeSPushable> extends STranslator<TabbedRoute, P> {
   // ignore: public_member_api_docs
-  STabbedRouteTranslator.static({
-    String? path,
-    required this.matchToRoute,
+  STabbedRouteTranslator({
+    String path = '*',
+    required TabbedRoute? Function(Map<T, SRouteInterface<NonSPushable>?> tabsRoute)
+        routeBuilder,
     this.routeToWebEntry = _defaultTabsMatchToWebEntry,
     required this.tabTranslators,
-  })  : _matcher = WebEntryMatcher(
-          path: path,
-        ),
+  })  : matchToRoute = ((_, tabsRoute) => routeBuilder(tabsRoute)),
+        _matcher = WebEntryMatcher(path: path),
         _sTranslatorsHandlers = {
           for (var key in tabTranslators.keys)
             key: STranslatorsHandler(translators: tabTranslators[key]!)
         };
 
   // ignore: public_member_api_docs
-  STabbedRouteTranslator({
-    required String? path,
+  STabbedRouteTranslator.parse({
+    required String path,
     required this.matchToRoute,
     required this.routeToWebEntry,
 

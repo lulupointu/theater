@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../srouter.dart';
 import '../../flutter_navigator_builder/nested_flutter_navigator_builder.dart';
 import '../../s_router/s_routes_state_manager/s_route_state_saver.dart';
 import '../on_pop_result/on_pop_result.dart';
@@ -10,10 +12,14 @@ import '../pushables/pushables.dart';
 import '../s_route.dart';
 import '../s_route_interface.dart';
 import 's_tab.dart';
-import 's_tabbed_route_state.dart';
 
+part 's_tabbed_route_state.dart';
+
+/// A [SRoute] used for tabbed screen. A tabbed screen can either be:
+///   - One tab shown at a time (e.g. with a bottom navigation bar)
+///   - Multiple tabs shown at the same time (e.g. a desktop app with a
+///   ^ permanent side bar)
 abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
-
   /// [STabbedRoute] must have [sTabs] which is a mapping between:
   ///   - Indexes of type [T]
   ///   - [STab]s
@@ -25,10 +31,10 @@ abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
   /// that has been used in this tab.
   ///
   /// The size of [sTabs] will determine the number of tabs
-  STabbedRoute({required this.sTabs});
+  STabbedRoute({required Map<T, STab> sTabs}) : _sTabs = sTabs;
 
   /// The list of the different tabs
-  final Map<T, STab> sTabs;
+  final Map<T, STab> _sTabs;
 
   /// The index of the tab being considered active
   ///
@@ -36,7 +42,7 @@ abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
   /// of the active tab
   ///
   ///
-  /// This must be in [sTabs.keys]
+  /// This must be in [_sTabs.keys]
   T get activeTab;
 
   /// A function which will be called when the active tab tries to pop
@@ -55,10 +61,7 @@ abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
   ///
   ///
   /// [tabs] can be used to get the different tabs, its length is the same as
-  /// the given [sTabs] parameter in this class constructor
-  ///
-  ///
-  /// // TODO: find a better name, builder could be taken if we wanted to add a wrapper to every [SRouteInterface]
+  /// the given [_sTabs] parameter in this class constructor
   Widget tabsBuilder(BuildContext context, Map<T, Widget> tabs);
 
   /// This is what [STabbedRoute] bring, an opinionated implementation of
@@ -73,17 +76,15 @@ abstract class STabbedRoute<T, P extends MaybeSPushable> extends SRoute<P> {
     return SRouteStateSaver(
       sRoute: this,
       state: state,
-      child: tabsBuilder(
-        context,
-        {
-          for (final key in sTabs.keys)
-            key: NestedSFlutterNavigatorBuilder(
-              sRoute: state.tabsRoute[key]!,
-              navigatorKey: state.navigatorKeys[key]!,
-              navigatorObservers: [], // This could be inconvenient
-            ),
-        },
-      ),
+      child: tabsBuilder(context, {
+        for (final key in _sTabs.keys)
+          key: NestedSFlutterNavigatorBuilder(
+            key: ValueKey(key),
+            sRoute: state.tabsRoute[key]!,
+            navigatorKey: state.navigatorKeys[key]!,
+            navigatorObservers: [], // This could be inconvenient
+          ),
+      }),
     );
   }
 
