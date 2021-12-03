@@ -6,15 +6,23 @@ class STab {
   /// The initial route of the tab
   final SRouteInterface<NonSPushable> initialSRoute;
 
-  /// The current route to be displayed
+  /// Builds the [SRouteInterface] of the associated tab
   ///
   ///
-  /// If this is null, the current route will be the last route that has been
-  /// used in this tab
-  /// If this tab is new (and therefore there is no "last used route")
-  /// [initialSRoute] will be used
-  final SRouteInterface<NonSPushable>? currentSRoute;
+  /// The [tab] argument given in this builder is the previous visible tab
+  final SRouteInterface<NonSPushable> Function(SRouteInterface<NonSPushable> tab)
+      tabRouteBuilder;
 
-  // ignore: public_member_api_docs
-  STab({required this.initialSRoute, required this.currentSRoute});
+  /// Describes a tab which might get updated
+  ///
+  ///
+  /// [tabRouteBuilder] is used to build a new tab based on the previous visible
+  /// one
+  ///
+  /// [initialSRoute] is needed and will be used in [tabRouteBuilder] if there
+  /// is no "previous visible" tab
+  STab(this.tabRouteBuilder, {required this.initialSRoute});
+
+  /// Describes a tab in which the [SRoute] is always the same
+  STab.static(this.initialSRoute) : tabRouteBuilder = ((tab) => initialSRoute);
 }

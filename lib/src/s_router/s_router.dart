@@ -162,7 +162,7 @@ main() {
   final bool disableUniversalTranslator;
 
   @override
-  State<SRouter> createState() => _SRouterState();
+  State<SRouter> createState() => SRouterState();
 
   /// A method to access the [SRouter] of the given [context]
   ///
@@ -171,14 +171,14 @@ main() {
   /// exception
   ///
   ///
-  /// If [listen] is true, any change to [_SRouterState] will cause a
+  /// If [listen] is true, any change to [SRouterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf] is true, it won't return try to look at the
   /// [StatefulElement] associated with the [context] and only look at its
   /// parents
   ///
-  /// If [findRoot] is true, it will try to find the root [_SRouterState]
+  /// If [findRoot] is true, it will try to find the root [SRouterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
   static SRouterInterface of(
@@ -204,13 +204,13 @@ main() {
   /// returned
   ///
   ///
-  /// If [listen] is true, any change to [_SRouterState] will cause a
+  /// If [listen] is true, any change to [SRouterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf], it won't return try to look at the [StatefulElement] associated
   /// with the [context] and only look at its parents
   ///
-  /// If [findRoot] is true, it will try to find the root [_SRouterState]
+  /// If [findRoot] is true, it will try to find the root [SRouterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
   static SRouterInterface? maybeOf(
@@ -230,9 +230,9 @@ main() {
       return _rootMaybeOf(context, listen: listen);
     }
 
-    late final _SRouterState? result;
-    if (!ignoreSelf && context is StatefulElement && context.state is _SRouterState) {
-      result = context.state as _SRouterState;
+    late final SRouterState? result;
+    if (!ignoreSelf && context is StatefulElement && context.state is SRouterState) {
+      result = context.state as SRouterState;
     } else if (listen) {
       result = context.dependOnInheritedWidgetOfExactType<_SRouterProvider>()?.state;
     } else {
@@ -250,11 +250,11 @@ main() {
   /// external method.
   /// It is used internally to ignore the state of the context during recursive
   /// calls
-  static _SRouterState? _rootMaybeOf(
+  static SRouterState? _rootMaybeOf(
     BuildContext context, {
     required bool listen,
   }) {
-    final maybeCurrentElement = maybeOf(context, listen: false) as _SRouterState?;
+    final maybeCurrentElement = maybeOf(context, listen: false) as SRouterState?;
 
     // If there are no element in the given context, return null
     if (maybeCurrentElement == null) {
@@ -266,7 +266,7 @@ main() {
       currentElement.context,
       listen: false,
       ignoreSelf: true,
-    ) as _SRouterState?;
+    ) as SRouterState?;
 
     // Continue to go up the tree until there is no element in the context
     while (aboveElement != null) {
@@ -275,7 +275,7 @@ main() {
         currentElement.context,
         listen: false,
         ignoreSelf: true,
-      ) as _SRouterState?;
+      ) as SRouterState?;
     }
 
     // At this point, the [currentElement] contains the root element
@@ -300,7 +300,7 @@ main() {
 ///
 /// A reference to this class can be obtained by calling [SRouter.of] or
 /// [context.sRouter]
-class _SRouterState extends State<SRouter> implements SRouterInterface {
+class SRouterState extends State<SRouter> implements SRouterInterface {
   /// The translator associated with the [SRouter] with is used to
   /// convert a [WebEntry] to a [SRoute] and vise versa
   ///
@@ -616,12 +616,12 @@ class _SRouterProvider extends InheritedWidget {
   /// Whether the associated [SRouter] is nested in another one
   final bool isNested;
 
-  /// The [_SRouterState] that this [InheritedWidget] provides
+  /// The [SRouterState] that this [InheritedWidget] provides
   ///
   ///
   /// Do NOT use this in [updateShouldNotify] since this object will mutate
   /// (therefore its reference will be the same)
-  final _SRouterState state;
+  final SRouterState state;
 
   const _SRouterProvider({
     Key? key,

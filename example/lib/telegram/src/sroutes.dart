@@ -158,17 +158,11 @@ class TabsWrapperSRoute extends STabbedRoute<MyTab, SPushable> {
   }) : super(
           sTabs: {
             MyTab.left: STab(
+              (tab) => tabLeftRoute ?? tab,
               initialSRoute: initialTabSRoutes[MyTab.left]!,
-              currentSRoute: tabLeftRoute,
             ),
-            MyTab.middle: STab(
-              initialSRoute: initialTabSRoutes[MyTab.middle]!,
-              currentSRoute: null, // This [SRoute] react to changes in the state
-            ),
-            MyTab.right: STab(
-              initialSRoute: initialTabSRoutes[MyTab.right]!,
-              currentSRoute: null, // This tab never switches
-            ),
+            MyTab.middle: STab.static(initialTabSRoutes[MyTab.middle]!),
+            MyTab.right: STab.static(initialTabSRoutes[MyTab.right]!),
           },
         );
 

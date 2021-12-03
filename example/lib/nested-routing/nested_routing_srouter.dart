@@ -17,37 +17,39 @@ class BooksApp extends StatelessWidget {
     return MaterialApp(
       title: 'Books App',
       home: SRouter(
-        initialRoute: ScaffoldSRoute(activeTab: 0),
+        initialRoute: ScaffoldSRoute(activeTab: ScaffoldTab.books),
         translatorsBuilder: (_) => [
-          STabbedRouteTranslator<ScaffoldSRoute, int, SPushable>(
+          STabbedRouteTranslator<ScaffoldSRoute, ScaffoldTab, SPushable>(
             routeBuilder: (tabs) {
               if (!tabs.entries.any((e) => e.value != null)) return null;
 
               final activeTabRoute = tabs.entries.firstWhere((e) => e.value != null);
 
-              return ScaffoldSRoute._toTab(
+              return ScaffoldSRoute(
                 activeTab: activeTabRoute.key,
-                newTabRoute: activeTabRoute.value,
+                booksViewSRoute: activeTabRoute.value is BooksViewSRoute
+                    ? activeTabRoute.value as BooksViewSRoute
+                    : null,
               );
             },
             tabTranslators: {
-              0: [
-                STabbedRouteTranslator<TabViewSRoute, int, NonSPushable>(
+              ScaffoldTab.books: [
+                STabbedRouteTranslator<BooksViewSRoute, BooksViewTab, NonSPushable>(
                   routeBuilder: (tabs) {
                     if (!tabs.entries.any((e) => e.value != null)) return null;
 
                     final activeTabRoute = tabs.entries.firstWhere((e) => e.value != null);
 
-                    return TabViewSRoute(activeTab: activeTabRoute.key);
+                    return BooksViewSRoute(activeTab: activeTabRoute.key);
                   },
                   tabTranslators: {
-                    0: [
+                    BooksViewTab.newBook: [
                       SPathTranslator<NewBooksSRoute, NonSPushable>(
                         path: '/books/new',
                         route: NewBooksSRoute(),
                       ),
                     ],
-                    1: [
+                    BooksViewTab.allBooks: [
                       SPathTranslator<AllBooksSRoute, NonSPushable>(
                         path: '/books/all',
                         route: AllBooksSRoute(),
@@ -56,7 +58,7 @@ class BooksApp extends StatelessWidget {
                   },
                 ),
               ],
-              1: [
+              ScaffoldTab.settings: [
                 SPathTranslator<SettingsSRoute, NonSPushable>(
                   path: '/settings',
                   route: SettingsSRoute(),
@@ -64,90 +66,74 @@ class BooksApp extends StatelessWidget {
               ],
             },
           ),
-          SRedirectorTranslator(path: '*', route: ScaffoldSRoute(activeTab: 0)),
+          SRedirectorTranslator(
+            path: '*',
+            route: ScaffoldSRoute(activeTab: ScaffoldTab.books),
+          ),
         ],
       ),
     );
   }
 }
 
-class ScaffoldSRoute extends STabbedRoute<int, SPushable> {
-  static final _initialSRoutes = {
-    0: TabViewSRoute(activeTab: 0),
-    1: SettingsSRoute(),
-  };
+enum ScaffoldTab { books, settings }
 
-  ScaffoldSRoute({required this.activeTab, int? tabViewTab})
-      : super(
-          sTabs: {
-            0: STab(
-              initialSRoute: _initialSRoutes[0]!,
-              currentSRoute: tabViewTab != null ? TabViewSRoute(activeTab: tabViewTab) : null,
-            ),
-            1: STab(initialSRoute: _initialSRoutes[1]!, currentSRoute: null),
-          },
-        );
-
-  // This factory is used in [onTabPop] and may used in the [STabbedTranslator]
-  ScaffoldSRoute._toTab({
-    required this.activeTab,
-    SRouteInterface<NonSPushable>? newTabRoute,
-  }) : super(
-          sTabs: {
-            0: STab(
-              initialSRoute: _initialSRoutes[0]!,
-              currentSRoute: activeTab == 0 ? newTabRoute : null,
-            ),
-            1: STab(
-              initialSRoute: _initialSRoutes[1]!,
-              currentSRoute: activeTab == 1 ? newTabRoute : null,
-            ),
-          },
-        );
+class ScaffoldSRoute extends STabbedRoute<ScaffoldTab, SPushable> {
+  ScaffoldSRoute({required this.activeTab, BooksViewSRoute? booksViewSRoute})
+      : super(sTabs: {
+          ScaffoldTab.books: STab(
+            (tab) => booksViewSRoute ?? tab,
+            initialSRoute: BooksViewSRoute(activeTab: BooksViewTab.newBook),
+          ),
+          ScaffoldTab.settings: STab.static(SettingsSRoute()),
+        });
 
   @override
-  final int activeTab;
+  final ScaffoldTab activeTab;
 
   @override
-  Widget tabsBuilder(BuildContext context, Map<int, Widget> tabs) {
-    return ScaffoldScreen(child: tabs[activeTab]!, currentIndex: activeTab);
-  }
-
-  @override
-  STabbedRoute<int, SPushable>? onTabPop(
-    BuildContext context,
-    SRouteInterface<NonSPushable> activeTabSRouteBellow,
-  ) {
-    return ScaffoldSRoute._toTab(
-      activeTab: activeTab,
-      newTabRoute: activeTabSRouteBellow,
+  Widget tabsBuilder(BuildContext context, Map<ScaffoldTab, Widget> tabs) {
+    return ScaffoldScreen(
+      child: tabs[activeTab]!,
+      currentIndex: ScaffoldTab.values.indexOf(activeTab),
     );
   }
-}
-
-class TabViewSRoute extends STabbedRoute<int, NonSPushable> {
-  TabViewSRoute({required this.activeTab})
-      : super(
-          sTabs: {
-            0: STab(initialSRoute: NewBooksSRoute(), currentSRoute: null),
-            1: STab(initialSRoute: AllBooksSRoute(), currentSRoute: null),
-          },
-        );
 
   @override
-  final int activeTab;
-
-  @override
-  Widget tabsBuilder(BuildContext context, Map<int, Widget> tabs) {
-    return BooksScreen(selectedTab: activeTab, tabs: tabs.values.toList());
-  }
-
-  @override
-  STabbedRoute<int, NonSPushable>? onTabPop(
+  STabbedRoute<ScaffoldTab, SPushable>? onTabPop(
     BuildContext context,
     SRouteInterface<NonSPushable> activeTabSRouteBellow,
   ) =>
-      TabViewSRoute(activeTab: activeTab);
+      ScaffoldSRoute(
+        activeTab: activeTab,
+        booksViewSRoute:
+            activeTabSRouteBellow is BooksViewSRoute ? activeTabSRouteBellow : null,
+      );
+}
+
+enum BooksViewTab { newBook, allBooks }
+
+class BooksViewSRoute extends STabbedRoute<BooksViewTab, NonSPushable> {
+  BooksViewSRoute({required this.activeTab})
+      : super(sTabs: {
+          BooksViewTab.newBook: STab.static(NewBooksSRoute()),
+          BooksViewTab.allBooks: STab.static(AllBooksSRoute()),
+        });
+
+  @override
+  final BooksViewTab activeTab;
+
+  @override
+  Widget tabsBuilder(BuildContext context, Map<BooksViewTab, Widget> tabs) {
+    return BooksScreen(
+      selectedTab: BooksViewTab.values.indexOf(activeTab),
+      tabs: tabs.values.toList(),
+    );
+  }
+
+  @override
+  STabbedRoute<BooksViewTab, NonSPushable>? onTabPop(BuildContext context, _) =>
+      BooksViewSRoute(activeTab: activeTab);
 }
 
 class NewBooksSRoute extends SRoute<NonSPushable> {
@@ -184,7 +170,7 @@ class ScaffoldScreen extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (idx) => context.sRouter.to(ScaffoldSRoute(activeTab: idx)),
+        onTap: (idx) => context.sRouter.to(ScaffoldSRoute(activeTab: ScaffoldTab.values[idx])),
         items: [
           BottomNavigationBarItem(
             label: 'Books',
@@ -221,7 +207,11 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.selectedTab);
+    _tabController = TabController(
+      length: widget.tabs.length,
+      vsync: this,
+      initialIndex: widget.selectedTab,
+    );
   }
 
   @override
@@ -241,8 +231,12 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
       children: [
         TabBar(
           controller: _tabController,
-          onTap: (value) =>
-              context.sRouter.to(ScaffoldSRoute(activeTab: 0, tabViewTab: value)),
+          onTap: (index) => context.sRouter.to(
+            ScaffoldSRoute(
+              activeTab: ScaffoldTab.books,
+              booksViewSRoute: BooksViewSRoute(activeTab: BooksViewTab.values[index]),
+            ),
+          ),
           labelColor: Theme.of(context).primaryColor,
           tabs: [
             Tab(icon: Icon(Icons.bathtub), text: 'New'),

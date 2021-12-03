@@ -13,10 +13,10 @@ import 'web_entry_matcher/web_entry_matcher.dart';
 /// A translator which should be used with a [STabbedRoute]
 class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T,
     P extends MaybeSPushable> extends STranslator<TabbedRoute, P> {
-  // ignore: public_member_api_docs
+
   STabbedRouteTranslator({
     String path = '*',
-    required TabbedRoute? Function(Map<T, SRouteInterface<NonSPushable>?> tabsRoute)
+    required TabbedRoute? Function(Map<T, SRouteInterface<NonSPushable>?> newTabsRoute)
         routeBuilder,
     this.routeToWebEntry = _defaultTabsMatchToWebEntry,
     required this.tabTranslators,
@@ -27,7 +27,6 @@ class STabbedRouteTranslator<TabbedRoute extends STabbedRoute<T, P>, T,
             key: STranslatorsHandler(translators: tabTranslators[key]!)
         };
 
-  // ignore: public_member_api_docs
   STabbedRouteTranslator.parse({
     required String path,
     required this.matchToRoute,

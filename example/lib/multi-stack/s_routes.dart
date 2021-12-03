@@ -40,16 +40,16 @@ class AppSRoute extends STabbedRoute<TabItem, SPushable> {
   }) : super(
           sTabs: {
             TabItem.red: STab(
+              (tab) => tabRedRoute ?? tab,
               initialSRoute: initialTabsRoute[TabItem.red]!,
-              currentSRoute: tabRedRoute,
             ),
             TabItem.green: STab(
+              (tab) => tabGreenRoute ?? tab,
               initialSRoute: initialTabsRoute[TabItem.green]!,
-              currentSRoute: tabGreenRoute,
             ),
             TabItem.blue: STab(
+              (tab) => tabBlueRoute ?? tab,
               initialSRoute: initialTabsRoute[TabItem.blue]!,
-              currentSRoute: tabBlueRoute,
             ),
           },
         );
