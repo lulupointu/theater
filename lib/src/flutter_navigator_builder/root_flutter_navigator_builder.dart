@@ -102,7 +102,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
     // If the navigator created here has something which is not associated with
     // a page (therefore not associated with an SRouter) at the of its routes,
     // pop it
-    if (_getTopNavigatorRoute()?.settings is Page) {
+    if (_getTopNavigatorRoute()?.settings is! Page) {
       _navigatorKey.currentState!.pop();
       return true;
     }
