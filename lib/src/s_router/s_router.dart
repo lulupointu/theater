@@ -183,7 +183,7 @@ main() {
   /// current context)
   static SRouterInterface of(
     BuildContext context, {
-    bool listen = true,
+    bool listen = false,
     bool ignoreSelf = false,
     bool findRoot = false,
   }) {
@@ -215,7 +215,7 @@ main() {
   /// current context)
   static SRouterInterface? maybeOf(
     BuildContext context, {
-    bool listen = true,
+    bool listen = false,
     bool ignoreSelf = false,
     bool findRoot = false,
   }) {

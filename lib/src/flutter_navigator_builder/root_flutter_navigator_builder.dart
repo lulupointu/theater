@@ -85,6 +85,18 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
 
   /// Called when the android back button is pressed
   FutureOr<bool> _onBackButtonEvent() async {
+    // If the root navigator (certainly the one created by WidgetApp) can pop,
+    // it means that a ModalRoute (Dialog, BottomSheet, ...) has been pushed on
+    // top of everything so pop it
+    //
+    // We might also want to check if we have a ModalRoute ourselves (which is
+    // possible with [Navigator.popUntil]) but realistically their is always a
+    // WidgetApp above [SRouter] and all dialogs are pushed to the root navigator
+    if (Navigator.maybeOf(context, rootNavigator: true)?.canPop() ?? false) {
+      Navigator.of(context, rootNavigator: true).pop();
+      return true;
+    }
+
     return _handleSPop(await widget.sRoute.onBack(context));
   }
 

@@ -119,6 +119,10 @@ class BookDetailsScreen extends StatelessWidget {
           children: [
             Text(book.title, style: Theme.of(context).textTheme.headline6),
             Text(book.author, style: Theme.of(context).textTheme.subtitle1),
+            ElevatedButton(
+              onPressed: () => showAboutDialog(context: context),
+              child: Text('Click me'),
+            ),
           ],
         ),
       ),
