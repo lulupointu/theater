@@ -62,6 +62,12 @@ class RootSFlutterNavigatorBuilder extends StatefulWidget {
 }
 
 class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuilder> {
+  /// The key of the navigator created in [build]
+  ///
+  /// Used to call pop
+  late final GlobalKey<NavigatorState> _navigatorKey =
+      widget.navigatorKey ?? GlobalKey<NavigatorState>();
+
   /// Returns the stack of pages associated with the given [sRoute]
   List<Page> _getPagesFromSRoute(SRouteInterface sRoute) {
     final sRouteBellow = sRoute.buildSRouteBellow(context);
@@ -88,16 +94,33 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
     // If the root navigator (certainly the one created by WidgetApp) can pop,
     // it means that a ModalRoute (Dialog, BottomSheet, ...) has been pushed on
     // top of everything so pop it
-    //
-    // We might also want to check if we have a ModalRoute ourselves (which is
-    // possible with [Navigator.popUntil]) but realistically their is always a
-    // WidgetApp above [SRouter] and all dialogs are pushed to the root navigator
     if (Navigator.maybeOf(context, rootNavigator: true)?.canPop() ?? false) {
       Navigator.of(context, rootNavigator: true).pop();
       return true;
     }
 
+    // If the navigator created here has something which is not associated with
+    // a page (therefore not associated with an SRouter) at the of its routes,
+    // pop it
+    if (_getTopNavigatorRoute()?.settings is Page) {
+      _navigatorKey.currentState!.pop();
+      return true;
+    }
+
     return _handleSPop(await widget.sRoute.onBack(context));
+  }
+
+  /// Returns the [Route] (NOT [SRoute]) which is at the top of the [Navigator]
+  /// created in [build]
+  ///
+  /// Returns null if [build] has not yet been called
+  Route? _getTopNavigatorRoute() {
+    Route? topNavigatorRoute;
+    _navigatorKey.currentState?.popUntil((route) {
+      topNavigatorRoute = route;
+      return true;
+    });
+    return topNavigatorRoute;
   }
 
   /// Act based on a [SPop] value return either by the onPop or onBack callback
@@ -129,7 +152,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
       child: SBackButtonHandler(
         onBackButtonEventCallback: _onBackButtonEvent,
         child: Navigator(
-          key: widget.navigatorKey,
+          key: _navigatorKey,
           observers: widget.navigatorObservers,
           pages: _getPagesFromSRoute(widget.sRoute),
           onPopPage: (route, data) => _onPopPage(context, route, data),
