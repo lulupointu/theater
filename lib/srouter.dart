@@ -1,6 +1,5 @@
 library srouter;
 
-export 'src/back_button_handler/s_back_button_handler.dart';
 export 'src/browser/s_browser.dart';
 export 'src/browser/s_url_strategy.dart';
 export 'src/initialize/initialize_s_router.dart';

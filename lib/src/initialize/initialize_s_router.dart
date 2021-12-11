@@ -1,4 +1,3 @@
-import '../back_button_handler/s_back_button_observer.dart';
 import '../browser/s_browser.dart';
 import '../browser/s_url_strategy.dart';
 
@@ -8,5 +7,4 @@ import '../browser/s_url_strategy.dart';
 /// Read the [SUrlStrategy] class documentation for more details.
 void initializeSRouter({SUrlStrategy sUrlStrategy = SUrlStrategy.hash}) {
   SBrowser.initialize(sUrlStrategy: sUrlStrategy);
-  SBackButtonObserver.initialize();
 }

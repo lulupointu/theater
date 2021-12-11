@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:move_to_background/move_to_background.dart';
 
-import '../back_button_handler/s_back_button_handler.dart';
+import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../route/on_pop_result/on_pop_result.dart';
 import '../route/pushables/pushables.dart';
 import '../route/s_route_interface.dart';
@@ -90,7 +90,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
   }
 
   /// Called when the android back button is pressed
-  FutureOr<bool> _onBackButtonEvent() async {
+  Future<bool> _onBackButtonEvent() async {
     // If the root navigator (certainly the one created by WidgetApp) can pop,
     // it means that a ModalRoute (Dialog, BottomSheet, ...) has been pushed on
     // top of everything so pop it
@@ -102,7 +102,8 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
     // If the navigator created here has something which is not associated with
     // a page (therefore not associated with an SRouter) at the of its routes,
     // pop it
-    if (_getTopNavigatorRoute()?.settings is! Page) {
+    final _currentRoute = _getTopNavigatorRoute();
+    if (_currentRoute?.settings is! Page) {
       _navigatorKey.currentState!.pop();
       return true;
     }
@@ -149,8 +150,8 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
   Widget build(BuildContext context) {
     return _RootSFlutterNavigatorBuilderProvider(
       onPopPage: _onPopPage,
-      child: SBackButtonHandler(
-        onBackButtonEventCallback: _onBackButtonEvent,
+      child: BackButtonListener(
+        onBackButtonPressed: _onBackButtonEvent,
         child: Navigator(
           key: _navigatorKey,
           observers: widget.navigatorObservers,

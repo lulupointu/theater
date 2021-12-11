@@ -2,6 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../browser/s_browser.dart';
 import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
 import '../route/pushables/pushables.dart';
@@ -587,18 +588,20 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
       state: this,
       currentHistoryEntry: currentHistoryEntry!,
       isNested: _isNested,
-      child: Builder(
-        builder: (context) {
-          final navigatorBuilder = RootSFlutterNavigatorBuilder(
-            sRoute: currentHistoryEntry!.route,
-            navigatorKey: widget.navigatorKey,
-            navigatorObservers: widget.navigatorObservers,
-            disableSendAppToBackground:
-                !_isPlatformMobile || _isNested || widget.disableSendAppToBackground,
-          );
+      child: BackButtonListenerScope(
+        child: Builder(
+          builder: (context) {
+            final navigatorBuilder = RootSFlutterNavigatorBuilder(
+              sRoute: currentHistoryEntry!.route,
+              navigatorKey: widget.navigatorKey,
+              navigatorObservers: widget.navigatorObservers,
+              disableSendAppToBackground:
+                  !_isPlatformMobile || _isNested || widget.disableSendAppToBackground,
+            );
 
-          return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
-        },
+            return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
+          },
+        ),
       ),
     );
   }
