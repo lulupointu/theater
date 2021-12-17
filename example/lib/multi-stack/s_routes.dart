@@ -3,10 +3,10 @@ import 'package:srouter/srouter.dart';
 
 import 'multi_stack_srouter.dart';
 
-class SettingsSRoute extends SRoute<NotSNested> {
+class SettingsPageStack extends PageStack<NonNestedStack> {
   final TabItem tabItem;
 
-  SettingsSRoute({required this.tabItem});
+  SettingsPageStack({required this.tabItem});
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +20,18 @@ class SettingsSRoute extends SRoute<NotSNested> {
   _withCapitalLetter(String word) => word[0].toUpperCase() + word.substring(1);
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
-    return AppSRoute(
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+    return AppPageStack(
       (state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem)),
     );
   }
 }
 
-class AppSRoute extends S2TabsRoute<NotSNested> {
-  AppSRoute(StateBuilder<S2TabsState> stateBuilder) : super(stateBuilder);
+class AppPageStack extends Multi2TabsPageStack<NonNestedStack> {
+  AppPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, S2TabsState state) {
+  Widget build(BuildContext context, Multi2TabsState state) {
     return App(
       activeTab: TabItem.values[state.activeIndex],
       tabs: {TabItem.red: state.tabs[0], TabItem.green: state.tabs[1]},
@@ -39,25 +39,25 @@ class AppSRoute extends S2TabsRoute<NotSNested> {
   }
 
   @override
-  S2TabsState get initialState => S2TabsState(
+  Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: RedListSRoute(),
-        tab2SRoute: GreenListSRoute(),
+        tab1SRoute: RedListPageStack(),
+        tab2SRoute: GreenListPageStack(),
       );
 }
 
-class RedListSRoute extends ColoredListSRoute {
-  RedListSRoute() : super(TabItem.red);
+class RedListPageStack extends ColoredListPageStack {
+  RedListPageStack() : super(TabItem.red);
 }
 
-class GreenListSRoute extends ColoredListSRoute {
-  GreenListSRoute() : super(TabItem.green);
+class GreenListPageStack extends ColoredListPageStack {
+  GreenListPageStack() : super(TabItem.green);
 }
 
-abstract class ColoredListSRoute extends SRoute<SNested> {
+abstract class ColoredListPageStack extends PageStack<NestedStack> {
   final TabItem tabItem;
 
-  ColoredListSRoute(this.tabItem);
+  ColoredListPageStack(this.tabItem);
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +66,13 @@ abstract class ColoredListSRoute extends SRoute<SNested> {
       color: activeTabColor[tabItem]!,
       title: tabName[tabItem]!,
       onPush: (materialIndex) => context.sRouter.to(
-        AppSRoute(
+        AppPageStack(
           (state) => state.copyWith(
             activeIndex: TabItem.values.indexOf(tabItem),
             tab1SRoute:
-                tabItem == TabItem.red ? RedDetailSRoute(materialIndex: materialIndex) : null,
+                tabItem == TabItem.red ? RedDetailPageStack(materialIndex: materialIndex) : null,
             tab2SRoute: tabItem == TabItem.green
-                ? GreenDetailSRoute(materialIndex: materialIndex)
+                ? GreenDetailPageStack(materialIndex: materialIndex)
                 : null,
           ),
         ),
@@ -81,24 +81,24 @@ abstract class ColoredListSRoute extends SRoute<SNested> {
   }
 }
 
-class RedDetailSRoute extends ColoredDetailSRoute {
+class RedDetailPageStack extends ColoredDetailPageStack {
   final int materialIndex;
 
-  RedDetailSRoute({required this.materialIndex}) : super(TabItem.red);
+  RedDetailPageStack({required this.materialIndex}) : super(TabItem.red);
 }
 
-class GreenDetailSRoute extends ColoredDetailSRoute {
+class GreenDetailPageStack extends ColoredDetailPageStack {
   final int materialIndex;
 
-  GreenDetailSRoute({required this.materialIndex}) : super(TabItem.green);
+  GreenDetailPageStack({required this.materialIndex}) : super(TabItem.green);
 }
 
-abstract class ColoredDetailSRoute extends SRoute<SNested> {
+abstract class ColoredDetailPageStack extends PageStack<NestedStack> {
   int get materialIndex;
 
   final TabItem tabItem;
 
-  ColoredDetailSRoute(this.tabItem);
+  ColoredDetailPageStack(this.tabItem);
 
   @override
   Widget build(BuildContext context) {
@@ -111,12 +111,12 @@ abstract class ColoredDetailSRoute extends SRoute<SNested> {
   }
 
   @override
-  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
+  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
     switch (tabItem) {
       case TabItem.red:
-        return RedListSRoute();
+        return RedListPageStack();
       case TabItem.green:
-        return GreenListSRoute();
+        return GreenListPageStack();
     }
   }
 }

@@ -30,7 +30,7 @@ class _WishlistAppState extends State<WishlistApp> {
   void toWishlist(BuildContext context, Wishlist wishlist) {
     _addWishlistIfNotPresent(wishlist);
     context.sRouter.to(
-      WishlistSRoute(wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist),
+      WishlistPageStack(wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist),
     );
   }
 
@@ -42,25 +42,25 @@ class _WishlistAppState extends State<WishlistApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
+        initialPageStack: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
-          SPathTranslator<WishlistListSRoute, NotSNested>(
+          PathTranslator<WishlistListPageStack, NonNestedStack>(
             path: '/',
-            route: WishlistListSRoute(wishlists: wishlists, toWishlist: toWishlist),
+            route: WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist),
           ),
-          SPathTranslator<WishlistSRoute, NotSNested>.parse(
+          PathTranslator<WishlistPageStack, NonNestedStack>.parse(
             path: '/wishlist/:id',
             matchToRoute: (match) {
               final wishlist = Wishlist(match.pathParams['id']!);
               _addWishlistIfNotPresent(wishlist);
-              return WishlistSRoute(
+              return WishlistPageStack(
                   wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist);
             },
             routeToWebEntry: (route) => WebEntry(path: '/wishlist/${route.wishlist.id}'),
           ),
-          SRedirectorTranslator(
+          RedirectorTranslator(
             path: '*',
-            route: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
+            route: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
           ),
         ],
       ),
@@ -68,11 +68,11 @@ class _WishlistAppState extends State<WishlistApp> {
   }
 }
 
-class WishlistListSRoute extends SRoute<NotSNested> {
+class WishlistListPageStack extends PageStack<NonNestedStack> {
   final List<Wishlist> wishlists;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
 
-  WishlistListSRoute({required this.wishlists, required this.toWishlist});
+  WishlistListPageStack({required this.wishlists, required this.toWishlist});
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +80,19 @@ class WishlistListSRoute extends SRoute<NotSNested> {
   }
 }
 
-class WishlistSRoute extends SRoute<NotSNested> {
+class WishlistPageStack extends PageStack<NonNestedStack> {
   final List<Wishlist> wishlists;
   final Wishlist wishlist;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
 
-  WishlistSRoute({required this.wishlists, required this.wishlist, required this.toWishlist});
+  WishlistPageStack({required this.wishlists, required this.wishlist, required this.toWishlist});
 
   @override
   Widget build(BuildContext context) => WishlistScreen(wishlist: wishlist);
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
-    return WishlistListSRoute(wishlists: wishlists, toWishlist: toWishlist);
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+    return WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist);
   }
 }
 

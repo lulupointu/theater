@@ -1,30 +1,44 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 import '../../../browser/web_entry.dart';
-import '../../../routes/framework.dart';
-import '../../../routes/s_nested.dart';
-import '../../../routes/s_tabs_route/s_2_tabs_route.dart';
+import '../../../page_stack/framework.dart';
+import '../../../page_stack/nested_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
 import '../../../s_router/s_router.dart';
-import '../../s_translator.dart';
-import '../../s_translators_handler.dart';
+import '../../translator.dart';
+import '../../translators_handler.dart';
 import '../web_entry_matcher/web_entry_match.dart';
 import '../web_entry_matcher/web_entry_matcher.dart';
 
+
+/// PageStackBase
+/// PageStack
+/// MultiTabPageStack -> MultiTabState
+/// 2TabsPageStack -> 2TabsState
+///
+/// MaybeNestedStack
+/// NestedStack
+/// NonNestedStack
+///
+/// Translator
+/// PathTranslator
+/// MultiTabTranslator
+
 /// A translator which should be used with a [STabbedRoute]
-class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested>
-    extends STabsRouteTranslator<Route, S2TabsState, N> {
-  /// {@template srouter.s_tabs_route_translators.constructor}
+class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends MaybeNestedStack>
+    extends MultiTabTranslator<Route, Multi2TabsState, N> {
+  /// {@template srouter.multi_tab_translators.constructor}
   ///
-  /// [route] builds the associated [STabsRoute] from a [StateBuilder],
+  /// [route] builds the associated [MultiTabPageStack] from a [StateBuilder],
   /// Use MySTabsRoute.new
   ///
   /// There are also one list of [STranslator] per tab, which you should use to
-  /// map the different possible [SRoute]s of each tab to a url
+  /// map the different possible [PageStack]s of each tab to a url
   ///
   ///
   /// ### Example with 2 tabs
   /// ```dart
-  /// S2TabsRouteTranslator<MyTabsRoute, NotSNested>(
+  /// Multi2TabsTranslator<MyTabsRoute, NotSNested>(
   ///   route: MyTabsRoute.new,
   ///   tab1Translators: [...],
   ///   tab2Translators: [...],
@@ -32,35 +46,35 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   /// ```
   ///
   ///
-  /// If a [STabsRoute] of the associated type [Route] is given to [SRouter]
+  /// If a [MultiTabPageStack] of the associated type [Route] is given to [SRouter]
   /// but the active tab could not be converted to a [WebEntry], an
-  /// [UnknownSRouteError] will be thrown
+  /// [UnknownPageStackError] will be thrown
   ///
   /// {@endtemplate}
   ///
   /// See also:
-  ///   - [S2TabsRouteTranslator.parse] for a way to match the path dynamically
-  S2TabsRouteTranslator({
-    required Route Function(StateBuilder<S2TabsState> stateBuilder) route,
+  ///   - [Multi2TabsTranslator.parse] for a way to match the path dynamically
+  Multi2TabsTranslator({
+    required Route Function(StateBuilder<Multi2TabsState> stateBuilder) route,
 
     // Translators for each tabs
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
-    // inside a STabsRoute are [SNested] routes)
-    required List<STranslator<SElement<SNested>, SRouteBase<SNested>, SNested>>
+    // inside a STabsRoute are [SNested] page_stack)
+    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
         tab1Translators,
-    required List<STranslator<SElement<SNested>, SRouteBase<SNested>, SNested>>
+    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
         tab2Translators,
-  })  : matchToRoute =
+  })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : route(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
-        sTranslatorsHandlers = [
-          STranslatorsHandler(translators: tab1Translators),
-          STranslatorsHandler(translators: tab2Translators),
+        translatorsHandlers = [
+          TranslatorsHandler(translators: tab1Translators),
+          TranslatorsHandler(translators: tab2Translators),
         ],
-        routeToWebEntry = _defaultRouteToWebEntry;
+        pageStackToWebEntry = _defaultRouteToWebEntry;
 
-  /// {@template srouter.s_tabs_route_translators.parse}
+  /// {@template srouter.multi_tab_translators.parse}
   ///
   /// Allows you to parse the incoming [WebEntry]
   ///
@@ -68,8 +82,8 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted
   ///
-  /// [matchToRoute] is called when the current path matches [path], and must
-  /// return a [STabsRoute] of the associated [Route] type.
+  /// [matchToPageStack] is called when the current path matches [path], and must
+  /// return a [MultiTabPageStack] of the associated [Route] type.
   /// Use the given match object to access the different parameters of the
   /// matched path.
   /// The given stateBuilder value depends on whether a [tabXTranslators]
@@ -79,9 +93,9 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   ///     `((state) => state.copyWith(activeIndex: x, tabXRoute: tabSRoute)`
   ///   - If no [tabXTranslators] matched, stateBuilder is null
   ///
-  /// [routeToWebEntry] converts the [SRoute] of the associated [Route] type to
+  /// [pageStackToWebEntry] converts the [PageStack] of the associated [Route] type to
   /// a [WebEntry] (i.e. a representation of the url)
-  /// The [state] tab is the [STabsRoute] state
+  /// The [state] tab is the [MultiTabPageStack] state
   /// The [activeTabWebEntry] variable gives you access to the [WebEntry]
   /// returned by the active tab is also given. If the active  tab could not be
   /// converted to a [WebEntry], this variable is null
@@ -91,7 +105,7 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   /// precise which [WebEntry] to match
   ///
   /// There are also one list of [STranslator] per tab, which you should use to
-  /// map the different possible [SRoute]s of each tab to a url
+  /// map the different possible [PageStack]s of each tab to a url
   ///
   ///
   /// IMPORTANT: The [path] given as argument does not influence the [WebEntry]
@@ -103,10 +117,10 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
   ///
   /// {@endtemplate}
-  S2TabsRouteTranslator.parse({
+  Multi2TabsTranslator.parse({
     required String path,
-    required this.matchToRoute,
-    required this.routeToWebEntry,
+    required this.matchToPageStack,
+    required this.pageStackToWebEntry,
 
     // Functions used to validate the different components of the url
     final bool Function(Map<String, String> pathParams)? validatePathParams,
@@ -117,10 +131,10 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
     // Translators for each tabs
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
-    // inside a STabsRoute are [SNested] routes)
-    required List<STranslator<SElement<SNested>, SRouteBase<SNested>, SNested>>
+    // inside a STabsRoute are [SNested] page_stack)
+    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
         tab1Translators,
-    required List<STranslator<SElement<SNested>, SRouteBase<SNested>, SNested>>
+    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
         tab2Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
@@ -129,14 +143,14 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
           validateFragment: validateFragment,
           validateHistoryState: validateHistoryState,
         ),
-        sTranslatorsHandlers = [
-          STranslatorsHandler(translators: tab1Translators),
-          STranslatorsHandler(translators: tab2Translators),
+        translatorsHandlers = [
+          TranslatorsHandler(translators: tab1Translators),
+          TranslatorsHandler(translators: tab2Translators),
         ];
 
   @override
-  final Route? Function(WebEntryMatch match, StateBuilder<S2TabsState>? stateBuilder)
-      matchToRoute;
+  final Route? Function(WebEntryMatch match, StateBuilder<Multi2TabsState>? stateBuilder)
+      matchToPageStack;
 
   @override
   final WebEntryMatcher matcher;
@@ -144,28 +158,28 @@ class S2TabsRouteTranslator<Route extends S2TabsRoute<N>, N extends MaybeSNested
   @override
   final WebEntry Function(
     Route route,
-    S2TabsState state,
+    Multi2TabsState state,
     WebEntry? activeTabWebEntry,
-  ) routeToWebEntry;
+  ) pageStackToWebEntry;
 
   @override
-  final List<STranslatorsHandler<SNested>> sTranslatorsHandlers;
+  final List<TranslatorsHandler<NestedStack>> translatorsHandlers;
 
   static WebEntry _defaultRouteToWebEntry(
-    S2TabsRoute route,
-    S2TabsState state,
+    Multi2TabsPageStack route,
+    Multi2TabsState state,
     WebEntry? activeTabWebEntry,
   ) {
     if (activeTabWebEntry == null) {
-      throw UnknownSRouteError(sRoute: route);
+      throw UnknownPageStackError(pageStack: route);
     }
 
     return activeTabWebEntry;
   }
 
   @override
-  S2TabsState buildFromSTabsState(int activeIndex, IList<SRouteBase<SNested>> sRoutes) {
-    return S2TabsState(
+  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> sRoutes) {
+    return Multi2TabsState(
       activeIndex: activeIndex,
       tab1SRoute: sRoutes[0],
       tab2SRoute: sRoutes[1],

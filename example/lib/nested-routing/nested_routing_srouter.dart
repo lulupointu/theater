@@ -16,37 +16,37 @@ class BooksApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: ScaffoldSRoute((state) => state),
+        initialPageStack: ScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
-          S2TabsRouteTranslator<ScaffoldSRoute, NotSNested>(
-            route: ScaffoldSRoute.new,
+          Multi2TabsTranslator<ScaffoldPageStack, NonNestedStack>(
+            route: ScaffoldPageStack.new,
             tab1Translators: [
-              S2TabsRouteTranslator<BooksViewSRoute, SNested>(
-                route: BooksViewSRoute.new,
+              Multi2TabsTranslator<BooksViewPageStack, NestedStack>(
+                route: BooksViewPageStack.new,
                 tab1Translators: [
-                  SPathTranslator<NewBooksSRoute, SNested>(
+                  PathTranslator<NewBooksPageStack, NestedStack>(
                     path: '/books/new',
-                    route: NewBooksSRoute(),
+                    route: NewBooksPageStack(),
                   ),
                 ],
                 tab2Translators: [
-                  SPathTranslator<AllBooksSRoute, SNested>(
+                  PathTranslator<AllBooksPageStack, NestedStack>(
                     path: '/books/all',
-                    route: AllBooksSRoute(),
+                    route: AllBooksPageStack(),
                   ),
                 ],
               ),
             ],
             tab2Translators: [
-              SPathTranslator<SettingsSRoute, SNested>(
+              PathTranslator<SettingsPageStack, NestedStack>(
                 path: '/settings',
-                route: SettingsSRoute(),
+                route: SettingsPageStack(),
               ),
             ],
           ),
-          SRedirectorTranslator(
+          RedirectorTranslator(
             path: '*',
-            route: ScaffoldSRoute((state) => state),
+            route: ScaffoldPageStack((state) => state),
           ),
         ],
       ),
@@ -54,11 +54,11 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class ScaffoldSRoute extends S2TabsRoute<NotSNested> {
-  ScaffoldSRoute(StateBuilder<S2TabsState> stateBuilder) : super(stateBuilder);
+class ScaffoldPageStack extends Multi2TabsPageStack<NonNestedStack> {
+  ScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, S2TabsState state) {
+  Widget build(BuildContext context, Multi2TabsState state) {
     return ScaffoldScreen(
       child: state.tabs[state.activeIndex],
       currentIndex: state.activeIndex,
@@ -66,40 +66,40 @@ class ScaffoldSRoute extends S2TabsRoute<NotSNested> {
   }
 
   @override
-  S2TabsState get initialState => S2TabsState(
+  Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: BooksViewSRoute((state) => state),
-        tab2SRoute: SettingsSRoute(),
+        tab1SRoute: BooksViewPageStack((state) => state),
+        tab2SRoute: SettingsPageStack(),
       );
 }
 
-class BooksViewSRoute extends S2TabsRoute<SNested> {
-  BooksViewSRoute(StateBuilder<S2TabsState> stateBuilder) : super(stateBuilder);
+class BooksViewPageStack extends Multi2TabsPageStack<NestedStack> {
+  BooksViewPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, S2TabsState state) {
+  Widget build(BuildContext context, Multi2TabsState state) {
     return BooksScreen(selectedTab: state.activeIndex, tabs: state.tabs);
   }
 
   @override
-  S2TabsState get initialState => S2TabsState(
+  Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: NewBooksSRoute(),
-        tab2SRoute: AllBooksSRoute(),
+        tab1SRoute: NewBooksPageStack(),
+        tab2SRoute: AllBooksPageStack(),
       );
 }
 
-class NewBooksSRoute extends SRoute<SNested> {
+class NewBooksPageStack extends PageStack<NestedStack> {
   @override
   Widget build(BuildContext context) => NewBooksScreen();
 }
 
-class AllBooksSRoute extends SRoute<SNested> {
+class AllBooksPageStack extends PageStack<NestedStack> {
   @override
   Widget build(BuildContext context) => AllBooksScreen();
 }
 
-class SettingsSRoute extends SRoute<SNested> {
+class SettingsPageStack extends PageStack<NestedStack> {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }
@@ -124,7 +124,7 @@ class ScaffoldScreen extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (idx) => context.sRouter.to(
-          ScaffoldSRoute((state) => state.copyWith(activeIndex: idx)),
+          ScaffoldPageStack((state) => state.copyWith(activeIndex: idx)),
         ),
         items: [
           BottomNavigationBarItem(
@@ -187,9 +187,9 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
         TabBar(
           controller: _tabController,
           onTap: (index) => context.sRouter.to(
-            ScaffoldSRoute(
+            ScaffoldPageStack(
               (state) => state.copyWith(
-                tab1SRoute: BooksViewSRoute((state) => state.copyWith(activeIndex: index)),
+                tab1SRoute: BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
               ),
             ),
           ),

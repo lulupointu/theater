@@ -4,13 +4,13 @@ import '../framework.dart';
 /// [SElement.onSystemPop]
 ///
 ///
-/// Use [SPop.done] or [SPop.parent] to describe result of the callback
-abstract class SPop {
+/// Use [SystemPopResult.done] or [SystemPopResult.parent] to describe result of the callback
+abstract class SystemPopResult {
   /// The pop event has been handled internally
-  static _SPopDone done() => _SPopDone();
+  static _SystemPopResultDone done() => _SystemPopResultDone();
 
   /// The event should be handled by the parent
-  static _SPopParent parent() => _SPopParent();
+  static _SystemPopResultParent parent() => _SystemPopResultParent();
 
   /// Used to handle the different possible value of an instance of this class
   T when<T>({
@@ -19,11 +19,11 @@ abstract class SPop {
   }) {
     final _this = this;
 
-    if (_this is _SPopParent) {
+    if (_this is _SystemPopResultParent) {
       return parent();
     }
 
-    if (_this is _SPopDone) {
+    if (_this is _SystemPopResultDone) {
       return done();
     }
 
@@ -32,7 +32,7 @@ abstract class SPop {
 }
 
 /// The pop event has been handled internally
-class _SPopDone extends SPop {}
+class _SystemPopResultDone extends SystemPopResult {}
 
-/// Delegate the pop responsibility to this [SRouteBase] parent
-class _SPopParent extends SPop {}
+/// Delegate the pop responsibility to this [PageStackBase] parent
+class _SystemPopResultParent extends SystemPopResult {}

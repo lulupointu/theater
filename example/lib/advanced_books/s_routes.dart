@@ -3,20 +3,20 @@ import 'package:srouter/srouter.dart';
 
 import 'advanced_books_srouter.dart';
 
-class HomeSRoute extends SRoute<NotSNested> {
+class HomePageStack extends PageStack<NonNestedStack> {
   @override
   Widget build(BuildContext context) {
     return HomeScreen();
   }
 }
 
-class BooksSRoute extends SRoute<NotSNested> {
+class BooksPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final String? searchedGenre;
   final String? searchedName;
   final String title;
 
-  BooksSRoute({
+  BooksPageStack({
     required List<Book> books,
     this.searchedGenre = null,
     this.searchedName = null,
@@ -37,17 +37,17 @@ class BooksSRoute extends SRoute<NotSNested> {
   }
 
   @override
-  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
-    return HomeSRoute();
+  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+    return HomePageStack();
   }
 }
 
-class BookDetailsSRoute extends SRoute<NotSNested> {
+class BookDetailsPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final Book book;
   final String title;
 
-  BookDetailsSRoute({required this.books, required this.book}) : title = book.title;
+  BookDetailsPageStack({required this.books, required this.book}) : title = book.title;
 
   @override
   Widget build(BuildContext context) {
@@ -55,17 +55,17 @@ class BookDetailsSRoute extends SRoute<NotSNested> {
   }
 
   @override
-  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
-    return BooksSRoute(books: books);
+  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+    return BooksPageStack(books: books);
   }
 }
 
-class BookBuySRoute extends SRoute<NotSNested> {
+class BookBuyPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final Book book;
   final String title;
 
-  BookBuySRoute({required this.books, required this.book}) : title = 'Buy ${book.title}';
+  BookBuyPageStack({required this.books, required this.book}) : title = 'Buy ${book.title}';
 
   @override
   Widget build(BuildContext context) {
@@ -73,17 +73,17 @@ class BookBuySRoute extends SRoute<NotSNested> {
   }
 
   @override
-  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
-    return BookDetailsSRoute(books: books, book: book);
+  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+    return BookDetailsPageStack(books: books, book: book);
   }
 }
 
-class BookGenresSRoute extends SRoute<NotSNested> {
+class BookGenresPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final Book book;
   final String title;
 
-  BookGenresSRoute({required this.books, required this.book})
+  BookGenresPageStack({required this.books, required this.book})
       : title = '${book.title}\'s Genres';
 
   @override
@@ -92,7 +92,7 @@ class BookGenresSRoute extends SRoute<NotSNested> {
   }
 
   @override
-  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
-    return BookDetailsSRoute(books: books, book: book);
+  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+    return BookDetailsPageStack(books: books, book: book);
   }
 }

@@ -75,32 +75,32 @@ class _BooksAppState extends State<BooksApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: SignInSRoute(onSignedIn: authState.signIn),
+        initialPageStack: SignInPageStack(onSignedIn: authState.signIn),
         builder: (_, child) => AuthStateUpdateHandler(child: child, authState: authState),
         translatorsBuilder: (_) => [
           ...authState.isSignedIn
               ? [
-                  SPathTranslator<HomeSRoute, NotSNested>(
+                  PathTranslator<HomePageStack, NonNestedStack>(
                     path: '/',
-                    route: HomeSRoute(onSignOut: authState.signOut),
+                    route: HomePageStack(onSignOut: authState.signOut),
                   ),
-                  SPathTranslator<BooksListSRoute, NotSNested>(
+                  PathTranslator<BooksListPageStack, NonNestedStack>(
                     path: '/books',
-                    route: BooksListSRoute(onSignOut: authState.signOut),
+                    route: BooksListPageStack(onSignOut: authState.signOut),
                   ),
-                  SRedirectorTranslator(
+                  RedirectorTranslator(
                     path: '*',
-                    route: HomeSRoute(onSignOut: authState.signOut),
+                    route: HomePageStack(onSignOut: authState.signOut),
                   ),
                 ]
               : [
-                  SPathTranslator<SignInSRoute, NotSNested>(
+                  PathTranslator<SignInPageStack, NonNestedStack>(
                     path: '/signin',
-                    route: SignInSRoute(onSignedIn: authState.signIn),
+                    route: SignInPageStack(onSignedIn: authState.signIn),
                   ),
-                  SRedirectorTranslator(
+                  RedirectorTranslator(
                     path: '*',
-                    route: SignInSRoute(onSignedIn: authState.signIn),
+                    route: SignInPageStack(onSignedIn: authState.signIn),
                   ),
                 ],
         ],
@@ -123,8 +123,8 @@ class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   void _onAuthStateChange() {
     context.sRouter.to(
       widget.authState.isSignedIn
-          ? HomeSRoute(onSignOut: widget.authState.signOut)
-          : SignInSRoute(onSignedIn: widget.authState.signIn),
+          ? HomePageStack(onSignOut: widget.authState.signOut)
+          : SignInPageStack(onSignedIn: widget.authState.signIn),
     );
   }
 
@@ -144,35 +144,35 @@ class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class HomeSRoute extends SRoute<NotSNested> {
+class HomePageStack extends PageStack<NonNestedStack> {
   final VoidCallback onSignOut;
 
-  HomeSRoute({required this.onSignOut});
+  HomePageStack({required this.onSignOut});
 
   @override
   Widget build(BuildContext context) => HomeScreen(onSignOut: onSignOut);
 }
 
-class SignInSRoute extends SRoute<NotSNested> {
+class SignInPageStack extends PageStack<NonNestedStack> {
   final ValueChanged<Credentials> onSignedIn;
 
-  SignInSRoute({required this.onSignedIn});
+  SignInPageStack({required this.onSignedIn});
 
   @override
   Widget build(BuildContext context) => SignInScreen(onSignedIn: onSignedIn);
 }
 
-class BooksListSRoute extends SRoute<NotSNested> {
+class BooksListPageStack extends PageStack<NonNestedStack> {
   final VoidCallback onSignOut;
 
-  BooksListSRoute({required this.onSignOut});
+  BooksListPageStack({required this.onSignOut});
 
   @override
   Widget build(BuildContext context) => BooksListScreen();
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) =>
-      HomeSRoute(onSignOut: onSignOut);
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) =>
+      HomePageStack(onSignOut: onSignOut);
 }
 
 class HomeScreen extends StatelessWidget {
@@ -188,7 +188,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.to(BooksListSRoute(onSignOut: onSignOut)),
+              onPressed: () => context.sRouter.to(BooksListPageStack(onSignOut: onSignOut)),
               child: Text('View my bookshelf'),
             ),
             ElevatedButton(

@@ -1,41 +1,47 @@
 import 'package:flutter/widgets.dart';
 
 import '../../browser/web_entry.dart';
-import '../../routes/framework.dart';
-import '../../routes/s_nested.dart';
-import '../../s_router/s_router.dart';
-import '../s_route_translator.dart';
+import '../../page_stack/framework.dart';
+import '../../page_stack/nested_stack.dart';
+import '../page_stack_translator.dart';
+import '../translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
-/// A translator which can be used to redirect from a [path] to a [SRoute]
-class SRedirectorTranslator<N extends MaybeSNested> extends SRouteTranslator<SRouteBase<N>, N> {
-  /// Redirect a static [WebEntry] to a [SRoute]
+/// An implementation of [STranslator] which makes it easy determine if a
+/// [WebEntry] is matched
+class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
+    extends PageStackTranslator<Route, P> {
+  /// Converts a static [WebEntry] into a [PageStack]
   ///
   ///
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted but cannot be used to create the [route].
   ///
-  /// [route] is the [SRoute] of the associated [Route] type that will be used
+  /// [route] is the [PageStack] of the associated [Route] type that will be used
   /// in [SRouter] if the path patches the given one
   ///
   ///
-  /// # Example
+  /// ### Example
   /// ```dart
-  /// SRedirectorTranslator(path: '*', route: HomeSRoute())
+  /// SPathTranslator<UserSRoute, SPushable>(
+  ///   path: '/user',
+  ///   route: UserSRoute(),
+  /// )
   /// ```
   ///
   ///
   /// See also:
-  ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
-  SRedirectorTranslator({
+  ///   - [SPathTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
+  PathTranslator({
     required String path,
-    required SRouteBase<N> route,
-    this.replace = true,
-  })  : _matcher = WebEntryMatcher(path: path),
-        matchToRoute = ((_, __) => route);
+    required Route route,
+    String? title,
+  })  : routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
+        matchToRoute = ((_) => route),
+        _matcher = WebEntryMatcher(path: path);
 
-  /// Converts a [WebEntry] to a [SRoute] to redirect to, by parsing dynamic
+  /// Converts a [WebEntry] to a [PageStack] and vise versa, by parsing dynamic
   /// element of the [WebEntry] (such as path parameters, query parameters, ...)
   ///
   ///
@@ -43,16 +49,20 @@ class SRedirectorTranslator<N extends MaybeSNested> extends SRouteTranslator<SRo
   /// parameters are accepted
   ///
   /// [matchToRoute] is called when the current path matches [path], and must
-  /// return a [SRoute] which will then be used to create the new [WebEntry].
+  /// return a [PageStack] of the associated [Route] type.
   /// Use the given match object to access the different parameters of the
   /// matched path. See example bellow.
+  ///
+  /// [routeToWebEntry] converts the [PageStack] of the associated [Route] type to
+  /// a [WebEntry] (i.e. a representation of the url)
   ///
   ///
   /// # Example:
   /// ```dart
-  /// SRedirectorTranslator.parse(
+  /// SPathTranslator<UserSRoute, SPushable>.parse(
   ///   path: '/user/:id',
   ///   matchToRoute: (match) => UserSRoute(id: match.pathParams['id']),
+  ///   routeToWebEntry: (route) => WebEntry(pathSegments: ['user', route.id]),
   /// )
   /// ```
   ///
@@ -65,10 +75,10 @@ class SRedirectorTranslator<N extends MaybeSNested> extends SRouteTranslator<SRo
   /// See also:
   ///   - [WebEntry] for the different parameters which can be used to form a url
   ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
-  SRedirectorTranslator.parse({
+  PathTranslator.parse({
     required String path,
     required this.matchToRoute,
-    this.replace = true,
+    required this.routeToWebEntry,
 
     // Functions used to validate the different components of the url
     final bool Function(Map<String, String> pathParams)? validatePathParams,
@@ -83,42 +93,28 @@ class SRedirectorTranslator<N extends MaybeSNested> extends SRouteTranslator<SRo
           validateHistoryState: validateHistoryState,
         );
 
-  /// The [SRoute] to redirect to
-  final SRouteBase<N> Function(BuildContext context, WebEntryMatch match)
-      matchToRoute;
-
-  /// Whether the path we navigate to should replace the current history entry
-  ///
-  ///
-  /// Defaults to true
-  final bool replace;
-
-  /// A class which determined whether a given [WebEntry] is valid
-  final WebEntryMatcher _matcher;
+  /// A callback used to convert a [WebEntryMatch] (which is basically
+  /// a [WebEntry] with the parsed path parameters) to a [PageStack]
+  final Route Function(WebEntryMatch match) matchToRoute;
 
   @override
-  SRouteBase<N>? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
+  Route? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
-    // If the web entry does not match, return null
     if (match == null) {
       return null;
     }
 
-
-    // We can redirect the route even if the url is not right since after
-    // [webEntryToSRoute] [sRouteToWebEntry] is always called, meaning that
-    // [match] will be converted into the right url
-    return matchToRoute(context, match);
+    return matchToRoute(match);
   }
 
-  /// We must override the [routeType] so that this translator is never matched
-  /// when trying to convert a [SRoute] to a [WebEntry]
-  @override
-  Type get routeType => Null;
+  /// A class which determined whether a given [WebEntry] is valid
+  final WebEntryMatcher _matcher;
+
+  /// Converts the associated [PageStack] into a string representing
+  /// the url
+  final WebEntry Function(Route route) routeToWebEntry;
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, SRouteBase route) {
-    throw 'This should never be called';
-  }
+  WebEntry sRouteToWebEntry(BuildContext context, Route route) => routeToWebEntry(route);
 }

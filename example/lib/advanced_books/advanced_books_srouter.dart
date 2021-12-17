@@ -15,16 +15,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: SRouter(
-        initialRoute: HomeSRoute(),
+        initialPageStack: HomePageStack(),
         translatorsBuilder: (_) => [
-          SPathTranslator<HomeSRoute, NotSNested>(
+          PathTranslator<HomePageStack, NonNestedStack>(
             path: '/',
-            route: HomeSRoute(),
+            route: HomePageStack(),
             title: 'Home',
           ),
-          SPathTranslator<BooksSRoute, NotSNested>.parse(
+          PathTranslator<BooksPageStack, NonNestedStack>.parse(
             path: '/books',
-            matchToRoute: (match) => BooksSRoute(
+            matchToRoute: (match) => BooksPageStack(
               books: books,
               searchedGenre: match.queryParams['genre'],
               searchedName: match.queryParams['name'],
@@ -38,9 +38,9 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
+          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/books/:bookId',
-            matchToRoute: (match) => BookDetailsSRoute(
+            matchToRoute: (match) => BookDetailsPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
@@ -49,9 +49,9 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookBuySRoute, NotSNested>.parse(
+          PathTranslator<BookBuyPageStack, NonNestedStack>.parse(
             path: '/books/:bookId/buy',
-            matchToRoute: (match) => BookBuySRoute(
+            matchToRoute: (match) => BookBuyPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
@@ -60,9 +60,9 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookGenresSRoute, NotSNested>.parse(
+          PathTranslator<BookGenresPageStack, NonNestedStack>.parse(
             path: '/books/:bookId/genres',
-            matchToRoute: (match) => BookGenresSRoute(
+            matchToRoute: (match) => BookGenresPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.to(BooksSRoute(books: books)),
+              onPressed: () => context.sRouter.to(BooksPageStack(books: books)),
               child: Text('See all books'),
             ),
             SizedBox(height: 15),
@@ -104,12 +104,12 @@ class HomeScreen extends StatelessWidget {
                   suffixIcon: IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () => context.sRouter.to(
-                      BooksSRoute(books: books, searchedGenre: booksQueryController.text),
+                      BooksPageStack(books: books, searchedGenre: booksQueryController.text),
                     ),
                   ),
                 ),
                 onSubmitted: (title) => context.sRouter.to(
-                  BooksSRoute(books: books, searchedName: title),
+                  BooksPageStack(books: books, searchedName: title),
                 ),
               ),
             ),
@@ -138,7 +138,7 @@ class BooksScreen extends StatelessWidget {
               (book) => ListTile(
                 title: Text(book.title),
                 subtitle: Text(book.author),
-                onTap: () => context.sRouter.to(BookDetailsSRoute(books: books, book: book)),
+                onTap: () => context.sRouter.to(BookDetailsPageStack(books: books, book: book)),
               ),
             )
             .toList(),
@@ -167,12 +167,12 @@ class BookDetailsScreen extends StatelessWidget {
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () =>
-                  context.sRouter.to(BookGenresSRoute(books: books, book: book)),
+                  context.sRouter.to(BookGenresPageStack(books: books, book: book)),
               child: Text('See genres'),
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () => context.sRouter.to(BookBuySRoute(books: books, book: book)),
+              onPressed: () => context.sRouter.to(BookBuyPageStack(books: books, book: book)),
               child: Text('Buy'),
             ),
           ],
@@ -222,7 +222,7 @@ class BookGenresScreen extends StatelessWidget {
             book.genres.map(
               (genre) => ListTile(
                 onTap: () => context.sRouter.to(
-                  BooksSRoute(books: books, searchedGenre: genre),
+                  BooksPageStack(books: books, searchedGenre: genre),
                 ),
                 title: Text(genre),
               ),

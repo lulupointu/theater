@@ -29,15 +29,15 @@ class BooksApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: BooksListSRoute(
+        initialPageStack: BooksListPageStack(
           books: books,
           onFilterChanged: onFilterChanged,
           filter: null,
         ),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, NotSNested>.parse(
+          PathTranslator<BooksListPageStack, NonNestedStack>.parse(
             path: '/',
-            matchToRoute: (match) => BooksListSRoute(
+            matchToRoute: (match) => BooksListPageStack(
               books: books,
               onFilterChanged: onFilterChanged,
               filter: match.queryParams['filter'],
@@ -53,7 +53,7 @@ class BooksApp extends StatelessWidget {
   }
 
   void onFilterChanged(BuildContext context, String filter) {
-    context.sRouter.to(BooksListSRoute(
+    context.sRouter.to(BooksListPageStack(
       books: books,
       onFilterChanged: onFilterChanged,
       filter: filter.isEmpty ? null : filter,
@@ -61,12 +61,12 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListSRoute extends SRoute<NotSNested> {
+class BooksListPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final String? filter;
   final void Function(BuildContext context, String filter) onFilterChanged;
 
-  BooksListSRoute({
+  BooksListPageStack({
     required this.books,
     required this.onFilterChanged,
     required this.filter,

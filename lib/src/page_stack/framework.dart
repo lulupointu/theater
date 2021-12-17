@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 import '../browser/web_entry.dart';
 import '../s_router/s_router.dart';
-import '../s_translators/s_translator.dart';
-import '../s_translators/s_translators_handler.dart';
-import '../s_translators/translators/web_entry_matcher/web_entry_match.dart';
-import '../s_translators/translators/web_entry_matcher/web_entry_matcher.dart';
-import 's_nested.dart';
-import 's_pop_result/s_pop_result.dart';
+import '../translators/translator.dart';
+import '../translators/translators/web_entry_matcher/web_entry_match.dart';
+import '../translators/translators/web_entry_matcher/web_entry_matcher.dart';
+import '../translators/translators_handler.dart';
+import 'nested_stack.dart';
+import 'system_pop_result/system_pop_result.dart';
 
 /// This is the base objects which constitute SRouter.
 ///
@@ -20,11 +20,11 @@ import 's_pop_result/s_pop_result.dart';
 /// SRouter: [SWidget] -> [SElement] -> [Page]
 ///
 /// However, since the goal of [SRouter] is to describe a stack of [Page]s with
-/// only one object, we introduce a new class named [SRouteBase] so that:
-/// [SRouteBase] -> [SWidget]s -> [SElement]s -> [Page]s
+/// only one object, we introduce a new class named [PageStackBase] so that:
+/// [PageStackBase] -> [SWidget]s -> [SElement]s -> [Page]s
 ///
 /// The mutability of the different classes are also inspired by Flutter:
-///   - [SRouteBase] is immutable
+///   - [PageStackBase] is immutable
 ///   - [SWidget] is immutable
 ///   - [SElement] is mutable
 ///   - [Page] is immutable (this one differs)
@@ -32,10 +32,10 @@ import 's_pop_result/s_pop_result.dart';
 ///
 /// Here is how this system work is more details:
 ///
-/// 1. [SRouteBase] creates multiple [SWidget]s
+/// 1. [PageStackBase] creates multiple [SWidget]s
 ///
 /// 2. For each [SWidget], we look at the previous [SElement]s that the class
-/// containing [SRouteBase] has:
+/// containing [PageStackBase] has:
 ///   - If there is a [SElement] associated with an [SWidget] of the same
 ///   ^ [SWidget.runtimeType] and [SWidget.key], we call [SElement.update]
 ///   - If there is no corresponding [SElement], we create a new one by calling
@@ -45,7 +45,7 @@ import 's_pop_result/s_pop_result.dart';
 /// [SElement.buildPage]
 
 // TODO: write doc
-abstract class SElement<N extends MaybeSNested> {
+abstract class SElement<N extends MaybeNestedStack> {
   /// Creates an element that uses the given [SWidget] as its configuration.
   ///
   /// Typically called by an override of [SWidget.createSElement].
@@ -90,9 +90,9 @@ abstract class SElement<N extends MaybeSNested> {
   ///
   ///
   /// Return either:
-  ///   - [SPop.done] if the even was handled internally
-  ///   - [SPop.parent] if the even should be handled by the parent
-  SPop onSystemPop(BuildContext context);
+  ///   - [SystemPopResult.done] if the even was handled internally
+  ///   - [SystemPopResult.parent] if the even should be handled by the parent
+  SystemPopResult onSystemPop(BuildContext context);
 }
 
 /// A description of the configuration of a [SElement]
@@ -116,18 +116,18 @@ abstract class SElement<N extends MaybeSNested> {
 /// [SElement] is updated by calling [SElement.update] with the [SWidget] as a
 /// parameter
 @immutable
-abstract class SWidget<N extends MaybeSNested> {
+abstract class SWidget<N extends MaybeNestedStack> {
   /// An identifier of the [SWidget] used in [canUpdate] to know if a [SElement]
   /// is associated with this [SWidget] or not
   final Key? key;
 
   /// The configuration of this widget
-  final SRouteBase<N> sRoute;
+  final PageStackBase<N> pageStack;
 
   /// Initializes [key] for subclasses.
   ///
-  /// Typically called by an override of [SRouteBase.createSWidgets].
-  const SWidget(this.sRoute, {this.key});
+  /// Typically called by an override of [PageStackBase.createSWidgets].
+  const SWidget(this.pageStack, {this.key});
 
   /// Create an [SElement] which will be associated to this [SWidget]
   ///
@@ -148,7 +148,7 @@ abstract class SWidget<N extends MaybeSNested> {
 
 /// An [SElement] which is entirely defined by its [StatelessSWidget]
 /// configuration
-class StatelessSElement<N extends MaybeSNested> extends SElement<N> {
+class StatelessSElement<N extends MaybeNestedStack> extends SElement<N> {
   /// Creates an element which uses [sWidget] as its configuration
   StatelessSElement(StatelessSWidget<N> sWidget) : super(sWidget);
 
@@ -159,7 +159,7 @@ class StatelessSElement<N extends MaybeSNested> extends SElement<N> {
   Page buildPage(BuildContext context) => sWidget.buildPage(context);
 
   @override
-  SPop onSystemPop(BuildContext context) => SPop.parent();
+  SystemPopResult onSystemPop(BuildContext context) => SystemPopResult.parent();
 }
 
 /// Describes the configuration of a [StatelessSElement]
@@ -167,9 +167,9 @@ class StatelessSElement<N extends MaybeSNested> extends SElement<N> {
 ///
 /// [buildPage] will be use when the [SElement] needs to build its page (in
 /// [SElement.buildPage])
-abstract class StatelessSWidget<N extends MaybeSNested> extends SWidget<N> {
-  /// Gives the [sRoute] and [key] to its superclass
-  const StatelessSWidget(SRouteBase<N> sRoute, {Key? key}) : super(sRoute, key: key);
+abstract class StatelessSWidget<N extends MaybeNestedStack> extends SWidget<N> {
+  /// Gives the [pageStack] and [key] to its superclass
+  const StatelessSWidget(PageStackBase<N> pageStack, {Key? key}) : super(pageStack, key: key);
 
   @nonVirtual
   @override
@@ -179,18 +179,18 @@ abstract class StatelessSWidget<N extends MaybeSNested> extends SWidget<N> {
   Page buildPage(BuildContext context);
 }
 
-/// Description of a list of [Page]s
+/// Description of a stack of [Page]s
 ///
 ///
 /// It creates a list of [Page]s by:
 ///   - Creating a [SWidget] in [createSWidget] which describes the top most
 ///   ^ [Page]
-///   - Creating a [SRoute] in [createSRouteBellow] which describes the [Page]s
+///   - Creating a [PageStack] in [createPageStackBellow] which describes the [Page]s
 ///   ^ which are bellow the one created in [createSWidget]
 @immutable
-abstract class SRouteBase<N extends MaybeSNested> {
+abstract class PageStackBase<N extends MaybeNestedStack> {
   /// Defines a const constructor so that subclasses can be const
-  const SRouteBase();
+  const PageStackBase();
 
   /// Creating a [SWidget] in [createSWidget] which describes the top most
   /// [Page]
@@ -200,7 +200,7 @@ abstract class SRouteBase<N extends MaybeSNested> {
   /// of [SRouter])
   SWidget<N> createSWidget(BuildContext context);
 
-  /// Creates an [SRouteBase] which describes the [Page]s to display bellow the
+  /// Creates an [PageStackBase] which describes the [Page]s to display bellow the
   /// page created by the [SWidget] in [createSWidget]
   ///
   /// If null, there is no [Page] bellow
@@ -208,34 +208,34 @@ abstract class SRouteBase<N extends MaybeSNested> {
   ///
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
-  SRouteBase<N>? createSRouteBellow(BuildContext context);
+  PageStackBase<N>? createPageStackBellow(BuildContext context);
 }
 
 /// An extension which allows us to easily build all the [SWidget]s generated
-/// by a [SRoute] (including the [SRoute] own [SWidget] and all those generated
-/// by the [SRoute] of [createSRouteBellow])
-extension _SRouteBaseSWidgetsBuilder<N extends MaybeSNested> on SRouteBase<N> {
+/// by a [PageStack] (including the [PageStack] own [SWidget] and all those generated
+/// by the [PageStack] of [createPageStackBellow])
+extension _PageStackBaseSWidgetsBuilder<N extends MaybeNestedStack> on PageStackBase<N> {
   IList<SWidget<N>> createSWidgets(BuildContext context) => <SWidget<N>>[
-        ...(createSRouteBellow(context)?.createSWidgets(context) ?? []),
+        ...(createPageStackBellow(context)?.createSWidgets(context) ?? []),
         createSWidget(context),
       ].lock;
 }
 
-/// Returns the new [SElement]s for the given [SRouteBase] based on the old
-/// [SElement]s of this [SRouteBase]
+/// Returns the new [SElement]s for the given [PageStackBase] based on the old
+/// [SElement]s of this [PageStackBase]
 ///
 ///
 /// It uses the same method that Flutter does, by matching the [SElement]
 /// with the [SWidget] of same runtimeType and key, else creating new
 /// [SElement] by calling [SWidget.createSElement]
-IList<SElement<N>> updateSRouteBaseSElements<N extends MaybeSNested>(
+IList<SElement<N>> updatePageStackBaseSElements<N extends MaybeNestedStack>(
   BuildContext context, {
   required IList<SElement<N>> oldSElements,
-  required SRouteBase<N> sRouteBase,
+  required PageStackBase<N> pageStack,
 }) {
   var _oldSElements = oldSElements;
   var _newSElements = IList<SElement<N>>();
-  for (final _sWidget in sRouteBase.createSWidgets(context)) {
+  for (final _sWidget in pageStack.createSWidgets(context)) {
     // If we have a widget match (i.e. the runtimeType are the same), we
     // update the corresponding element with the new widget
     if (_oldSElements.any((e) => SWidget.canUpdate(e.sWidget, _sWidget))) {
@@ -268,39 +268,39 @@ IList<SElement<N>> updateSRouteBaseSElements<N extends MaybeSNested>(
   return _newSElements;
 }
 
-/// A [StatelessSWidget] which uses a [StatelessSRoute] as its configuration
+/// A [StatelessSWidget] which uses a [StatelessPageStack] as its configuration
 ///
 ///
-/// This might seem counter intuitive since a [SRouteBase] is supposed to
+/// This might seem counter intuitive since a [PageStackBase] is supposed to
 /// describe a list of [SWidget]s and not a single one but it turns out that
-/// having both purpose it intuitive and effective. See [StatelessSRoute] to
+/// having both purpose it intuitive and effective. See [StatelessPageStack] to
 /// understand why.
-class StatelessSRouteSWidget<R extends StatelessSRoute<N>, N extends MaybeSNested>
+class StatelessPageStackSWidget<PS extends StatelessPageStack<N>, N extends MaybeNestedStack>
     extends StatelessSWidget<N> {
   /// The configuration of this [SWidget]
-  final R sRoute;
+  final PS pageStack;
 
-  /// Initialize [sRoute] for subclasses and passes [key] to the super
+  /// Initialize [pageStack] for subclasses and passes [key] to the super
   /// constructor
-  const StatelessSRouteSWidget(
-    this.sRoute, {
+  const StatelessPageStackSWidget(
+    this.pageStack, {
     Key? key,
-  }) : super(sRoute, key: key);
+  }) : super(pageStack, key: key);
 
   @override
-  Page buildPage(BuildContext context) => sRoute.buildPage(context);
+  Page buildPage(BuildContext context) => pageStack.buildPage(context);
 }
 
-/// This [SRouteBase] serves 2 purpose:
-///   1. Overrides [SRouteBase.createSWidget] by returning the [SWidget] from
-///   ^ the [SRoute] returned by [createSRouteBellow] AND a
-///   ^ [StatelessSRouteSWidget]
-///   2. Is the configuration of the [StatelessSRouteSWidget]
-abstract class StatelessSRoute<N extends MaybeSNested> extends SRouteBase<N> {
+/// This [PageStackBase] serves 2 purpose:
+///   1. Overrides [PageStackBase.createSWidget] by returning the [SWidget] from
+///   ^ the [PageStack] returned by [createPageStackBellow] AND a
+///   ^ [StatelessPageStackSWidget]
+///   2. Is the configuration of the [StatelessPageStackSWidget]
+abstract class StatelessPageStack<N extends MaybeNestedStack> extends PageStackBase<N> {
   /// Instantiate the [key] for subclasses
-  const StatelessSRoute({this.key});
+  const StatelessPageStack({this.key});
 
-  /// This key will be attached to the [SWidget] that this [StatelessSRoute]
+  /// This key will be attached to the [SWidget] that this [StatelessPageStack]
   /// describes
   ///
   /// See [SWidget.key] for more info
@@ -309,25 +309,25 @@ abstract class StatelessSRoute<N extends MaybeSNested> extends SRouteBase<N> {
   @override
   @nonVirtual
   SWidget<N> createSWidget(BuildContext context) =>
-      StatelessSRouteSWidget(this, key: key ?? ValueKey(runtimeType));
+      StatelessPageStackSWidget(this, key: key ?? ValueKey(runtimeType));
 
-  /// The page that will be build by the associated [StatelessSRouteSWidget]
+  /// The page that will be build by the associated [StatelessPageStackSWidget]
   ///
-  /// Since the [StatelessSRouteSWidget] is placed as the last element of
-  /// [createSWidgets], if this [StatelessSRoute] is used directly in [SRouter],
+  /// Since the [StatelessPageStackSWidget] is placed as the last element of
+  /// [createSWidgets], if this [StatelessPageStack] is used directly in [SRouter],
   /// this will be the visible [Page]
   Page buildPage(BuildContext context);
 
-  /// The [SRouteBase] which describes the stack of [Page]s that should be put
+  /// The [PageStackBase] which describes the stack of [Page]s that should be put
   /// bellow the [Page] built in [buildPage]
   ///
   ///
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
-  SRouteBase<N>? createSRouteBellow(BuildContext context);
+  PageStackBase<N>? createPageStackBellow(BuildContext context);
 }
 
-mixin _DefaultBuildPage<N extends MaybeSNested> on SRouteBase<N> {
+mixin _DefaultBuildPage<N extends MaybeNestedStack> on PageStackBase<N> {
   /// A key used (if non-null) in the [Page] built in [buildPage]
   Key? get key;
 
@@ -367,8 +367,8 @@ mixin _DefaultBuildPage<N extends MaybeSNested> on SRouteBase<N> {
   }
 }
 
-/// A superclass of [StatelessSRoute] which provides an implementation of
-/// [buildPage], [createSRouteBellow] and [onPop]
+/// A superclass of [StatelessPageStack] which provides an implementation of
+/// [buildPage], [createPageStackBellow] and [onPop]
 ///
 ///
 /// This is the primary class used in [SRouter] to describe the [Page] stack of
@@ -376,7 +376,7 @@ mixin _DefaultBuildPage<N extends MaybeSNested> on SRouteBase<N> {
 ///
 /// [build] will be the visible widget (the one at the top of the [Page] stack)
 ///
-/// [createSRouteBellow] builds an [SRouteBase] which describes the [Page] stack
+/// [createPageStackBellow] builds an [PageStackBase] which describes the [Page] stack
 /// to put bellow the page containing the widget from [build]
 ///
 ///
@@ -386,16 +386,16 @@ mixin _DefaultBuildPage<N extends MaybeSNested> on SRouteBase<N> {
 ///
 ///
 /// You an also override [onPop] to change the behavior of when pop is called
-/// on this [SRoute]
-abstract class SRoute<N extends MaybeSNested> extends StatelessSRoute<N>
+/// on this [PageStack]
+abstract class PageStack<N extends MaybeNestedStack> extends StatelessPageStack<N>
     with _DefaultBuildPage<N> {
   /// Passes the given key to the super constructor.
   ///
   /// If non-null, this key will also be used in [buildPage] to identify the
-  /// [Page] that this [SRoute] builds.
-  const SRoute({Key? key}) : super(key: key);
+  /// [Page] that this [PageStack] builds.
+  const PageStack({Key? key}) : super(key: key);
 
-  /// The widget which will be displayed on the screen when this [SRoute] is
+  /// The widget which will be displayed on the screen when this [PageStack] is
   /// used directly
   ///
   ///
@@ -408,7 +408,7 @@ abstract class SRoute<N extends MaybeSNested> extends StatelessSRoute<N>
 
   /// By default, we don't build any [Page] bellow this one
   @override
-  SRouteBase<N>? createSRouteBellow(BuildContext context) => null;
+  PageStackBase<N>? createPageStackBellow(BuildContext context) => null;
 }
 
 /// A function to build the state [S] based on a previous value of the state
@@ -416,8 +416,8 @@ abstract class SRoute<N extends MaybeSNested> extends StatelessSRoute<N>
 /// This works well with immutable states implementing a copyWith method
 typedef StateBuilder<S> = S Function(S state);
 
-/// State associated with the [STabsRoute], which describes the stacks of
-/// [Page]s of each tabs. It does that by storing one [SRouteBase] per tab.
+/// State associated with the [MultiTabPageStack], which describes the stacks of
+/// [Page]s of each tabs. It does that by storing one [PageStackBase] per tab.
 ///
 ///
 /// This state is immutable, therefore a new instance should be rebuilt from
@@ -425,19 +425,19 @@ typedef StateBuilder<S> = S Function(S state);
 /// [STabsSElement.update] is called
 /// Subclasses should implement a copyWith method to makes this easy
 @immutable
-class STabsState {
+class MultiTabState {
   /// {@template srouter.framework.STabsState.constructor}
   ///
   /// Creates a state where:
   ///   - [activeIndex] indicate the tab which is currently shown (this is also
   ///   ^ used to know which tab to pop when onPop is called)
-  ///   - [tabXSRoute] describes the [Page] stack of tab X
+  ///   - [tabXPageStack] describes the [Page] stack of tab X
   ///
   /// {@endtemplate}
-  STabsState({
+  MultiTabState({
     required this.activeIndex,
-    required IList<SRouteBase<SNested>> tabsSRoutes,
-  }) : _sRoutes = tabsSRoutes;
+    required IList<PageStackBase<NestedStack>> tabsPageStacks,
+  }) : _pageStacks = tabsPageStacks;
 
   /// An index indicating which tab is currently active
   ///
@@ -445,46 +445,46 @@ class STabsState {
   ///   - Popping the currently active tab
   ///   - Translating the currently active tab to a WebEntry
   ///
-  /// We always have: 0 <= [activeIndex] <= [_sRoutes.length] - 1
+  /// We always have: 0 <= [activeIndex] <= [_pageStacks.length] - 1
   final int activeIndex;
 
-  /// A list containing one [SRouteBase] per tab
+  /// A list containing one [PageStackBase] per tab
   ///
   ///
   /// Its length determines the number of tabs
-  final IList<SRouteBase<SNested>> _sRoutes;
+  final IList<PageStackBase<NestedStack>> _pageStacks;
 
   /// The tabs as usable [Widget] to put in the widget tree
   ///
   ///
   /// The widgets are created by [SRouter] and are [Builder]s so you don't use
-  /// this to reason on the state of your tabs, use the tabs [SRoute] instead
+  /// this to reason on the state of your tabs, use the tabs [PageStack] instead
   late final List<Widget> tabs;
 }
 
 /// The element created by [_STabsSWidget]
 ///
-/// It manages the [STabsState] and all the [SElement]s it creates
-class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SElement<N> {
-  /// Initialize the [state] with the initial state of the [STabsRoute]
+/// It manages the [MultiTabState] and all the [SElement]s it creates
+class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends SElement<N> {
+  /// Initialize the [state] with the initial state of the [MultiTabPageStack]
   STabsSElement(_STabsSWidget<S, N> sWidget)
-      : _initialState = sWidget._sTabsRoute.initialState,
+      : _initialState = sWidget._MultiTabPageStack.initialState,
         super(sWidget);
 
   @override
   _STabsSWidget<S, N> get sWidget => super.sWidget as _STabsSWidget<S, N>;
 
-  /// The state of the [STabsRoute]
+  /// The state of the [MultiTabPageStack]
   ///
-  /// It will first be [STabsRoute.initialState], then mutate each time
+  /// It will first be [MultiTabPageStack.initialState], then mutate each time
   /// [update] is called by being assigned the result of
-  /// [STabsRoute._stateBuilder]
+  /// [MultiTabPageStack._stateBuilder]
   ///
-  /// This state is then given to [STabsRoute.buildPage] and
-  /// [STabsRoute.onPop]
+  /// This state is then given to [MultiTabPageStack.buildPage] and
+  /// [MultiTabPageStack.onPop]
   ///
   ///
-  /// The state contains sRoutes which are translated into [SWidget]s, the
+  /// The state contains page stacks which are translated into [SWidget]s, the
   /// element associated with this widgets are stored into [_tabsSElements]
   /// which is updated each time the state mutates
   S get state => _state;
@@ -507,7 +507,7 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
   /// The elements created by the [state]
   ///
   ///
-  /// The [state] has different tabs, each tab has a [SRouteBase] which
+  /// The [state] has different tabs, each tab has a [PageStackBase] which
   /// produces a list of [SElement]s. The map maps the tab index to the
   /// generated tab [SElement]s
   ///
@@ -515,15 +515,15 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
   /// This is updated each time [state] changes, by using the method described
   /// at the top of this file (the same method Flutter uses to update its
   /// widgets and elements)
-  IMap<int, IList<SElement<SNested>>> get tabsSElements => _tabsSElements;
-  IMap<int, IList<SElement<SNested>>> _tabsSElements = IMap();
+  IMap<int, IList<SElement<NestedStack>>> get tabsSElements => _tabsSElements;
+  IMap<int, IList<SElement<NestedStack>>> _tabsSElements = IMap();
 
   /// The [GlobalKey] of the navigator of each tab
   ///
   /// The keys of this IMap are the same as the one of [_tabsSElements]
   IMap<int, GlobalKey<NavigatorState>> _tabsNavigatorKeys = IMap();
 
-  /// Builds the page by calling [STabsRoute.buildPage]
+  /// Builds the page by calling [MultiTabPageStack.buildPage]
   ///
   /// This is also responsible for populating [state.tabs] which consist in:
   ///   1. Updating the [SElement]s associated with each tab
@@ -531,7 +531,7 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
   ///   ^  [Navigator]
   @override
   Page buildPage(BuildContext context) {
-    return sWidget._sTabsRoute.buildPage(context, state);
+    return sWidget._MultiTabPageStack.buildPage(context, state);
   }
 
   /// This must be called after each [state] update
@@ -550,13 +550,13 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
     _state = newState;
 
     // Update the [SElement]s of each tabs
-    for (var i = 0; i < state._sRoutes.length; i++) {
+    for (var i = 0; i < state._pageStacks.length; i++) {
       _tabsSElements = _tabsSElements.add(
         i,
-        updateSRouteBaseSElements(
+        updatePageStackBaseSElements(
           context,
           oldSElements: _tabsSElements[i] ?? IList(),
-          sRouteBase: state._sRoutes[i],
+          pageStack: state._pageStacks[i],
         ),
       );
       _tabsNavigatorKeys = _tabsNavigatorKeys.putIfAbsent(i, GlobalKey<NavigatorState>.new);
@@ -577,16 +577,16 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
               if (didPop) {
                 final tabSElements = _tabsSElements[_tabIndex]!;
 
-                // Replace the current tab SRoute (which is the last one) by
+                // Replace the current tab pageStack (which is the last one) by
                 // the one bellow
                 //
                 // It has to exist if didPop is true
-                final newTabSRoute = tabSElements[tabSElements.length - 2].sWidget.sRoute;
+                final newTabPageStack = tabSElements[tabSElements.length - 2].sWidget.pageStack;
                 _updateState(
                   context,
-                  newState: sWidget._sTabsRoute._buildFromSTabsState(
+                  newState: sWidget._MultiTabPageStack._buildFromMultiTabState(
                     state.activeIndex,
-                    state._sRoutes.replace(state.activeIndex, newTabSRoute),
+                    state._pageStacks.replace(state.activeIndex, newTabPageStack),
                   ),
                 );
               }
@@ -602,28 +602,29 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
   void initialize(BuildContext context) {
     super.initialize(context);
 
-    // We need to update the state even now because the initial [_sTabsRoute]
-    // also has a state builder which must be taken into account
-    _updateState(context, newState: sWidget._sTabsRoute._stateBuilder(_initialState));
+    // We need to update the state even now because the initial 
+    // [_MultiTabPageStack] also has a state builder which must
+    // be taken into account
+    _updateState(context, newState: sWidget._MultiTabPageStack._stateBuilder(_initialState));
   }
 
   /// Updates:
   ///   - [sWidget] (by calling super)
-  ///   - [state] using [STabsRoute._stateBuilder]
-  ///   - [_tabsSElements] using the [SWidget]s generating by [state._sRoutes]
+  ///   - [state] using [MultiTabPageStack._stateBuilder]
+  ///   - [_tabsSElements] using the [SWidget]s generating by [state._pageStacks]
   @override
   void update(covariant _STabsSWidget<S, N> newSWidget, BuildContext context) {
     super.update(newSWidget, context);
 
-    // Since [_STabsRouteState] is immutable, we receive a new instance where
+    // Since [MultiTabState] is immutable, we receive a new instance where
     // the tabs have not been populated. This is why we can set the tabs in
-    // [buildPage] even if [_STabsRoute.tabs] is final
-    _updateState(context, newState: newSWidget._sTabsRoute._stateBuilder(state));
+    // [buildPage] even if [MultiTabState.tabs] is final
+    _updateState(context, newState: newSWidget._MultiTabPageStack._stateBuilder(state));
   }
 
   /// TODO: add comment
   @override
-  SPop onSystemPop(BuildContext context) {
+  SystemPopResult onSystemPop(BuildContext context) {
     final activeTabSElements = _tabsSElements[state.activeIndex]!;
 
     final result = activeTabSElements.last.onSystemPop(context);
@@ -631,39 +632,41 @@ class STabsSElement<S extends STabsState, N extends MaybeSNested> extends SEleme
     return result.when(
       parent: () {
         // We don't know if a tab bellow exists, so use getOrNull
-        final tabSRouteBellow =
-            activeTabSElements.getOrNull(activeTabSElements.length - 2)?.sWidget.sRoute;
+        final tabPageStackBellow =
+            activeTabSElements.getOrNull(activeTabSElements.length - 2)?.sWidget.pageStack;
 
-        if (tabSRouteBellow == null) {
-          // If there is no [SRoute] bellow, delegate the system pop to the parent
-          return SPop.parent();
+        if (tabPageStackBellow == null) {
+          // If there is no [PageStack] bellow, delegate the system pop to the 
+          // parent
+          return SystemPopResult.parent();
         }
 
-        // If there is a [SRoute] bellow, update the state with the new tab SRoute
+        // If there is a [PageStack] bellow, update the state with the new tab 
+        // PageStack
         _updateState(
           context,
-          newState: sWidget._sTabsRoute._buildFromSTabsState(
+          newState: sWidget._MultiTabPageStack._buildFromMultiTabState(
             state.activeIndex,
-            state._sRoutes.replace(state.activeIndex, tabSRouteBellow),
+            state._pageStacks.replace(state.activeIndex, tabPageStackBellow),
           ),
         );
 
-        return SPop.done();
+        return SystemPopResult.done();
       },
-      done: SPop.done,
+      done: SystemPopResult.done,
     );
   }
 }
 
 /// The [SWidget] creating the [STabsSElement]
 ///
-/// It uses [STabsRoute] as its configuration
-class _STabsSWidget<S extends STabsState, N extends MaybeSNested> extends SWidget<N> {
-  /// Passes the [key] to the super constructor and initializes [_sTabsRoute]
-  const _STabsSWidget(this._sTabsRoute, {Key? key}) : super(_sTabsRoute, key: key);
+/// It uses [MultiTabPageStack] as its configuration
+class _STabsSWidget<S extends MultiTabState, N extends MaybeNestedStack> extends SWidget<N> {
+  /// Passes the [key] to the super constructor and initializes [_MultiTabPageStack]
+  const _STabsSWidget(this._MultiTabPageStack, {Key? key}) : super(_MultiTabPageStack, key: key);
 
   /// The configuration of this widget
-  final STabsRoute<S, N> _sTabsRoute;
+  final MultiTabPageStack<S, N> _MultiTabPageStack;
 
   @override
   SElement<N> createSElement() => STabsSElement<S, N>(this);
@@ -671,20 +674,20 @@ class _STabsSWidget<S extends STabsState, N extends MaybeSNested> extends SWidge
 
 /// {@template srouter.framework.STabsRoute}
 ///
-/// An [SRouteBase] used to build a screen which has different tabs
+/// An [PageStackBase] used to build a screen which has different tabs
 ///
 ///
-/// Each tab is represented by an [SRoute] in the state. Each tab is therefore
+/// Each tab is represented by an [PageStack] in the state. Each tab is therefore
 /// a stack of [Page]s.
 ///
 /// An index (named [activeIndex]) is also stored in the state, and is useful
-/// to easily know which [SRoute] to display and is also used when popping to
-/// call onPop the active [SRoute]
+/// to easily know which [PageStack] to display and is also used when popping to
+/// call onPop the active [PageStack]
 ///
 ///
 /// ### Building a widget with the different tabs
 ///
-/// [STabsRoute] is focused on providing you an easy way to build a widget
+/// [MultiTabPageStack] is focused on providing you an easy way to build a widget
 /// with different tabs, the easiest way is to implement [build] and use the
 /// given state to access the tabs:
 ///
@@ -695,7 +698,7 @@ class _STabsSWidget<S extends STabsState, N extends MaybeSNested> extends SWidge
 ///       bottomNavigationBar: BottomNavigationBar(
 ///       currentIndex: tabsRouter.activeIndex,
 ///       onTap: (value) => SRouter.to(
-///         My2TabsRoute((state) => state.copyWith(activeIndex: value)),
+///         My2TabsPageStack((state) => state.copyWith(activeIndex: value)),
 ///       ),
 ///       items: [
 ///         BottomNavigationBarItem(label: 'Home', ...),
@@ -709,33 +712,33 @@ class _STabsSWidget<S extends STabsState, N extends MaybeSNested> extends SWidge
 ///
 /// ### Changing the state
 ///
-/// To change the state, you have to push your [STabsRoute] into [SRouter] and
+/// To change the state, you have to push your [MultiTabPageStack] into [SRouter] and
 /// use the [_stateBuilder] to provide the new state
 ///
 /// For example, here is how to change the active index to be 0:
 ///
 /// ```dart
 /// SRouter.to(
-///   MyTabsRoute((state) => state.copyWith(activeIndex: 0)),
+///   My2TabsPageStack((state) => state.copyWith(activeIndex: 0)),
 /// )
 /// ```
 ///
 ///
 /// ### Initial state
 ///
-/// Since [STabsRoute] uses a [_stateBuilder] to build the next state based on
+/// Since [MultiTabPageStack] uses a [_stateBuilder] to build the next state based on
 /// the previous one, there has to be a first state to transition from.
 ///
 ///
-/// Use the [_stateBuilder] is the constructor to go to a [STabsRoute] with an
+/// Use the [_stateBuilder] is the constructor to go to a [MultiTabPageStack] with an
 /// updated state. For example to change the active index you can use
 ///
 ///
-/// Use a subclass [S2TabsRoute], [S3TabsRoute], ... which allows you to build
+/// Use a subclass [Multi2Tabs], [Multi3Tabs], ... which allows you to build
 /// a fixed number of tabs
 ///
 /// {@endtemplate}
-abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends SRouteBase<N>
+abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedStack> extends PageStackBase<N>
     with _DefaultBuildPage<N> {
   /// A const constructor initializing different attributes with the given
   /// values
@@ -743,23 +746,23 @@ abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends 
   /// {@template srouter.framework.STabsRoute.constructor}
   ///
   /// [stateBuilder] is used to build a new state based on the previous one.
-  /// It is called each time a [STabsRoute] is given to [SRouter]
+  /// It is called each time a [MultiTabPageStack] is given to [SRouter]
   ///
   ///
   /// Example of changing the active index:
   /// ```dart
-  /// MySTabsRoute((state) => state.copyWith(activeIndex: 0))
+  /// My2TabsPageStack((state) => state.copyWith(activeIndex: 0))
   /// ```
   ///
   /// If you don't want to change the state, you can simply use:
   /// ```dart
-  /// MySTabsRoute((state) => state)
+  /// My2TabsPageStack((state) => state)
   /// ```
   ///
   /// {@endtemplate}
-  const STabsRoute(
+  const MultiTabPageStack(
     this._stateBuilder,
-    this._buildFromSTabsState, {
+    this._buildFromMultiTabState, {
     this.key,
   });
 
@@ -767,7 +770,7 @@ abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends 
   ///
   ///
   /// This key will also be attached to the [_STabsSWidget] that this
-  /// [StatelessSRoute] describes, see [SWidget.key] for more info
+  /// [StatelessPageStack] describes, see [SWidget.key] for more info
   final Key? key;
 
   /// The initial state, it will be used the first time [StateBuilder] is
@@ -779,7 +782,7 @@ abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends 
   /// `(state) => _STabsState(activeIndex: ..., ...)`
   S get initialState;
 
-  /// The widget which will be displayed on the screen when this [SRoute] is
+  /// The widget which will be displayed on the screen when this [PageStack] is
   /// used directly
   ///
   ///
@@ -793,16 +796,16 @@ abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends 
       );
 
   /// By default, we don't build any [Page] bellow this one
-  SRouteBase<N>? createSRouteBellow(BuildContext context) => null;
+  PageStackBase<N>? createPageStackBellow(BuildContext context) => null;
 
   /// Returns a new state based on the previous value of the state
   ///
-  /// This is used every time a [STabsRoute] is given to [SRouter]
+  /// This is used every time a [MultiTabPageStack] is given to [SRouter]
   ///
   ///
   /// Example of changing the active index:
   /// ```dart
-  /// MySTabsRoute((state) => state.copyWith(activeIndex: 0))
+  /// My2TabsPageStack((state) => state.copyWith(activeIndex: 0))
   /// ```
   final StateBuilder<S> _stateBuilder;
 
@@ -812,161 +815,146 @@ abstract class STabsRoute<S extends STabsState, N extends MaybeSNested> extends 
       _STabsSWidget<S, N>(this, key: key ?? ValueKey(runtimeType));
 
   /// A function which build the state [S] based on the base state class
-  /// [STabsState]
+  /// [MultiTabState]
   ///
-  /// It uses [STabsState] attributes rather than the class directly because
-  /// the class [_sRoutes] attribute is private and we want to be able to
+  /// It uses [MultiTabState] attributes rather than the class directly because
+  /// the class [_pageStacks] attribute is private and we want to be able to
   /// create subclasses in other files
   ///
   ///
-  /// This should be provided by [S2TabsRoute], [S3TabsRoute], ... and never
+  /// This should be provided by [Multi2Tabs], [Multi3Tabs], ... and never
   /// visible to the end user
   final S Function(
     int activeIndex,
-    IList<SRouteBase<SNested>> sRoutes,
-  ) _buildFromSTabsState;
+    IList<PageStackBase<NestedStack>> tabsPageStacks,
+  ) _buildFromMultiTabState;
 }
 
 /// {@template srouter.framework.STabsRouteTranslator}
 ///
-/// A translator which is used to map a [STabsRoute] to a [WebEntry]
+/// A translator which is used to map a [MultiTabPageStack] to a [WebEntry]
 ///
 ///
 ///
 /// DO always specify your class type:
 /// ```dart
 /// // GOOD
-/// STabsRouteTranslator<MyTabsRoute, ...>(...)
+/// MultiTabTranslator<MyTabsRoute, ...>(...)
 ///
 /// // BAD
-/// STabsRouteTranslator(...)
+/// MultiTabTranslator(...)
 /// ```
 ///
 /// {@endtemplate}
 ///
-/// DO use [S2TabsRouteTranslator], [S2TabsRouteTranslator], etc depending on
-/// which implementation of [STabsRoute] you implemented
-abstract class STabsRouteTranslator<Route extends STabsRoute<S, N>, S extends STabsState,
-    N extends MaybeSNested> extends STranslator<STabsSElement<S, N>, Route, N> {
-  /// Returns the [STabbedRoute] associated with the given [WebEntry]
+/// DO use [Multi2TabsTranslator], [Multi2TabsTranslator], etc depending on
+/// which implementation of [MultiTabPageStack] you implemented
+abstract class MultiTabTranslator<PS extends MultiTabPageStack<S, N>, S extends MultiTabState,
+    N extends MaybeNestedStack> extends STranslator<STabsSElement<S, N>, PS, N> {
+  /// Returns the [MultiTabPageStack] associated with the given [WebEntry]
   ///
   ///
-  /// [webEntry] is this incoming [WebEntry]
+  /// [match] is the match of the incoming [WebEntry] based on the 
+  /// [WebEntryMatcher] which was given
   ///
-  /// [tabsRoute] are the [SRouteBase]s returned by each tab's translators
+  /// [tabsPageStacks] are the [PageStackBase]s returned by each tab's translators
   /// if any
   ///
   ///
   /// Return [null] if the [WebEntry] should not be converted to the associated
-  /// [STabbedRoute]
-  ///
-  ///
-  /// For example, for a 3 tabbed route, a common way to implement this function
-  /// would be the following:
-  /// ```dart
-  /// tabsRouteToWebEntry: (_, __, tabsRoute) {
-  ///   if (!tabsRoute.entries.any((e) => e.value != null)) return null;
-  ///
-  ///   final activeTabRoute = tabsRoute.entries.firstWhere((e) => e.value != null);
-  ///
-  ///   return MySTabbedRoute.toTab(
-  ///     activeTab: activeTabRoute.key,
-  ///     newTabRoute: activeTabRoute.value!,
-  ///   );
-  /// }
-  /// ```
-  Route? Function(
+  /// [MultiTabPageStack]
+  PS? Function(
     WebEntryMatch match,
     StateBuilder<S>? stateBuilder,
-  ) get matchToRoute;
+  ) get matchToPageStack;
 
-  /// Returns the web entry to return web the associated [STabbedRoute] is
-  /// pushed into [SRouter]
+  /// Returns the web entry to return web the associated [MultiTabPageStack]
+  /// is pushed into [SRouter]
   ///
   ///
-  /// [route] is the [STabsRoute]
+  /// [pageStack] is the [MultiTabPageStack]
   ///
-  /// [state] is the current state of [route]
+  /// [state] is the current state of [pageStack]
   ///
   /// [activeTabWebEntry] is the web entry returned by the tab at the active
   /// index. If the active tab could not be converted to a [WebEntry] this
   /// value is null
   WebEntry Function(
-    Route route,
+    PS pageStack,
     S state,
     WebEntry? activeTabWebEntry,
-  ) get routeToWebEntry;
+  ) get pageStackToWebEntry;
 
   /// A class which determined whether a given [WebEntry] is valid
   WebEntryMatcher get matcher;
 
   /// A [STranslatorHandler] for each tab of the state
-  List<STranslatorsHandler<SNested>> get sTranslatorsHandlers;
+  List<TranslatorsHandler<NestedStack>> get translatorsHandlers;
 
   /// A function which build the state [S] based on the base state class
-  /// [STabsState]
+  /// [MultiTabState]
   ///
-  /// It uses [STabsState] attributes rather than the class directly because
-  /// the class [_sRoutes] attribute is private and we want to be able to
+  /// It uses [MultiTabState] attributes rather than the class directly because
+  /// the class [_pageStacks] attribute is private and we want to be able to
   /// create subclasses in other files
   ///
   ///
-  /// This should be provided by [S2TabsRoute], [S3TabsRoute], ... and never
+  /// This should be provided by [Multi2Tabs], [Multi3Tabs], ... and never
   /// visible to the end user
-  S buildFromSTabsState(
+  S buildFromMultiTabState(
     int activeIndex,
-    IList<SRouteBase<SNested>> sRoutes,
+    IList<PageStackBase<NestedStack>> tabsPageStacks,
   );
 
   @override
   WebEntry sElementToWebEntry(
     BuildContext context,
     STabsSElement<S, N> element,
-    Route sRoute,
+    PS pageStack,
   ) {
     // Get the web entry returned by the active tab
     final activeIndex = element.state.activeIndex;
-    final activeTabWebEntry = sTranslatorsHandlers[activeIndex].getWebEntryFromSElement(
+    final activeTabWebEntry = translatorsHandlers[activeIndex].getWebEntryFromSElement(
       context,
       element.tabsSElements[activeIndex]!.last,
     );
 
-    return routeToWebEntry(
-      sRoute,
+    return pageStackToWebEntry(
+      pageStack,
       element.state,
       activeTabWebEntry,
     );
   }
 
   @override
-  Route? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
+  PS? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final match = matcher.match(webEntry);
 
     if (match == null) {
       return null;
     }
 
-    // Get the sRoute and its associated index returned from the [webEntry]
-    MapEntry<int, SRouteBase<SNested>>? maybeNewActiveTabSRoute;
-    for (var i = 0; i < sTranslatorsHandlers.length; i++) {
-      final sTranslatorsHandler = sTranslatorsHandlers[i];
+    // Get the pageStack and its associated index returned from the [webEntry]
+    MapEntry<int, PageStackBase<NestedStack>>? maybeNewActiveTabPageStack;
+    for (var i = 0; i < translatorsHandlers.length; i++) {
+      final sTranslatorsHandler = translatorsHandlers[i];
 
-      final sRoute = sTranslatorsHandler.getRouteFromWebEntry(context, webEntry);
-      if (sRoute != null) {
-        maybeNewActiveTabSRoute = MapEntry(i, sRoute);
+      final pageStack = sTranslatorsHandler.getPageStackFromWebEntry(context, webEntry);
+      if (pageStack != null) {
+        maybeNewActiveTabPageStack = MapEntry(i, pageStack);
         break;
       }
     }
 
-    return matchToRoute(
+    return matchToPageStack(
       match,
-      maybeNewActiveTabSRoute == null
+      maybeNewActiveTabPageStack == null
           ? null
-          : (state) => buildFromSTabsState(
-                maybeNewActiveTabSRoute!.key,
-                state._sRoutes.replace(
-                  maybeNewActiveTabSRoute.key,
-                  maybeNewActiveTabSRoute.value,
+          : (state) => buildFromMultiTabState(
+                maybeNewActiveTabPageStack!.key,
+                state._pageStacks.replace(
+                  maybeNewActiveTabPageStack.key,
+                  maybeNewActiveTabPageStack.value,
                 ),
               ),
     );

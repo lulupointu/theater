@@ -15,16 +15,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue),
       home: SRouter(
-        initialRoute: AppSRoute((state) => state),
+        initialPageStack: AppPageStack((state) => state),
         translatorsBuilder: (_) => [
-          S2TabsRouteTranslator<AppSRoute, NotSNested>(
-            route: AppSRoute.new,
+          Multi2TabsTranslator<AppPageStack, NonNestedStack>(
+            route: AppPageStack.new,
             tab1Translators: _getTranslatorOfTab(TabItem.red),
             tab2Translators: _getTranslatorOfTab(TabItem.green),
           ),
-          SPathTranslator<SettingsSRoute, NotSNested>.parse(
+          PathTranslator<SettingsPageStack, NonNestedStack>.parse(
             path: '/:color/settings',
-            matchToRoute: (match) => SettingsSRoute(
+            matchToRoute: (match) => SettingsPageStack(
               tabItem: tabName.entries
                   .firstWhere((element) => element.value == match.pathParams['color'])
                   .key,
@@ -38,17 +38,17 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  List<SRouteTranslator<SRouteBase<SNested>, SNested>> _getTranslatorOfTab(TabItem tabItem) {
+  List<PageStackTranslator<PageStackBase<NestedStack>, NestedStack>> _getTranslatorOfTab(TabItem tabItem) {
     switch (tabItem) {
       case TabItem.red:
         return [
-          SPathTranslator<RedListSRoute, SNested>(
+          PathTranslator<RedListPageStack, NestedStack>(
             path: '${tabName[tabItem]!}',
-            route: RedListSRoute(),
+            route: RedListPageStack(),
           ),
-          SPathTranslator<RedDetailSRoute, SNested>.parse(
+          PathTranslator<RedDetailPageStack, NestedStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToRoute: (match) => RedDetailSRoute(
+            matchToRoute: (match) => RedDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
             ),
             routeToWebEntry: (route) =>
@@ -57,13 +57,13 @@ class MyApp extends StatelessWidget {
         ];
       case TabItem.green:
         return [
-          SPathTranslator<GreenListSRoute, SNested>(
+          PathTranslator<GreenListPageStack, NestedStack>(
             path: '${tabName[tabItem]!}',
-            route: GreenListSRoute(),
+            route: GreenListPageStack(),
           ),
-          SPathTranslator<GreenDetailSRoute, SNested>.parse(
+          PathTranslator<GreenDetailPageStack, NestedStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToRoute: (match) => GreenDetailSRoute(
+            matchToRoute: (match) => GreenDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
             ),
             routeToWebEntry: (route) =>
@@ -72,13 +72,13 @@ class MyApp extends StatelessWidget {
         ];
       // case TabItem.blue:
       //   return [
-      //     SPathTranslator<BlueListSRoute, NonSPushable>(
+      //     SPathTranslator<BlueListPageStack, NonSPushable>(
       //       path: '${tabName[tabItem]!}',
-      //       route: BlueListSRoute(),
+      //       route: BlueListPageStack(),
       //     ),
-      //     SPathTranslator<BlueDetailSRoute, NonSPushable>.parse(
+      //     SPathTranslator<BlueDetailPageStack, NonSPushable>.parse(
       //       path: '${tabName[tabItem]!}/details_:materialIndex',
-      //       matchToRoute: (match) => BlueDetailSRoute(
+      //       matchToRoute: (match) => BlueDetailPageStack(
       //         materialIndex: int.parse(match.pathParams['materialIndex']!),
       //       ),
       //       routeToWebEntry: (route) =>
@@ -100,17 +100,17 @@ class App extends StatelessWidget {
     if (tabItem == activeTab) {
       // pop to first route
       context.sRouter.to(
-        AppSRoute(
+        AppPageStack(
           (state) => state.copyWith(
             activeIndex: TabItem.values.indexOf(tabItem),
-            tab1SRoute: tabItem == TabItem.red ? RedListSRoute() : null,
-            tab2SRoute: tabItem == TabItem.green ? GreenListSRoute() : null,
+            tab1SRoute: tabItem == TabItem.red ? RedListPageStack() : null,
+            tab2SRoute: tabItem == TabItem.green ? GreenListPageStack() : null,
           ),
         ),
       );
     } else {
       context.sRouter.to(
-        AppSRoute((state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem))),
+        AppPageStack((state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem))),
       );
     }
   }
@@ -205,7 +205,7 @@ class ColorDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(50.0),
                 child: ElevatedButton(
                   onPressed: () => context.sRouter.to(
-                    AppSRoute(
+                    AppPageStack(
                       (state) => state.copyWith(activeIndex: TabItem.values.indexOf(e)),
                     ),
                   ),
@@ -308,7 +308,7 @@ List<Widget> _buildSettingsButtons(BuildContext context, {required TabItem tabIt
               color: activeTabColor[tabItem]!.shade100,
             ),
             child: IconButton(
-              onPressed: () => context.sRouter.to(SettingsSRoute(tabItem: e)),
+              onPressed: () => context.sRouter.to(SettingsPageStack(tabItem: e)),
               icon: Icon(Icons.settings, color: activeTabColor[e]),
             ),
           ),

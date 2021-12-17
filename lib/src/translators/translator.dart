@@ -1,14 +1,14 @@
 import 'package:flutter/widgets.dart';
 
 import '../browser/web_entry.dart';
-import '../routes/framework.dart';
-import '../routes/s_nested.dart';
+import '../page_stack/framework.dart';
+import '../page_stack/nested_stack.dart';
 
 /// A class used to interact with the web url
 ///
 /// This class has three goals:
 ///   1. Define which type of url can access this translator
-///   2. Convert the url to a [SRouteBase]
+///   2. Convert the url to a [PageStackBase]
 ///   3. Convert the [SElement] to a url
 ///
 /// It uses the [Element] type to determine if it is its role to convert a given
@@ -18,10 +18,10 @@ import '../routes/s_nested.dart';
 /// Prefer extending this class since the [routeType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class STranslator<Element extends SElement<N>, Route extends SRouteBase<N>,
-    N extends MaybeSNested> {
+abstract class STranslator<Element extends SElement<N>, Route extends PageStackBase<N>,
+    N extends MaybeNestedStack> {
   /// This constructor checks that the [Route] generic (stored in [routeType])
-  /// is resolved at runtime (i.e. that it is NOT [SRouteBase] but the
+  /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)
   ///
   ///
@@ -35,7 +35,7 @@ abstract class STranslator<Element extends SElement<N>, Route extends SRouteBase
   /// ```
   STranslator() {
     assert(() {
-      if (routeType == SRouteBase) {
+      if (routeType == PageStackBase) {
         final translatorType =
             runtimeType.toString().replaceFirst('<SRouteBase<dynamic>>', '');
         print('''\x1B[31m
@@ -59,11 +59,11 @@ $translatorType(...)
 
   /// This attributes describe which [SElement] is associated with this
   /// [STranslator] :
-  ///   - When this [SRouteBase] associated with this [SElement] is pushed in
+  ///   - When this [PageStackBase] associated with this [SElement] is pushed in
   ///   ^ [SRouter], the translator with which is is associated will be used to
   ///   ^ convert it to a [WebEntry]
   ///   - When a [WebEntry] matches this translator, it is this translator job
-  ///   ^ to convert it to an [SRoute] instance
+  ///   ^ to convert it to an [PageStack] instance
   ///
   /// This type match is exact match only, no subclass match
   ///
@@ -80,14 +80,14 @@ $translatorType(...)
   /// This is checked by the assert in this class' constructor
   final Type routeType = Route;
 
-  /// Converts the associated [SElement] and [SRoute] into a string representing
+  /// Converts the associated [SElement] and [PageStack] into a string representing
   /// the url
   WebEntry sElementToWebEntry(BuildContext context, Element element, Route sRoute);
 
-  /// Converts the given url into the associated [SRoute]
+  /// Converts the given url into the associated [PageStack]
   ///
   ///
   /// If the returned value is null, it means that the given url can't
   /// be used to create such a route
-  Route? webEntryToSRoute(BuildContext context, WebEntry webEntry);
+  Route? webEntryToPageStack(BuildContext context, WebEntry webEntry);
 }

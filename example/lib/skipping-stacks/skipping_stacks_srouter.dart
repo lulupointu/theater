@@ -34,24 +34,24 @@ class BooksApp extends StatelessWidget {
   List<Author> get authors => books.map<Author>((e) => e.author).toList();
 
   void toBooks(BuildContext context) {
-    context.sRouter.to(BooksListSRoute(books: books, toBook: toBook));
+    context.sRouter.to(BooksListPageStack(books: books, toBook: toBook));
   }
 
   void toBook(BuildContext context, Book book) {
     context.sRouter.to(
-      BookDetailsSRoute(books: books, book: book, toBook: toBook, toAuthor: toAuthor),
+      BookDetailsPageStack(books: books, book: book, toBook: toBook, toAuthor: toAuthor),
     );
   }
 
   void toAuthors(BuildContext context) {
     context.sRouter.to(
-      AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
+      AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
     );
   }
 
   void toAuthor(BuildContext context, Author author) {
     context.sRouter.to(
-      AuthorDetailsSRoute(
+      AuthorDetailsPageStack(
           authors: authors, author: author, toBooks: toBooks, toAuthor: toAuthor),
     );
   }
@@ -60,15 +60,15 @@ class BooksApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: BooksListSRoute(books: books, toBook: toBook),
+        initialPageStack: BooksListPageStack(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, NotSNested>(
+          PathTranslator<BooksListPageStack, NonNestedStack>(
             path: '/',
-            route: BooksListSRoute(books: books, toBook: toBook),
+            route: BooksListPageStack(books: books, toBook: toBook),
           ),
-          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
+          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/book/:id',
-            matchToRoute: (match) => BookDetailsSRoute(
+            matchToRoute: (match) => BookDetailsPageStack(
               books: books,
               book: books[int.parse(match.pathParams['id']!)],
               toBook: toBook,
@@ -77,13 +77,13 @@ class BooksApp extends StatelessWidget {
             routeToWebEntry: (route) =>
                 WebEntry(path: '/book/${route.books.indexOf(route.book)}'),
           ),
-          SPathTranslator<AuthorsListSRoute, NotSNested>(
+          PathTranslator<AuthorsListPageStack, NonNestedStack>(
             path: '/authors',
-            route: AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
+            route: AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
-          SPathTranslator<AuthorDetailsSRoute, NotSNested>.parse(
+          PathTranslator<AuthorDetailsPageStack, NonNestedStack>.parse(
             path: '/author/:id',
-            matchToRoute: (match) => AuthorDetailsSRoute(
+            matchToRoute: (match) => AuthorDetailsPageStack(
               authors: authors,
               author: authors[int.parse(match.pathParams['id']!)],
               toAuthor: toAuthor,
@@ -92,30 +92,30 @@ class BooksApp extends StatelessWidget {
             routeToWebEntry: (route) =>
                 WebEntry(path: '/author/${authors.indexOf(route.author)}'),
           ),
-          SRedirectorTranslator(path: '*', route: BooksListSRoute(books: books, toBook: toBook)),
+          RedirectorTranslator(path: '*', route: BooksListPageStack(books: books, toBook: toBook)),
         ],
       ),
     );
   }
 }
 
-class BooksListSRoute extends SRoute<NotSNested> {
+class BooksListPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final void Function(BuildContext context, Book book) toBook;
 
-  BooksListSRoute({required this.books, required this.toBook});
+  BooksListPageStack({required this.books, required this.toBook});
 
   @override
   Widget build(BuildContext context) => BooksListScreen(books: books, toBook: toBook);
 }
 
-class BookDetailsSRoute extends SRoute<NotSNested> {
+class BookDetailsPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final Book book;
   final void Function(BuildContext context, Author author) toAuthor;
   final void Function(BuildContext context, Book book) toBook;
 
-  const BookDetailsSRoute({
+  const BookDetailsPageStack({
     required this.books,
     required this.book,
     required this.toBook,
@@ -128,17 +128,17 @@ class BookDetailsSRoute extends SRoute<NotSNested> {
   }
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
-    return BooksListSRoute(books: books, toBook: toBook);
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+    return BooksListPageStack(books: books, toBook: toBook);
   }
 }
 
-class AuthorsListSRoute extends SRoute<NotSNested> {
+class AuthorsListPageStack extends PageStack<NonNestedStack> {
   final List<Author> authors;
   final void Function(BuildContext context, Author author) toAuthor;
   final void Function(BuildContext context) toBooks;
 
-  const AuthorsListSRoute({
+  const AuthorsListPageStack({
     required this.authors,
     required this.toAuthor,
     required this.toBooks,
@@ -150,13 +150,13 @@ class AuthorsListSRoute extends SRoute<NotSNested> {
   }
 }
 
-class AuthorDetailsSRoute extends SRoute<NotSNested> {
+class AuthorDetailsPageStack extends PageStack<NonNestedStack> {
   final List<Author> authors;
   final Author author;
   final void Function(BuildContext context, Author author) toAuthor;
   final void Function(BuildContext context) toBooks;
 
-  const AuthorDetailsSRoute({
+  const AuthorDetailsPageStack({
     required this.authors,
     required this.author,
     required this.toAuthor,
@@ -167,8 +167,8 @@ class AuthorDetailsSRoute extends SRoute<NotSNested> {
   Widget build(BuildContext context) => AuthorDetailsScreen(author: author);
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext _) {
-    return AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks);
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext _) {
+    return AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks);
   }
 }
 

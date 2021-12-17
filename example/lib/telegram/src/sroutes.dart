@@ -7,24 +7,24 @@ import 'data.dart';
 import 'navigators.dart';
 import 'navigators_implementations.dart';
 
-/// Contains the definitions of each stack of pages as [SRoute]s
+/// Contains the definitions of each stack of pages as [PageStack]s
 ///
 ///
 /// Something interesting is how clear the dependencies are, if you are on
 /// [SettingsSRoute], you have a stack of [ChatsListScreen, SettingsScreen]
 /// therefore your dependencies are the union of the dependencies of the
-/// two screens. This really shows that an [SRoute] is a STACK
+/// two screens. This really shows that an [PageStack] is a STACK
 ///
 ///
-/// Note how no [SRoute] is [Pushable] except the [STabbedRoute], this is
+/// Note how no [PageStack] is [Pushable] except the [STabbedRoute], this is
 /// because only the [STabbedRoute] can directly be pushed into [SRouter]
 
 // Left side
-class ChatsListSRoute extends SRoute<SNested> {
+class ChatsListPageStack extends PageStack<NestedStack> {
   final ChatsListNavigator navigator;
   final List<Chat> chats;
 
-  ChatsListSRoute({
+  ChatsListPageStack({
     required this.navigator,
     required this.chats,
   });
@@ -38,12 +38,12 @@ class ChatsListSRoute extends SRoute<SNested> {
   }
 }
 
-class SettingsSRoute extends SRoute<SNested> {
+class SettingsPageStack extends PageStack<NestedStack> {
   final SettingsNavigator settingsNavigator;
   final ChatsListNavigator chatsListNavigator;
   final List<Chat> chats;
 
-  SettingsSRoute({
+  SettingsPageStack({
     required this.settingsNavigator,
     required this.chatsListNavigator,
     required this.chats,
@@ -55,8 +55,8 @@ class SettingsSRoute extends SRoute<SNested> {
   }
 
   @override
-  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
-    return ChatsListSRoute(
+  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
+    return ChatsListPageStack(
       navigator: chatsListNavigator,
       chats: chats,
     );
@@ -64,11 +64,11 @@ class SettingsSRoute extends SRoute<SNested> {
 }
 
 // Middle side
-class StackedChatsSRoute extends SRoute<SNested> {
+class StackedChatsPageStack extends PageStack<NestedStack> {
   final ChatNavigator navigator;
   final List<Chat> chats;
 
-  StackedChatsSRoute({required this.navigator, required this.chats});
+  StackedChatsPageStack({required this.navigator, required this.chats});
 
   @override
   Page buildPage(BuildContext context) {
@@ -80,7 +80,7 @@ class StackedChatsSRoute extends SRoute<SNested> {
 
   void _onPop(BuildContext context) {
     context.sRouter.to(
-      TabsWrapperSRoute.from(
+      TabsWrapperPageStack.from(
         context,
         selectedChats: List.from(chats)..removeLast(),
       ),
@@ -114,18 +114,18 @@ class StackedChatsSRoute extends SRoute<SNested> {
   }
 
   @override
-  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
+  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
     return chats.length <= 1
         ? null
-        : StackedChatsSRoute(chats: List.from(chats)..removeLast(), navigator: navigator);
+        : StackedChatsPageStack(chats: List.from(chats)..removeLast(), navigator: navigator);
   }
 }
 
 // Right side
-class MembersDetailsSRoute extends SRoute<SNested> {
+class MembersDetailsPageStack extends PageStack<NestedStack> {
   final MembersDetailsNavigator navigator;
 
-  MembersDetailsSRoute({
+  MembersDetailsPageStack({
     required this.navigator,
   });
 
@@ -143,29 +143,29 @@ class MembersDetailsSRoute extends SRoute<SNested> {
 // The [chats] global variable is used directly but since it's a global
 // dependency something like a [Provider] should be put on top on [SRouter] and
 // be accessed here (or even in the screens directly)
-class TabsWrapperSRoute extends S3TabsRoute<NotSNested> {
+class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
   final bool showMemberDetails;
   final bool maybeShowLeftTab;
 
-  TabsWrapperSRoute(
-    StateBuilder<S3TabsState> stateBuilder, {
+  TabsWrapperPageStack(
+    StateBuilder<Multi3TabsState> stateBuilder, {
     this.showMemberDetails = false,
     this.maybeShowLeftTab = false,
   }) : super(stateBuilder);
 
-  factory TabsWrapperSRoute.from(
+  factory TabsWrapperPageStack.from(
     BuildContext context, {
     bool? showMemberDetails,
     bool? maybeShowLeftTab,
     List<Chat>? selectedChats,
-    SRouteBase<SNested>? tabLeftRoute,
+    PageStackBase<NestedStack>? tabLeftRoute,
   }) {
     final previousState = context.read<TabsWrapperScreenState?>();
 
-    return TabsWrapperSRoute(
+    return TabsWrapperPageStack(
       (state) => state.copyWith(
         tab1SRoute: tabLeftRoute,
-        tab2SRoute: StackedChatsSRoute(
+        tab2SRoute: StackedChatsPageStack(
           navigator: ChatNavigatorImplementation(),
           chats: selectedChats ?? previousState?.widget.chats ?? [chats.first],
         ),
@@ -176,27 +176,27 @@ class TabsWrapperSRoute extends S3TabsRoute<NotSNested> {
   }
 
   @override
-  Widget build(BuildContext context, S3TabsState state) {
+  Widget build(BuildContext context, Multi3TabsState state) {
     return TabsWrapperScreen(
       tabs: state.tabs,
-      chats: (state.tab2SRoute as StackedChatsSRoute).chats,
+      chats: (state.tab2SRoute as ChatsListPageStack).chats,
       showMemberDetails: showMemberDetails,
       maybeShowLeftTab: maybeShowLeftTab,
     );
   }
 
   @override
-  S3TabsState get initialState => S3TabsState(
+  Multi3TabsState get initialState => Multi3TabsState(
         activeIndex: 1,
-        tab1SRoute: ChatsListSRoute(
+        tab1SRoute: ChatsListPageStack(
           navigator: ChatsListNavigatorImplementation(),
           chats: chats,
         ),
-        tab2SRoute: StackedChatsSRoute(
+        tab2SRoute: StackedChatsPageStack(
           navigator: ChatNavigatorImplementation(),
           chats: [chats.first],
         ),
-        tab3SRoute: MembersDetailsSRoute(
+        tab3SRoute: MembersDetailsPageStack(
           navigator: MembersDetailsNavigatorImplementation(),
         ),
       );

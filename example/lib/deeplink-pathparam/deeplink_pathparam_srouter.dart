@@ -29,41 +29,41 @@ class BooksApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SRouter(
-        initialRoute: BooksListScreenSRoute(books: _books),
+        initialPageStack: BooksListScreenPageStack(books: _books),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListScreenSRoute, NotSNested>(
+          PathTranslator<BooksListScreenPageStack, NonNestedStack>(
             path: '/',
-            route: BooksListScreenSRoute(books: _books),
+            route: BooksListScreenPageStack(books: _books),
           ),
-          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
+          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/book/:id',
-            matchToRoute: (match) => BookDetailsSRoute(
+            matchToRoute: (match) => BookDetailsPageStack(
               books: _books,
               selectedBook: int.parse(match.pathParams['id']!),
             ),
             routeToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
           ),
-          SRedirectorTranslator(path: '*', route: BooksListScreenSRoute(books: _books)),
+          RedirectorTranslator(path: '*', route: BooksListScreenPageStack(books: _books)),
         ],
       ),
     );
   }
 }
 
-class BooksListScreenSRoute extends SRoute<NotSNested> {
+class BooksListScreenPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
 
-  BooksListScreenSRoute({required this.books});
+  BooksListScreenPageStack({required this.books});
 
   @override
   Widget build(BuildContext context) => BooksListScreen(books: books);
 }
 
-class BookDetailsSRoute extends SRoute<NotSNested> {
+class BookDetailsPageStack extends PageStack<NonNestedStack> {
   final List<Book> books;
   final int selectedBook;
 
-  BookDetailsSRoute({
+  BookDetailsPageStack({
     required this.books,
     required this.selectedBook,
   }) : super(key: ValueKey(selectedBook));
@@ -72,8 +72,8 @@ class BookDetailsSRoute extends SRoute<NotSNested> {
   Widget build(BuildContext context) => BookDetailsScreen(book: books[selectedBook]);
 
   @override
-  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) =>
-      BooksListScreenSRoute(books: books);
+  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) =>
+      BooksListScreenPageStack(books: books);
 }
 
 class BooksListScreen extends StatelessWidget {
@@ -92,7 +92,7 @@ class BooksListScreen extends StatelessWidget {
               title: Text(book.title),
               subtitle: Text(book.author),
               onTap: () => context.sRouter.to(
-                BookDetailsSRoute(books: books, selectedBook: books.indexOf(book)),
+                BookDetailsPageStack(books: books, selectedBook: books.indexOf(book)),
               ),
             ),
         ],

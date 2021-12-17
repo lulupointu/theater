@@ -7,32 +7,32 @@ import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../browser/s_browser.dart';
 import '../browser/web_entry.dart';
 import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
-import '../routes/framework.dart';
-import '../routes/s_nested.dart';
-import '../s_translators/s_translator.dart';
-import '../s_translators/s_translators_handler.dart';
-import '../s_translators/translators/universal_web_entry_translator.dart';
-import 's_history_entry.dart';
+import '../page_stack/framework.dart';
+import '../page_stack/nested_stack.dart';
+import '../translators/translator.dart';
+import '../translators/translators/universal_web_entry_translator.dart';
+import '../translators/translators_handler.dart';
+import 'history_entry.dart';
 import 's_router_interface.dart';
 
 /// A widget which assembles the different part of the package to
-/// create the greatest routing experience of your life
+/// create the greatest routing experience of your life ;)
 ///
 /// This class is an interface between [Navigator] and [SBrowserInterface].
 /// [SBrowserInterface] must never be handled directly, always use [SRouter]
 ///
-/// The responsibility of this class is to exposed the current [SHistoryEntry]
+/// The responsibility of this class is to exposed the current [HistoryEntry]
 /// which should be displayed
 ///
 ///
-/// The state of this class (using for push and Co) can be accessed using
+/// The state of this class (used to navigate) can be accessed using
 /// [SRouter.of] or [content.sRouter]
 class SRouter extends StatefulWidget {
-  /// The [initialRoute] is required but can be null on the web since it won't
+  /// The [initialPageStack] is required but can be null on the web since it won't
   /// be used. It has to be non-null on other platform.
   ///
   /// [translatorsBuilder] are optional but must be given to support the web platform,
-  /// otherwise [SRouter] can't turn the url into [SRoute]s
+  /// otherwise [SRouter] can't turn the url into [PageStack]s
   ///
   /// [key] can be useful if you need to use [to] and friends without
   /// a [BuildContext]. In which case you would create
@@ -43,7 +43,7 @@ class SRouter extends StatefulWidget {
   /// with the created navigator.
   SRouter({
     Key? key,
-    required this.initialRoute,
+    required this.initialPageStack,
     this.translatorsBuilder,
     this.builder,
     this.navigatorKey,
@@ -51,14 +51,14 @@ class SRouter extends StatefulWidget {
     this.disableSendAppToBackground = false,
     this.disableUniversalTranslator = false,
   })  : assert(!kIsWeb || translatorsBuilder != null, '''
-You must define [translators] when you are on the web, otherwise SRouter can't know which [SRoute] correspond to which url
+You must define [translators] when you are on the web, otherwise SRouter can't know which [PageStack] correspond to which url
 '''),
         super(key: key) {
-    _debugCheckSRouteInitialized();
+    _debugCheckPageStackInitialized();
   }
 
   /// Checks that [initializeSRouter] has been called
-  static void _debugCheckSRouteInitialized() {
+  static void _debugCheckPageStackInitialized() {
     assert(
       () {
         try {
@@ -97,20 +97,20 @@ main() {
   }
 
   /// The list of [STranslator]s which will be used to convert a web
-  /// to a [SRoute] and vise versa
+  /// to a [PageStack] and vise versa
   ///
   ///
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
-  /// might be null since the conversion from route to web entry or vise versa
-  /// is not done
-  final List<STranslator<SElement<NotSNested>, SRouteBase<NotSNested>, NotSNested>> Function(
+  /// might be null since the conversion from page stack to web entry or vise 
+  /// versa is not done
+  final List<STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>> Function(
       BuildContext context)? translatorsBuilder;
 
-  /// The initial [SRoute] to display
+  /// The initial [PageStack] to display
   ///
   ///
   /// This will be ignored if we are deep-linking
-  final SRouteBase<NotSNested> initialRoute;
+  final PageStackBase<NonNestedStack> initialPageStack;
 
   /// A callback to build a widget around the [Navigator] created by this
   /// widget
@@ -129,13 +129,9 @@ main() {
   /// The observers of the navigator
   final List<NavigatorObserver> navigatorObservers;
 
-  /// When the current route [onPop] or [onBack] is called and their return
-  /// value indicate that the event should be handled by the router, the router
-  /// will send the app to the background.
+  /// When trying to pop the current [PageStack] and the [PageStack] does not
+  /// have a [PageStack] bellow, the router will send the app to the background.
   /// You can set [disableUniversalTranslator] to true to disable this behavior
-  ///
-  /// By default, such an event occurs when the current route doesn't have an
-  /// sRouteBellow
   ///
   ///
   /// In a nested [SRouter], we never tries to put the app in the background so
@@ -302,13 +298,13 @@ main() {
 /// [context.sRouter]
 class SRouterState extends State<SRouter> implements SRouterInterface {
   /// The translator associated with the [SRouter] with is used to
-  /// convert a [WebEntry] to a [SRoute] and vise versa
+  /// convert a [WebEntry] to a [PageStack] and vise versa
   ///
   ///
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
-  /// might be null since the conversion from route to web entry or vise versa
-  /// is not done
-  STranslatorsHandler<NotSNested> get _translatorsHandler => STranslatorsHandler(
+  /// might be null since the conversion from page stack to web entry or vise 
+  /// versa is not done
+  TranslatorsHandler<NonNestedStack> get _translatorsHandler => TranslatorsHandler(
         translators: [
           ...widget.translatorsBuilder?.call(context) ?? [],
 
@@ -316,10 +312,10 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
           // not true, add [UniversalNonWebTranslator] as the magic translator
           //
           // We add it last so that it does not interfere with other potential
-          // translators (since it matches all [WebEntry]s and all [SRoute]s)
+          // translators (since it matches all [WebEntry]s and all [PageStack]s)
           if (!kIsWeb && !widget.disableUniversalTranslator)
             UniversalNonWebTranslator(
-              initialRoute: widget.initialRoute,
+              initialPageStack: widget.initialPageStack,
               history: history,
             ),
         ],
@@ -332,13 +328,13 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// If this is the case, we will NOT listen to browser updates and instead
-  /// get the [SRoute] associated with a new [WebEntry] only during
+  /// get the [PageStack] associated with a new [WebEntry] only during
   /// [build]
   ///
   ///
   /// This is needed because a nested [SRouter] might not be placed in
   /// the widget tree during the next build call. In which case it should NOT
-  /// try to find the [SRoute] corresponding to the current [WebEntry]
+  /// try to find the [PageStack] corresponding to the current [WebEntry]
   /// (which likely does NOT exists for this [SRouter])
   ///
   /// However this is only possible in nested [SRouter] because
@@ -349,15 +345,15 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
       SRouter.maybeOf(context, listen: false, ignoreSelf: true) != null;
 
   /// The history is a map between an history index and a
-  /// [SHistoryEntry]
+  /// [HistoryEntry]
   ///
   ///
   /// This is empty but the first value will be available as soon as the first
   /// [build] method
-  IMap<int, SHistoryEntry> _history = IMap();
+  IMap<int, HistoryEntry> _history = IMap();
 
   /// A getter of the [_history]
-  IMap<int, SHistoryEntry> get history => _history;
+  IMap<int, HistoryEntry> get history => _history;
 
   /// An helper to get the current web entry using [history] and the history
   /// index from [SBrowserInterface]
@@ -367,56 +363,56 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///   - It can be null when [SRouter] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
   ///   ^ a value (i.e. NOT be null) during all [build] phases
-  ///   - It will have an outdated value when a new [WebEntry] or a new route
-  ///   ^ it pushed until the update happens.
+  ///   - It will have an outdated value when a new [WebEntry] or a new page 
+  ///   ^ stack it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
-  /// [STranslator]s as using the context in [STranslator.webEntryToSRoute] and
-  /// [STranslator.sRouteToWebEntry] to get this SRouter will be in the
+  /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
+  /// [STranslator.sElementToWebEntry] to get this SRouter will be in the
   /// in-between state described above
-  SHistoryEntry? _currentHistoryEntry;
+  HistoryEntry? _currentHistoryEntry;
 
   /// The getter of [_currentHistoryEntry]
-  SHistoryEntry? get currentHistoryEntry => _currentHistoryEntry;
+  HistoryEntry? get currentHistoryEntry => _currentHistoryEntry;
 
   /// Whether the first [WebEntry] coming from the browser has been handled
   ///
   ///
   /// This is needed because the first url is handled differently since we have
-  /// to use the [widget.initialRoute] (if we are not deep-linking)
+  /// to use the [widget.initialPageStack] (if we are not deep-linking)
   bool _initialUrlHandled = false;
 
   /// The [SElement]s used to create the [Page]s
   ///
   ///
   /// It will be updated each time [to] is called
-  IList<SElement<NotSNested>> _sElements = IList();
+  IList<SElement<NonNestedStack>> _sElements = IList();
 
-  /// Pushes a new entry with the given route
+  /// Pushes a new entry with the given page stack
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(SRouteBase<NotSNested> route, {bool isReplacement = false}) {
-    _sElements = updateSRouteBaseSElements(
+  void to(PageStackBase<NonNestedStack> pageStack, {bool isReplacement = false}) {
+    _sElements = updatePageStackBaseSElements(
       context,
       oldSElements: _sElements,
-      sRouteBase: route,
+      pageStack: pageStack,
     );
 
     final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
     return _toCallback(
-      SHistoryEntry(
+      HistoryEntry(
         webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
-            (throw UnknownSRouteError(sRoute: route)),
-        route: route,
+            (throw UnknownPageStackError(pageStack: pageStack)),
+        pageStack: pageStack,
       ),
     );
   }
 
   /// Pushes a new [WebEntry] which will eventually be converted in its
-  /// corresponding [SRoute]
+  /// corresponding [PageStack]
   ///
   ///
   /// DO prefer using [to] when possible
@@ -433,9 +429,9 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     // [_sBrowser.push] only notify its listener when the browser changes its
     // state (contrary to when itself changes the state of the browser)
     return _toCallback(
-      SHistoryEntry(
+      HistoryEntry(
         webEntry: webEntry,
-        route: _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
+        pageStack: _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
             (throw UnknownWebEntryError(webEntry: webEntry)),
       ),
     );
@@ -445,7 +441,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// This will also push in the browser
-  void _pushSHistoryEntry(SHistoryEntry sHistoryEntry) {
+  void _pushSHistoryEntry(HistoryEntry sHistoryEntry) {
     final newHistoryIndex = _sBrowser.historyIndex + 1;
     // Update the history by:
     //  - Adding the given [sHistoryEntry] with a key corresponding to the next
@@ -470,7 +466,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   /// See "Optimization Remarks" to learn why we update [history] while we
   /// could simply react to [SBrowserInterface] notifications
-  void _replaceSHistoryEntry(SHistoryEntry sHistoryEntry) {
+  void _replaceSHistoryEntry(HistoryEntry sHistoryEntry) {
     setState(() {
       _currentHistoryEntry = sHistoryEntry;
       _history = history.add(_sBrowser.historyIndex, sHistoryEntry);
@@ -507,7 +503,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// Always returns true or false on non web platforms
   bool? canGo(int delta) => _sBrowser.canGo(delta);
 
-  /// Converts the current [WebEntry] from [_sBrowser] to a [SRoute]
+  /// Converts the current [WebEntry] from [_sBrowser] to a [PageStack]
   ///
   ///
   /// This must be called when [_sBrowser] notify its listeners
@@ -519,22 +515,22 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     final historyIndex = _sBrowser.historyIndex;
 
     // If [initialUrlHandled] is false and we are NOT deep-linking, report
-    // the url with [widget.initialRoute]
+    // the url with [widget.initialPageStack]
     if (!_initialUrlHandled) {
       _initialUrlHandled = true;
 
       if (webEntry == _sBrowser.initialWebEntry && historyIndex == 0) {
-        return to(widget.initialRoute, isReplacement: true);
+        return to(widget.initialPageStack, isReplacement: true);
       }
     }
-    // Get the route from the translators
-    final route = _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
+    // Get the page stack from the translators
+    final pageStack = _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
         (throw UnknownWebEntryError(webEntry: webEntry));
 
-    // Call replace with the route instead of directly storing the corresponding
-    // [SHistoryEntry] because the title might need to be set and this is only
-    // accessible by converting the route to a [WebEntry]
-    to(route, isReplacement: true);
+    // Call replace with the page stack instead of directly storing the
+    // corresponding [SHistoryEntry] because the title might need to be set and
+    // this is only accessible by converting the page stack to a [WebEntry]
+    to(pageStack, isReplacement: true);
   }
 
   /// This function must end up removing the last page in the list of pages
@@ -542,16 +538,16 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   void _onPop() {
     // At this point, we already know that there is a page bellow because
     // [RootSFlutterNavigatorBuilder] checked route.didPop
-    final newSRoute = _sElements[_sElements.length - 2].sWidget.sRoute;
+    final newPageStack = _sElements[_sElements.length - 2].sWidget.pageStack;
 
-    to(newSRoute);
+    to(newPageStack);
   }
 
   /// This function handles a system pop by first passing the event to the top
   /// [SElement]
   ///
   /// If the top [SElement] did NOT handle the event, we handle it by:
-  ///   - Either popping on the SRoute bellow if any
+  ///   - Either popping on the [PageStack] bellow if any
   ///   - Or putting the app in the background
   void _onSystemPop() {
     final result = _sElements.last.onSystemPop(context);
@@ -559,25 +555,25 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     result.when(
       parent: () {
         // We don't know if a tab bellow exists, so use getOrNull
-        final sRouteBellow = _sElements.getOrNull(_sElements.length - 2)?.sWidget.sRoute;
+        final pageStackBellow = _sElements.getOrNull(_sElements.length - 2)?.sWidget.pageStack;
 
-        if (sRouteBellow == null) {
-          // If there is no [SRoute] bellow, move the app to the background
+        if (pageStackBellow == null) {
+          // If there is no [PageStack] bellow, move the app to the background
           if (!widget.disableSendAppToBackground) {
             MoveToBackground.moveTaskToBack();
           }
           return;
         }
 
-        to(sRouteBellow);
+        to(pageStackBellow);
       },
       done: () {
-        // We navigate to the same [sRoute] since the changes where internal
+        // We navigate to the current [PageStack] since the changes where internal
         _pushSHistoryEntry(
-          SHistoryEntry(
+          HistoryEntry(
             webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
-                (throw UnknownSRouteError(sRoute: currentHistoryEntry!.route)),
-            route: currentHistoryEntry!.route,
+                (throw UnknownPageStackError(pageStack: currentHistoryEntry!.pageStack)),
+            pageStack: currentHistoryEntry!.pageStack,
           ),
         );
       },
@@ -654,8 +650,8 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
 /// This will also cause the subscribed [BuildContext] to rebuild if [isNested]
 /// of [currentHistoryEntry] are updated
 class _SRouterProvider extends InheritedWidget {
-  /// The current [SHistoryEntry]
-  final SHistoryEntry currentHistoryEntry;
+  /// The current [HistoryEntry]
+  final HistoryEntry currentHistoryEntry;
 
   /// Whether the associated [SRouter] is nested in another one
   final bool isNested;
@@ -682,10 +678,10 @@ class _SRouterProvider extends InheritedWidget {
 }
 
 /// An exception thrown when the given web entry in
-/// [STranslatorsHandler.getRouteFromWebEntry] could not be matched by any
+/// [TranslatorsHandler.getPageStackFromWebEntry] could not be matched by any
 /// translator
 class UnknownWebEntryError implements Exception {
-  /// The web entry which could not be converted to an SRoute
+  /// The web entry which could not be converted to a [PageStack]
   final WebEntry webEntry;
 
   // ignore: public_member_api_docs
@@ -693,7 +689,7 @@ class UnknownWebEntryError implements Exception {
 
   @override
   String toString() => '''
-The web entry $webEntry could not be translated to a route.
+The web entry $webEntry could not be translated to a page stack.
 
 If you are on the web, did you forget to add the translator corresponding to the web entry $webEntry ?
 
@@ -701,21 +697,21 @@ If you are NOT on the web, this should never happen, please fill an issue.
 ''';
 }
 
-/// An exception thrown when the given [SRouteBase] in
-/// [STranslatorsHandler.getRouteFromWebEntry] could not be matched by any
+/// An exception thrown when the given [PageStackBase] in
+/// [TranslatorsHandler.getPageStackFromWebEntry] could not be matched by any
 /// translator
-class UnknownSRouteError implements Exception {
-  /// The [SRouteBase] which could not be converted to an [WebEntry]
-  final SRouteBase sRoute;
+class UnknownPageStackError implements Exception {
+  /// The [PageStackBase] which could not be converted to an [WebEntry]
+  final PageStackBase pageStack;
 
   // ignore: public_member_api_docs
-  UnknownSRouteError({required this.sRoute});
+  UnknownPageStackError({required this.pageStack});
 
   @override
   String toString() => '''
-The route of type ${sRoute.runtimeType} could not be translated to a web entry.
+The [PageStack] of type ${pageStack.runtimeType} could not be translated to a web entry.
 
-If you are on the web, did you forget to add the translator corresponding to the route of type ${sRoute.runtimeType} ?
+If you are on the web, did you forget to add the translator corresponding to the [PageStack] of type ${pageStack.runtimeType} ?
 
 If you are NOT on the web, this should never happen, please fill an issue.
 ''';

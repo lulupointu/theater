@@ -48,15 +48,15 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black87,
       ),
       home: SRouter(
-        initialRoute: TabsWrapperSRoute((state) => state),
+        initialPageStack: TabsWrapperPageStack((state) => state),
         translatorsBuilder: (_) => [
-          S3TabsRouteTranslator<TabsWrapperSRoute, NotSNested>(
-            route: TabsWrapperSRoute.new,
+          Multi3TabsTranslator<TabsWrapperPageStack, NonNestedStack>(
+            route: TabsWrapperPageStack.new,
             tab1Translators: [],
             tab2Translators: [
-              SPathTranslator<ChatsListSRoute, SNested>.parse(
+              PathTranslator<ChatsListPageStack, NestedStack>.parse(
                 path: '*',
-                matchToRoute: (match) => ChatsListSRoute(
+                matchToRoute: (match) => ChatsListPageStack(
                   navigator: ChatsListNavigatorImplementation(),
                   chats: match.pathSegments
                       .map((id) => chats.firstWhere((chat) => chat.id == id))

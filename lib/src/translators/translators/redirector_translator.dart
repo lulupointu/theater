@@ -1,47 +1,41 @@
 import 'package:flutter/widgets.dart';
 
 import '../../browser/web_entry.dart';
-import '../../routes/framework.dart';
-import '../../routes/s_nested.dart';
-import '../s_route_translator.dart';
-import '../s_translator.dart';
+import '../../page_stack/framework.dart';
+import '../../page_stack/nested_stack.dart';
+import '../../s_router/s_router.dart';
+import '../page_stack_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
-/// An implementation of [STranslator] which makes it easy determine if a
-/// [WebEntry] is matched
-class SPathTranslator<Route extends SRouteBase<P>, P extends MaybeSNested>
-    extends SRouteTranslator<Route, P> {
-  /// Converts a static [WebEntry] into a [SRoute]
+/// A translator which can be used to redirect from a [path] to a [PageStack]
+class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslator<PageStackBase<N>, N> {
+  /// Redirect a static [WebEntry] to a [PageStack]
   ///
   ///
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted but cannot be used to create the [route].
   ///
-  /// [route] is the [SRoute] of the associated [Route] type that will be used
+  /// [route] is the [PageStack] of the associated [Route] type that will be used
   /// in [SRouter] if the path patches the given one
   ///
   ///
-  /// ### Example
+  /// # Example
   /// ```dart
-  /// SPathTranslator<UserSRoute, SPushable>(
-  ///   path: '/user',
-  ///   route: UserSRoute(),
-  /// )
+  /// SRedirectorTranslator(path: '*', route: HomeSRoute())
   /// ```
   ///
   ///
   /// See also:
-  ///   - [SPathTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
-  SPathTranslator({
+  ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
+  RedirectorTranslator({
     required String path,
-    required Route route,
-    String? title,
-  })  : routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
-        matchToRoute = ((_) => route),
-        _matcher = WebEntryMatcher(path: path);
+    required PageStackBase<N> route,
+    this.replace = true,
+  })  : _matcher = WebEntryMatcher(path: path),
+        matchToRoute = ((_, __) => route);
 
-  /// Converts a [WebEntry] to a [SRoute] and vise versa, by parsing dynamic
+  /// Converts a [WebEntry] to a [PageStack] to redirect to, by parsing dynamic
   /// element of the [WebEntry] (such as path parameters, query parameters, ...)
   ///
   ///
@@ -49,20 +43,16 @@ class SPathTranslator<Route extends SRouteBase<P>, P extends MaybeSNested>
   /// parameters are accepted
   ///
   /// [matchToRoute] is called when the current path matches [path], and must
-  /// return a [SRoute] of the associated [Route] type.
+  /// return a [PageStack] which will then be used to create the new [WebEntry].
   /// Use the given match object to access the different parameters of the
   /// matched path. See example bellow.
-  ///
-  /// [routeToWebEntry] converts the [SRoute] of the associated [Route] type to
-  /// a [WebEntry] (i.e. a representation of the url)
   ///
   ///
   /// # Example:
   /// ```dart
-  /// SPathTranslator<UserSRoute, SPushable>.parse(
+  /// SRedirectorTranslator.parse(
   ///   path: '/user/:id',
   ///   matchToRoute: (match) => UserSRoute(id: match.pathParams['id']),
-  ///   routeToWebEntry: (route) => WebEntry(pathSegments: ['user', route.id]),
   /// )
   /// ```
   ///
@@ -75,10 +65,10 @@ class SPathTranslator<Route extends SRouteBase<P>, P extends MaybeSNested>
   /// See also:
   ///   - [WebEntry] for the different parameters which can be used to form a url
   ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
-  SPathTranslator.parse({
+  RedirectorTranslator.parse({
     required String path,
     required this.matchToRoute,
-    required this.routeToWebEntry,
+    this.replace = true,
 
     // Functions used to validate the different components of the url
     final bool Function(Map<String, String> pathParams)? validatePathParams,
@@ -93,28 +83,42 @@ class SPathTranslator<Route extends SRouteBase<P>, P extends MaybeSNested>
           validateHistoryState: validateHistoryState,
         );
 
-  /// A callback used to convert a [WebEntryMatch] (which is basically
-  /// a [WebEntry] with the parsed path parameters) to a [SRoute]
-  final Route Function(WebEntryMatch match) matchToRoute;
+  /// The [PageStack] to redirect to
+  final PageStackBase<N> Function(BuildContext context, WebEntryMatch match)
+      matchToRoute;
 
-  @override
-  Route? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
-    final match = _matcher.match(webEntry);
-
-    if (match == null) {
-      return null;
-    }
-
-    return matchToRoute(match);
-  }
+  /// Whether the path we navigate to should replace the current history entry
+  ///
+  ///
+  /// Defaults to true
+  final bool replace;
 
   /// A class which determined whether a given [WebEntry] is valid
   final WebEntryMatcher _matcher;
 
-  /// Converts the associated [SRoute] into a string representing
-  /// the url
-  final WebEntry Function(Route route) routeToWebEntry;
+  @override
+  PageStackBase<N>? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
+    final match = _matcher.match(webEntry);
+
+    // If the web entry does not match, return null
+    if (match == null) {
+      return null;
+    }
+
+
+    // We can redirect the route even if the url is not right since after
+    // [webEntryToSRoute] [sRouteToWebEntry] is always called, meaning that
+    // [match] will be converted into the right url
+    return matchToRoute(context, match);
+  }
+
+  /// We must override the [routeType] so that this translator is never matched
+  /// when trying to convert a [PageStack] to a [WebEntry]
+  @override
+  Type get routeType => Null;
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, Route route) => routeToWebEntry(route);
+  WebEntry sRouteToWebEntry(BuildContext context, PageStackBase route) {
+    throw 'This should never be called';
+  }
 }

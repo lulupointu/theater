@@ -1,7 +1,8 @@
 import '../browser/web_entry.dart';
-import '../routes/framework.dart';
-import '../routes/s_nested.dart';
-import 's_history_entry.dart';
+import '../page_stack/framework.dart';
+import '../page_stack/nested_stack.dart';
+import '../translators/translator.dart';
+import 'history_entry.dart';
 import 's_router.dart';
 
 /// The object returned by [SRouter.of]
@@ -18,24 +19,24 @@ abstract class SRouterInterface {
   ///   - It can be null when [SRouter] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
   ///   ^ a value (i.e. NOT be null) during all [buildTabs] phases
-  ///   - It will have an outdated value when a new [WebEntry] or a new route
-  ///   ^ it pushed until the update happens.
+  ///   - It will have an outdated value when a new [WebEntry] or a new page
+  ///   ^ stack it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
-  /// [STranslator]s as using the context in [STranslator.webEntryToSRoute] and
-  /// [STranslator.sRouteToWebEntry] to get this SRouter will be in the
+  /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
+  /// [STranslator.sElementToWebEntry] to get this SRouter will be in the
   /// in-between state described above
-  SHistoryEntry? get currentHistoryEntry;
+  HistoryEntry? get currentHistoryEntry;
 
-  /// Pushes a new entry with the given route
+  /// Pushes a new entry with the given page stack
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(SRouteBase<NotSNested> route, {bool isReplacement = false});
+  void to(PageStackBase<NonNestedStack> pageStack, {bool isReplacement = false});
 
   /// Pushes a new [WebEntry] which will eventually be converted in its
-  /// corresponding [SRoute]
+  /// corresponding [PageStack]
   ///
   ///
   /// DO prefer using [to] when possible

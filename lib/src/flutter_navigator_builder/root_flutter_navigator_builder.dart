@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../routes/framework.dart';
+import '../page_stack/framework.dart';
 import '../s_router/s_router.dart';
 
 /// The widget which creates the [Navigator] and map the current
-/// [SRoute] to a list of pages to display in [Navigator.pages]
+/// [PageStack] to a list of pages to display in [Navigator.pages]
 ///
 ///
 /// This also handles onPop and onBack
@@ -79,7 +79,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
     }
 
     // If the navigator created here has something which is not associated with
-    // a page (therefore not associated with an SRouter) at the of its routes,
+    // a page (therefore not associated with an SRouter) at the of its page_stack,
     // pop it
     final _currentRoute = _getTopNavigatorRoute();
     if (_currentRoute?.settings is! Page) {
@@ -93,7 +93,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
     return true;
   }
 
-  /// Returns the [Route] (NOT [SRoute]) which is at the top of the [Navigator]
+  /// Returns the [Route] (NOT [PageStack]) which is at the top of the [Navigator]
   /// created in [build]
   ///
   /// Returns null if [build] has not yet been called
