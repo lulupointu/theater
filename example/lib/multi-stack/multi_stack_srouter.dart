@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/pushables/pushables.dart';
 import 'package:srouter/srouter.dart';
 
 import 's_routes.dart';
@@ -14,12 +13,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: SRouter(
-        initialRoute: AppSRoute(activeTab: TabItem.red),
+        initialRoute: AppSRoute((state) => state),
         translatorsBuilder: (_) => [
-          SPathTranslator<SettingsSRoute, SPushable>.parse(
+          S2TabsRouteTranslator<AppSRoute, NotSNested>(
+            route: AppSRoute.new,
+            tab1Translators: _getTranslatorOfTab(TabItem.red),
+            tab2Translators: _getTranslatorOfTab(TabItem.green),
+          ),
+          SPathTranslator<SettingsSRoute, NotSNested>.parse(
             path: '/:color/settings',
             matchToRoute: (match) => SettingsSRoute(
               tabItem: tabName.entries
@@ -30,36 +33,20 @@ class MyApp extends StatelessWidget {
               pathSegments: [tabName[route.tabItem]!, 'settings'],
             ),
           ),
-          STabbedRouteTranslator<AppSRoute, TabItem, SPushable>(
-            routeBuilder: (tabsRoute) {
-              if (!tabsRoute.entries.any((e) => e.value != null)) return null;
-
-              final activeTabRoute = tabsRoute.entries.firstWhere((e) => e.value != null);
-
-              return AppSRoute.toTab(
-                activeTab: activeTabRoute.key,
-                newTabRoute: activeTabRoute.value!,
-              );
-            },
-            tabTranslators: {
-              for (final tabItem in TabItem.values) tabItem: _getTranslatorOfTab(tabItem),
-            },
-          ),
         ],
       ),
     );
   }
 
-  List<STranslator<SRouteInterface<NonSPushable>, NonSPushable>> _getTranslatorOfTab(
-      TabItem tabItem) {
+  List<SRouteTranslator<SRouteBase<SNested>, SNested>> _getTranslatorOfTab(TabItem tabItem) {
     switch (tabItem) {
       case TabItem.red:
         return [
-          SPathTranslator<RedListSRoute, NonSPushable>(
+          SPathTranslator<RedListSRoute, SNested>(
             path: '${tabName[tabItem]!}',
             route: RedListSRoute(),
           ),
-          SPathTranslator<RedDetailSRoute, NonSPushable>.parse(
+          SPathTranslator<RedDetailSRoute, SNested>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToRoute: (match) => RedDetailSRoute(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -70,11 +57,11 @@ class MyApp extends StatelessWidget {
         ];
       case TabItem.green:
         return [
-          SPathTranslator<GreenListSRoute, NonSPushable>(
+          SPathTranslator<GreenListSRoute, SNested>(
             path: '${tabName[tabItem]!}',
             route: GreenListSRoute(),
           ),
-          SPathTranslator<GreenDetailSRoute, NonSPushable>.parse(
+          SPathTranslator<GreenDetailSRoute, SNested>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToRoute: (match) => GreenDetailSRoute(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -83,21 +70,21 @@ class MyApp extends StatelessWidget {
                 WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
           ),
         ];
-      case TabItem.blue:
-        return [
-          SPathTranslator<BlueListSRoute, NonSPushable>(
-            path: '${tabName[tabItem]!}',
-            route: BlueListSRoute(),
-          ),
-          SPathTranslator<BlueDetailSRoute, NonSPushable>.parse(
-            path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToRoute: (match) => BlueDetailSRoute(
-              materialIndex: int.parse(match.pathParams['materialIndex']!),
-            ),
-            routeToWebEntry: (route) =>
-                WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
-          ),
-        ];
+      // case TabItem.blue:
+      //   return [
+      //     SPathTranslator<BlueListSRoute, NonSPushable>(
+      //       path: '${tabName[tabItem]!}',
+      //       route: BlueListSRoute(),
+      //     ),
+      //     SPathTranslator<BlueDetailSRoute, NonSPushable>.parse(
+      //       path: '${tabName[tabItem]!}/details_:materialIndex',
+      //       matchToRoute: (match) => BlueDetailSRoute(
+      //         materialIndex: int.parse(match.pathParams['materialIndex']!),
+      //       ),
+      //       routeToWebEntry: (route) =>
+      //           WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
+      //     ),
+      //   ];
     }
   }
 }
@@ -113,10 +100,18 @@ class App extends StatelessWidget {
     if (tabItem == activeTab) {
       // pop to first route
       context.sRouter.to(
-        AppSRoute.toTab(activeTab: tabItem, newTabRoute: AppSRoute.initialTabsRoute[tabItem]!),
+        AppSRoute(
+          (state) => state.copyWith(
+            activeIndex: TabItem.values.indexOf(tabItem),
+            tab1SRoute: tabItem == TabItem.red ? RedListSRoute() : null,
+            tab2SRoute: tabItem == TabItem.green ? GreenListSRoute() : null,
+          ),
+        ),
       );
     } else {
-      context.sRouter.to(AppSRoute(activeTab: tabItem));
+      context.sRouter.to(
+        AppSRoute((state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem))),
+      );
     }
   }
 
@@ -148,7 +143,7 @@ class BottomNavigation extends StatelessWidget {
       items: [
         _buildItem(TabItem.red),
         _buildItem(TabItem.green),
-        _buildItem(TabItem.blue),
+        // _buildItem(TabItem.blue),
       ],
       onTap: (index) => onSelectTab(context, TabItem.values[index]),
       currentIndex: currentTab.index,
@@ -209,7 +204,11 @@ class ColorDetailScreen extends StatelessWidget {
               (e) => Padding(
                 padding: const EdgeInsets.all(50.0),
                 child: ElevatedButton(
-                  onPressed: () => context.sRouter.to(AppSRoute(activeTab: e)),
+                  onPressed: () => context.sRouter.to(
+                    AppSRoute(
+                      (state) => state.copyWith(activeIndex: TabItem.values.indexOf(e)),
+                    ),
+                  ),
                   child: Text('Go to ${tabName[e]}'),
                 ),
               ),
@@ -318,16 +317,20 @@ List<Widget> _buildSettingsButtons(BuildContext context, {required TabItem tabIt
       .toList();
 }
 
-enum TabItem { red, green, blue }
+enum TabItem {
+  red,
+  green,
+  // blue,
+}
 
 const Map<TabItem, String> tabName = {
   TabItem.red: 'red',
   TabItem.green: 'green',
-  TabItem.blue: 'blue',
+  // TabItem.blue: 'blue',
 };
 
 const Map<TabItem, MaterialColor> activeTabColor = {
   TabItem.red: Colors.red,
   TabItem.green: Colors.green,
-  TabItem.blue: Colors.blue,
+  // TabItem.blue: Colors.blue,
 };

@@ -1,10 +1,8 @@
 import 'package:example/telegram/src/navigators_implementations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:srouter/srouter.dart';
 
 import 'src/data.dart';
-import 'src/screens.dart';
 import 'src/sroutes.dart';
 
 /// This is a partial fake implementation of the telegram app
@@ -50,68 +48,27 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black87,
       ),
       home: SRouter(
-        initialRoute: TabsWrapperSRoute(
-          showMemberDetails: false,
-          maybeShowLeftTab: false,
-          selectedChats: [chats.first],
-        ),
+        initialRoute: TabsWrapperSRoute((state) => state),
         translatorsBuilder: (_) => [
-          STabbedRouteTranslator<TabsWrapperSRoute, MyTab, SPushable>.parse(
-            path: '*',
-            matchToRoute: (match, tabs) {
-              // We should be able to return null from here
-
-              final showMemberDetails = match.historyState['showMemberDetails'] == 'true';
-              final maybeShowLeftTab = match.historyState['maybeShowLeftTab'] == 'true';
-
-              final selectedChats = match.pathSegments
-                  .map((id) => chats.firstWhere((chat) => chat.id == id))
-                  .toList();
-
-              return TabsWrapperSRoute.from(
-                context,
-                showMemberDetails: showMemberDetails,
-                maybeShowLeftTab: maybeShowLeftTab,
-                selectedChats: selectedChats,
-                tabLeftRoute: tabs[MyTab.left],
-              );
-            },
-            routeToWebEntry: (_, route, tabsWebEntry) {
-              return WebEntry(
-                pathSegments: route.selectedChats.map((e) => e.id).toList(),
-                historyState: {
-                  'showMemberDetails': '${route.showMemberDetails}',
-                  'maybeShowLeftTab': '${route.maybeShowLeftTab}',
-                  ...(tabsWebEntry[MyTab.left]?.historyState ?? {}),
-                },
-                title: 'Chat ${route.selectedChats.last.title}',
-              );
-            },
-            tabTranslators: {
-              MyTab.left: [
-                SPathTranslator<ChatsListSRoute, NonSPushable>.parse(
-                  path: '*',
-                  validateHistoryState: (historyState) =>
-                      historyState['showSettings'] != 'true',
-                  matchToRoute: (match) => ChatsListSRoute(
-                    navigator: ChatsListNavigatorImplementation(),
-                    chats: chats,
-                  ),
-                  routeToWebEntry: (route) => WebEntry(),
+          S3TabsRouteTranslator<TabsWrapperSRoute, NotSNested>(
+            route: TabsWrapperSRoute.new,
+            tab1Translators: [],
+            tab2Translators: [
+              SPathTranslator<ChatsListSRoute, SNested>.parse(
+                path: '*',
+                matchToRoute: (match) => ChatsListSRoute(
+                  navigator: ChatsListNavigatorImplementation(),
+                  chats: match.pathSegments
+                      .map((id) => chats.firstWhere((chat) => chat.id == id))
+                      .toList(),
                 ),
-                SPathTranslator<SettingsSRoute, NonSPushable>.parse(
-                  path: '*',
-                  validateHistoryState: (historyState) =>
-                      historyState['showSettings'] == 'true',
-                  matchToRoute: (match) => SettingsSRoute(
-                    settingsNavigator: SettingsNavigatorImplementation(),
-                    chatsListNavigator: ChatsListNavigatorImplementation(),
-                    chats: chats,
-                  ),
-                  routeToWebEntry: (route) => WebEntry(historyState: {'showSettings': 'true'}),
+                routeToWebEntry: (route) => WebEntry(
+                  pathSegments: route.chats.map((e) => e.id).toList(),
+                  title: 'Chat ${route.chats.last.title}',
                 ),
-              ],
-            },
+              ),
+            ],
+            tab3Translators: [],
           ),
         ],
       ),

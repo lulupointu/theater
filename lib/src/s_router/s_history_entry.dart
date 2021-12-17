@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-import '../route/pushables/pushables.dart';
-import '../route/s_route_interface.dart';
-import '../web_entry/web_entry.dart';
+import '../browser/web_entry.dart';
+import '../routes/framework.dart';
+import '../routes/s_nested.dart';
 
 /// An SHistoryEntry is simply a tuple containing a [WebEntry] and a
 /// [SRoute]
@@ -11,7 +11,7 @@ class SHistoryEntry extends Equatable {
   final WebEntry webEntry;
 
   /// The [SRoute] of this history entry
-  final SRouteInterface<SPushable> route;
+  final SRouteBase<NotSNested> route;
 
   // ignore: public_member_api_docs
   SHistoryEntry({required this.webEntry, required this.route});

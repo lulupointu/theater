@@ -1,20 +1,19 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:move_to_background/move_to_background.dart';
 
 import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../browser/s_browser.dart';
+import '../browser/web_entry.dart';
 import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
-import '../route/pushables/pushables.dart';
-import '../route/s_route.dart';
-import '../route/s_route_interface.dart';
+import '../routes/framework.dart';
+import '../routes/s_nested.dart';
 import '../s_translators/s_translator.dart';
 import '../s_translators/s_translators_handler.dart';
 import '../s_translators/translators/universal_web_entry_translator.dart';
-import '../web_entry/web_entry.dart';
 import 's_history_entry.dart';
 import 's_router_interface.dart';
-import 's_routes_state_manager/s_routes_state_manager.dart';
 
 /// A widget which assembles the different part of the package to
 /// create the greatest routing experience of your life
@@ -104,14 +103,14 @@ main() {
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
   /// might be null since the conversion from route to web entry or vise versa
   /// is not done
-  final List<STranslator<SRouteInterface<SPushable>, SPushable>> Function(
+  final List<STranslator<SElement<NotSNested>, SRouteBase<NotSNested>, NotSNested>> Function(
       BuildContext context)? translatorsBuilder;
 
   /// The initial [SRoute] to display
   ///
   ///
   /// This will be ignored if we are deep-linking
-  final SRouteInterface<SPushable> initialRoute;
+  final SRouteBase<NotSNested> initialRoute;
 
   /// A callback to build a widget around the [Navigator] created by this
   /// widget
@@ -309,7 +308,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
   /// might be null since the conversion from route to web entry or vise versa
   /// is not done
-  STranslatorsHandler<SPushable> get _translatorsHandler => STranslatorsHandler(
+  STranslatorsHandler<NotSNested> get _translatorsHandler => STranslatorsHandler(
         translators: [
           ...widget.translatorsBuilder?.call(context) ?? [],
 
@@ -387,20 +386,29 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// to use the [widget.initialRoute] (if we are not deep-linking)
   bool _initialUrlHandled = false;
 
-  /// An object which can be used to store the state of a route
-  final SRoutesStateManager sRoutesStateManager = SRoutesStateManager();
+  /// The [SElement]s used to create the [Page]s
+  ///
+  ///
+  /// It will be updated each time [to] is called
+  IList<SElement<NotSNested>> _sElements = IList();
 
   /// Pushes a new entry with the given route
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(SRouteInterface<SPushable> route, {bool isReplacement = false}) {
+  void to(SRouteBase<NotSNested> route, {bool isReplacement = false}) {
+    _sElements = updateSRouteBaseSElements(
+      context,
+      oldSElements: _sElements,
+      sRouteBase: route,
+    );
+
     final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
     return _toCallback(
       SHistoryEntry(
-        webEntry: _translatorsHandler.getWebEntryFromRoute(context, route) ??
+        webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
             (throw UnknownSRouteError(sRoute: route)),
         route: route,
       ),
@@ -483,8 +491,8 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// NOT calling [setState] is NOT an error, it will be called during
-  /// [_updateHistoryWithCurrentWebEntry] when [SBrowserInterface] will have processed this
-  /// method and updated its current history index
+  /// [_updateHistoryWithCurrentWebEntry] when [SBrowserInterface] will have
+  /// processed this method and updated its current history index
   void go(int delta) => _sBrowser.go(delta);
 
   /// Whether it is possible to ask the navigator to change the history index
@@ -519,7 +527,6 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
         return to(widget.initialRoute, isReplacement: true);
       }
     }
-
     // Get the route from the translators
     final route = _translatorsHandler.getRouteFromWebEntry(context, webEntry) ??
         (throw UnknownWebEntryError(webEntry: webEntry));
@@ -530,15 +537,51 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     to(route, isReplacement: true);
   }
 
-  /// Returns true if the current platform is android or iOS
-  bool get _isPlatformMobile {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return true;
-      default:
-        return false;
-    }
+  /// This function must end up removing the last page in the list of pages
+  /// given to [RootSFlutterNavigatorBuilder]
+  void _onPop() {
+    // At this point, we already know that there is a page bellow because
+    // [RootSFlutterNavigatorBuilder] checked route.didPop
+    final newSRoute = _sElements[_sElements.length - 2].sWidget.sRoute;
+
+    to(newSRoute);
+  }
+
+  /// This function handles a system pop by first passing the event to the top
+  /// [SElement]
+  ///
+  /// If the top [SElement] did NOT handle the event, we handle it by:
+  ///   - Either popping on the SRoute bellow if any
+  ///   - Or putting the app in the background
+  void _onSystemPop() {
+    final result = _sElements.last.onSystemPop(context);
+
+    result.when(
+      parent: () {
+        // We don't know if a tab bellow exists, so use getOrNull
+        final sRouteBellow = _sElements.getOrNull(_sElements.length - 2)?.sWidget.sRoute;
+
+        if (sRouteBellow == null) {
+          // If there is no [SRoute] bellow, move the app to the background
+          if (!widget.disableSendAppToBackground) {
+            MoveToBackground.moveTaskToBack();
+          }
+          return;
+        }
+
+        to(sRouteBellow);
+      },
+      done: () {
+        // We navigate to the same [sRoute] since the changes where internal
+        _pushSHistoryEntry(
+          SHistoryEntry(
+            webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
+                (throw UnknownSRouteError(sRoute: currentHistoryEntry!.route)),
+            route: currentHistoryEntry!.route,
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -580,9 +623,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   Widget build(BuildContext context) {
     // No need to update if we are NOT nested since this will be done on browser
     // update anyway
-    if (_isNested) {
-      _updateHistoryWithCurrentWebEntry();
-    }
+    if (_isNested) _updateHistoryWithCurrentWebEntry();
 
     return _SRouterProvider(
       state: this,
@@ -592,11 +633,11 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
         child: Builder(
           builder: (context) {
             final navigatorBuilder = RootSFlutterNavigatorBuilder(
-              sRoute: currentHistoryEntry!.route,
+              pages: _sElements.map((element) => element.buildPage(context)).toList(),
               navigatorKey: widget.navigatorKey,
               navigatorObservers: widget.navigatorObservers,
-              disableSendAppToBackground:
-                  !_isPlatformMobile || _isNested || widget.disableSendAppToBackground,
+              onPop: _onPop,
+              onSystemPop: _onSystemPop,
             );
 
             return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
@@ -660,12 +701,12 @@ If you are NOT on the web, this should never happen, please fill an issue.
 ''';
 }
 
-/// An exception thrown when the given [SRouteInterface] in
+/// An exception thrown when the given [SRouteBase] in
 /// [STranslatorsHandler.getRouteFromWebEntry] could not be matched by any
 /// translator
 class UnknownSRouteError implements Exception {
-  /// The [SRouteInterface] which could not be converted to an [WebEntry]
-  final SRouteInterface sRoute;
+  /// The [SRouteBase] which could not be converted to an [WebEntry]
+  final SRouteBase sRoute;
 
   // ignore: public_member_api_docs
   UnknownSRouteError({required this.sRoute});

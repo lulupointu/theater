@@ -1,12 +1,15 @@
-import '../route/pushables/pushables.dart';
-import '../route/s_route_interface.dart';
-import '../web_entry/web_entry.dart';
-
+import '../browser/web_entry.dart';
+import '../routes/framework.dart';
+import '../routes/s_nested.dart';
 import 's_history_entry.dart';
-import 's_routes_state_manager/s_routes_state_manager.dart';
+import 's_router.dart';
 
+/// The object returned by [SRouter.of]
+///
+///
+/// We use this object instead of returning [SRouterState] so that internal
+/// non private methods do not appear in the IDE
 abstract class SRouterInterface {
-
   /// An helper to get the current web entry using [history] and the history
   /// index from [SBrowserInterface]
   ///
@@ -14,7 +17,7 @@ abstract class SRouterInterface {
   /// Watch out for edge cases:
   ///   - It can be null when [SRouter] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
-  ///   ^ a value (i.e. NOT be null) during all [build] phases
+  ///   ^ a value (i.e. NOT be null) during all [buildTabs] phases
   ///   - It will have an outdated value when a new [WebEntry] or a new route
   ///   ^ it pushed until the update happens.
   ///
@@ -24,20 +27,12 @@ abstract class SRouterInterface {
   /// in-between state described above
   SHistoryEntry? get currentHistoryEntry;
 
-  /// An object which can be used to store the state of a route
-  ///
-  ///
-  /// This should only be used internally or when implementing your own
-  /// [SRoute].
-  /// See [STabbedRoute] for an example of its use.
-  SRoutesStateManager get sRoutesStateManager;
-
   /// Pushes a new entry with the given route
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(SRouteInterface<SPushable> route, {bool isReplacement = false});
+  void to(SRouteBase<NotSNested> route, {bool isReplacement = false});
 
   /// Pushes a new [WebEntry] which will eventually be converted in its
   /// corresponding [SRoute]

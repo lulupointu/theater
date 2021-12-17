@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import '../web_entry/web_entry.dart';
+import 'web_entry.dart';
 
-export 'implementations/non_web/s_browser.dart' if (dart.library.html) 'implementations/web/s_browser.dart' show SBrowser;
+export 'src/non_web/s_browser.dart' if (dart.library.html) 'src/web/s_browser.dart' show SBrowser;
 
 /// A class which interacts with the browser i.e.:
 ///   - Passes information to update the browser

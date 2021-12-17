@@ -24,8 +24,6 @@ import 'package:flutter/material.dart';
 /// An important consideration is that nothing here should depend on the
 /// routing package. This are only UI elements
 
-enum MyTab { left, middle, right }
-
 // Left side
 class ChatsListScreen extends StatelessWidget {
   final ChatsListNavigator navigator;
@@ -54,7 +52,7 @@ class ChatsListScreen extends StatelessWidget {
         itemCount: chats.length,
         itemBuilder: (context, index) {
           final isSelected = chats[index] ==
-              context.watch<TabsWrapperScreenState>().widget.selectedChats.last;
+              context.watch<TabsWrapperScreenState>().selectedChat;
 
           return ColoredBox(
             color: isSelected ? Colors.deepPurpleAccent : Colors.transparent,
@@ -204,7 +202,7 @@ class MembersDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chat = context.watch<TabsWrapperScreenState>().widget.selectedChats.last;
+    final chat = context.watch<TabsWrapperScreenState>().selectedChat;
 
     return Scaffold(
       appBar: AppBar(
@@ -280,15 +278,15 @@ class MembersDetailsScreen extends StatelessWidget {
 
 // The tabs wrapper which show the left, middle and right tab
 class TabsWrapperScreen extends StatefulWidget {
-  final Map<MyTab, Widget> tabs;
-  final List<Chat> selectedChats;
+  final List<Widget> tabs;
+  final List<Chat> chats;
   final bool showMemberDetails;
   final bool maybeShowLeftTab;
 
   const TabsWrapperScreen({
     Key? key,
     required this.tabs,
-    required this.selectedChats,
+    required this.chats,
     required this.showMemberDetails,
     required this.maybeShowLeftTab,
   }) : super(key: key);
@@ -298,6 +296,8 @@ class TabsWrapperScreen extends StatefulWidget {
 }
 
 class TabsWrapperScreenState extends State<TabsWrapperScreen> {
+  Chat get selectedChat => widget.chats.last;
+
   bool get mustShowLeftTab => MediaQuery.of(context).size.width > 1000;
 
   bool get showLeftTab => mustShowLeftTab ? true : widget.maybeShowLeftTab;
@@ -320,11 +320,11 @@ class TabsWrapperScreenState extends State<TabsWrapperScreen> {
               ),
               child: SizedBox(
                 width: 250,
-                child: widget.tabs[MyTab.left],
+                child: widget.tabs[0],
               ),
             ),
           ),
-          Flexible(child: widget.tabs[MyTab.middle]!),
+          Flexible(child: widget.tabs[1]),
           ClipRRect(
             child: TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 500),
@@ -337,7 +337,7 @@ class TabsWrapperScreenState extends State<TabsWrapperScreen> {
               ),
               child: SizedBox(
                 width: 250,
-                child: widget.tabs[MyTab.right]!,
+                child: widget.tabs[2],
               ),
             ),
           ),

@@ -1,16 +1,17 @@
 import 'package:flutter/widgets.dart';
 
-import '../../route/pushables/pushables.dart';
-import '../../route/s_route_interface.dart';
-import '../../web_entry/web_entry.dart';
+import '../../browser/web_entry.dart';
+import '../../routes/framework.dart';
+import '../../routes/s_nested.dart';
+import '../s_route_translator.dart';
 import '../s_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// An implementation of [STranslator] which makes it easy determine if a
 /// [WebEntry] is matched
-class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable>
-    extends STranslator<Route, P> {
+class SPathTranslator<Route extends SRouteBase<P>, P extends MaybeSNested>
+    extends SRouteTranslator<Route, P> {
   /// Converts a static [WebEntry] into a [SRoute]
   ///
   ///
@@ -21,7 +22,7 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
   /// in [SRouter] if the path patches the given one
   ///
   ///
-  /// # Example
+  /// ### Example
   /// ```dart
   /// SPathTranslator<UserSRoute, SPushable>(
   ///   path: '/user',
@@ -36,10 +37,9 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
     required String path,
     required Route route,
     String? title,
-  })  : _routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
+  })  : routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
         matchToRoute = ((_) => route),
-        _matcher = WebEntryMatcher(path: path),
-        routeType = Route;
+        _matcher = WebEntryMatcher(path: path);
 
   /// Converts a [WebEntry] to a [SRoute] and vise versa, by parsing dynamic
   /// element of the [WebEntry] (such as path parameters, query parameters, ...)
@@ -78,22 +78,20 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
   SPathTranslator.parse({
     required String path,
     required this.matchToRoute,
-    required WebEntry Function(Route route) routeToWebEntry,
+    required this.routeToWebEntry,
 
     // Functions used to validate the different components of the url
     final bool Function(Map<String, String> pathParams)? validatePathParams,
     final bool Function(Map<String, String> queryParams)? validateQueryParams,
     final bool Function(String fragment)? validateFragment,
     final bool Function(Map<String, String> historyState)? validateHistoryState,
-  })  : _routeToWebEntry = routeToWebEntry,
-        _matcher = WebEntryMatcher(
+  }) : _matcher = WebEntryMatcher(
           path: path,
           validatePathParams: validatePathParams,
           validateQueryParams: validateQueryParams,
           validateFragment: validateFragment,
           validateHistoryState: validateHistoryState,
-        ),
-        routeType = Route;
+        );
 
   /// A callback used to convert a [WebEntryMatch] (which is basically
   /// a [WebEntry] with the parsed path parameters) to a [SRoute]
@@ -110,16 +108,13 @@ class SPathTranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable
     return matchToRoute(match);
   }
 
-  @override
-  final Type routeType;
-
   /// A class which determined whether a given [WebEntry] is valid
   final WebEntryMatcher _matcher;
 
   /// Converts the associated [SRoute] into a string representing
   /// the url
-  final WebEntry Function(Route route) _routeToWebEntry;
+  final WebEntry Function(Route route) routeToWebEntry;
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, Route route) => _routeToWebEntry(route);
+  WebEntry sRouteToWebEntry(BuildContext context, Route route) => routeToWebEntry(route);
 }

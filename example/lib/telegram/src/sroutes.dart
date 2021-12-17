@@ -1,6 +1,5 @@
 import 'package:example/telegram/src/screens.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/src/provider.dart';
 import 'package:srouter/srouter.dart';
 
@@ -21,7 +20,7 @@ import 'navigators_implementations.dart';
 /// because only the [STabbedRoute] can directly be pushed into [SRouter]
 
 // Left side
-class ChatsListSRoute extends SRoute<NonSPushable> {
+class ChatsListSRoute extends SRoute<SNested> {
   final ChatsListNavigator navigator;
   final List<Chat> chats;
 
@@ -39,7 +38,7 @@ class ChatsListSRoute extends SRoute<NonSPushable> {
   }
 }
 
-class SettingsSRoute extends SRoute<NonSPushable> {
+class SettingsSRoute extends SRoute<SNested> {
   final SettingsNavigator settingsNavigator;
   final ChatsListNavigator chatsListNavigator;
   final List<Chat> chats;
@@ -56,7 +55,7 @@ class SettingsSRoute extends SRoute<NonSPushable> {
   }
 
   @override
-  SRouteInterface<NonSPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
     return ChatsListSRoute(
       navigator: chatsListNavigator,
       chats: chats,
@@ -65,53 +64,65 @@ class SettingsSRoute extends SRoute<NonSPushable> {
 }
 
 // Middle side
-class StackedChatsSRoute extends SRoute<NonSPushable> {
+class StackedChatsSRoute extends SRoute<SNested> {
   final ChatNavigator navigator;
-  final List<Chat>? selectedChats;
+  final List<Chat> chats;
 
-  StackedChatsSRoute({required this.navigator}) : selectedChats = null;
-
-  StackedChatsSRoute._({required this.navigator, this.selectedChats});
+  StackedChatsSRoute({required this.navigator, required this.chats});
 
   @override
-  Page buildPage(BuildContext context, Widget child) {
-    final chats = selectedChats != null
-        ? selectedChats!
-        : context.watch<TabsWrapperScreenState>().widget.selectedChats;
+  Page buildPage(BuildContext context) {
     return MaterialPage(
       key: ValueKey(chats.length),
-      child: child,
+      child: build(context),
+    );
+  }
+
+  void _onPop(BuildContext context) {
+    context.sRouter.to(
+      TabsWrapperSRoute.from(
+        context,
+        selectedChats: List.from(chats)..removeLast(),
+      ),
+    );
+  }
+
+  Widget popHandler(BuildContext context, {required Widget child}) {
+    return BackButtonListener(
+      onBackButtonPressed: () async {
+        _onPop(context);
+        return true;
+      },
+      child: WillPopScope(
+        onWillPop: () async {
+          _onPop(context);
+          return false;
+        },
+        child: child,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChatScreen(
+    final child = ChatScreen(
       navigator: navigator,
-      chat: selectedChats != null
-          ? selectedChats!.last
-          : context.read<TabsWrapperScreenState>().widget.selectedChats.last,
+      chat: chats.last,
     );
+
+    return chats.length > 1 ? popHandler(context, child: child) : child;
   }
 
   @override
-  SRouteInterface<NonSPushable>? buildSRouteBellow(BuildContext context) {
-    final _selectedChats = List<Chat>.from(
-      selectedChats != null
-          ? selectedChats!
-          : context.read<TabsWrapperScreenState>().widget.selectedChats,
-    );
-    return _selectedChats.length <= 1
+  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
+    return chats.length <= 1
         ? null
-        : StackedChatsSRoute._(
-            selectedChats: _selectedChats..removeLast(),
-            navigator: navigator,
-          );
+        : StackedChatsSRoute(chats: List.from(chats)..removeLast(), navigator: navigator);
   }
 }
 
 // Right side
-class MembersDetailsSRoute extends SRoute<NonSPushable> {
+class MembersDetailsSRoute extends SRoute<SNested> {
   final MembersDetailsNavigator navigator;
 
   MembersDetailsSRoute({
@@ -126,87 +137,67 @@ class MembersDetailsSRoute extends SRoute<NonSPushable> {
 
 // Tabs wrapper
 //
-// Using the navigator implementations directly is ok since this is part of
+// Using the navigator src directly is ok since this is part of
 // the SRouter package anyway, but a DI approach could be used
 //
 // The [chats] global variable is used directly but since it's a global
 // dependency something like a [Provider] should be put on top on [SRouter] and
 // be accessed here (or even in the screens directly)
-class TabsWrapperSRoute extends STabbedRoute<MyTab, SPushable> {
-  static final initialTabSRoutes = {
-    MyTab.left: ChatsListSRoute(
-      navigator: ChatsListNavigatorImplementation(),
-      chats: chats,
-    ),
-    MyTab.middle: StackedChatsSRoute(
-      navigator: ChatNavigatorImplementation(),
-    ),
-    MyTab.right: MembersDetailsSRoute(
-      navigator: MembersDetailsNavigatorImplementation(),
-    ),
-  };
-
+class TabsWrapperSRoute extends S3TabsRoute<NotSNested> {
   final bool showMemberDetails;
   final bool maybeShowLeftTab;
-  final List<Chat> selectedChats;
 
-  TabsWrapperSRoute({
-    SRouteInterface<NonSPushable>? tabLeftRoute,
-    required this.showMemberDetails,
-    required this.selectedChats,
-    required this.maybeShowLeftTab,
-  }) : super(
-          sTabs: {
-            MyTab.left: STab(
-              (tab) => tabLeftRoute ?? tab,
-              initialSRoute: initialTabSRoutes[MyTab.left]!,
-            ),
-            MyTab.middle: STab.static(initialTabSRoutes[MyTab.middle]!),
-            MyTab.right: STab.static(initialTabSRoutes[MyTab.right]!),
-          },
-        );
+  TabsWrapperSRoute(
+    StateBuilder<S3TabsState> stateBuilder, {
+    this.showMemberDetails = false,
+    this.maybeShowLeftTab = false,
+  }) : super(stateBuilder);
 
   factory TabsWrapperSRoute.from(
     BuildContext context, {
     bool? showMemberDetails,
     bool? maybeShowLeftTab,
     List<Chat>? selectedChats,
-    SRouteInterface<NonSPushable>? tabLeftRoute,
+    SRouteBase<SNested>? tabLeftRoute,
   }) {
     final previousState = context.read<TabsWrapperScreenState?>();
 
     return TabsWrapperSRoute(
-      tabLeftRoute: tabLeftRoute,
+      (state) => state.copyWith(
+        tab1SRoute: tabLeftRoute,
+        tab2SRoute: StackedChatsSRoute(
+          navigator: ChatNavigatorImplementation(),
+          chats: selectedChats ?? previousState?.widget.chats ?? [chats.first],
+        ),
+      ),
       showMemberDetails: showMemberDetails ?? previousState?.widget.showMemberDetails ?? false,
       maybeShowLeftTab: maybeShowLeftTab ?? previousState?.widget.maybeShowLeftTab ?? false,
-      selectedChats: selectedChats ?? previousState?.widget.selectedChats ?? [chats.first],
     );
   }
 
   @override
-  MyTab get activeTab => MyTab.middle;
-
-  @override
-  Widget tabsBuilder(BuildContext context, Map<MyTab, Widget> tabs) {
+  Widget build(BuildContext context, S3TabsState state) {
     return TabsWrapperScreen(
-      tabs: tabs,
-      selectedChats: selectedChats,
+      tabs: state.tabs,
+      chats: (state.tab2SRoute as StackedChatsSRoute).chats,
       showMemberDetails: showMemberDetails,
       maybeShowLeftTab: maybeShowLeftTab,
     );
   }
 
   @override
-  STabbedRoute<MyTab, SPushable>? onTabPop(
-    BuildContext context,
-    SRouteInterface<NonSPushable> activeTabSRouteBellow,
-  ) {
-    final selectedChats = context.read<TabsWrapperScreenState>().widget.selectedChats;
-
-    return TabsWrapperSRoute(
-      selectedChats: selectedChats.sublist(0, selectedChats.length - 1),
-      showMemberDetails: showMemberDetails,
-      maybeShowLeftTab: maybeShowLeftTab,
-    );
-  }
+  S3TabsState get initialState => S3TabsState(
+        activeIndex: 1,
+        tab1SRoute: ChatsListSRoute(
+          navigator: ChatsListNavigatorImplementation(),
+          chats: chats,
+        ),
+        tab2SRoute: StackedChatsSRoute(
+          navigator: ChatNavigatorImplementation(),
+          chats: [chats.first],
+        ),
+        tab3SRoute: MembersDetailsSRoute(
+          navigator: MembersDetailsNavigatorImplementation(),
+        ),
+      );
 }

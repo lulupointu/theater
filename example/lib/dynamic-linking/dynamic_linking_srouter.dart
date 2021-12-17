@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/s_route_interface.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
@@ -42,15 +41,14 @@ class _WishlistAppState extends State<WishlistApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Books App',
       home: SRouter(
         initialRoute: WishlistListSRoute(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
-          SPathTranslator<WishlistListSRoute, SPushable>(
+          SPathTranslator<WishlistListSRoute, NotSNested>(
             path: '/',
             route: WishlistListSRoute(wishlists: wishlists, toWishlist: toWishlist),
           ),
-          SPathTranslator<WishlistSRoute, SPushable>.parse(
+          SPathTranslator<WishlistSRoute, NotSNested>.parse(
             path: '/wishlist/:id',
             matchToRoute: (match) {
               final wishlist = Wishlist(match.pathParams['id']!);
@@ -70,7 +68,7 @@ class _WishlistAppState extends State<WishlistApp> {
   }
 }
 
-class WishlistListSRoute extends SRoute<SPushable> {
+class WishlistListSRoute extends SRoute<NotSNested> {
   final List<Wishlist> wishlists;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
 
@@ -82,7 +80,7 @@ class WishlistListSRoute extends SRoute<SPushable> {
   }
 }
 
-class WishlistSRoute extends SRoute<SPushable> {
+class WishlistSRoute extends SRoute<NotSNested> {
   final List<Wishlist> wishlists;
   final Wishlist wishlist;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
@@ -93,7 +91,7 @@ class WishlistSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => WishlistScreen(wishlist: wishlist);
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
     return WishlistListSRoute(wishlists: wishlists, toWishlist: toWishlist);
   }
 }

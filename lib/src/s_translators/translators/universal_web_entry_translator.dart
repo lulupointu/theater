@@ -2,11 +2,12 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../browser/s_browser.dart';
-import '../../route/pushables/pushables.dart';
-import '../../route/s_route_interface.dart';
+import '../../browser/web_entry.dart';
+import '../../routes/framework.dart';
+import '../../routes/s_nested.dart';
 import '../../s_router/s_history_entry.dart';
 import '../../s_router/s_router.dart';
-import '../../web_entry/web_entry.dart';
+import '../s_route_translator.dart';
 import '../s_translator.dart';
 
 /// This [STranslator] will
@@ -19,7 +20,7 @@ import '../s_translator.dart';
 /// This should be used on mobile at the bottom of the [translator] so that if
 /// a [SRouter] navigates somewhere, the response of other [SRouter]s will be
 /// to re-render the same route
-class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, SPushable> {
+class UniversalNonWebTranslator extends SRouteTranslator<SRouteBase<NotSNested>, NotSNested> {
   /// This is a trick to please our assert which checks that the generic type
   /// of [STranslator] is available at runtime
   ///
@@ -28,7 +29,7 @@ class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, 
   Type get routeType => dynamic;
 
   /// The initial [SRoute] to display when the [SRouter] is initialized
-  final SRouteInterface<SPushable> initialRoute;
+  final SRouteBase<NotSNested> initialRoute;
 
   /// The history of the [SRouterState] associating history indexes to
   /// [SHistoryEntry]
@@ -38,14 +39,14 @@ class UniversalNonWebTranslator extends STranslator<SRouteInterface<SPushable>, 
   UniversalNonWebTranslator({required this.initialRoute, required this.history});
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, SRouteInterface<SPushable> route) {
+  WebEntry sRouteToWebEntry(BuildContext context, SRouteBase<NotSNested> route) {
     // Use SBrowser directly because the currentWebEntry may not be
     // set at this point
     return SBrowser.instance.webEntry;
   }
 
   @override
-  SRouteInterface<SPushable> webEntryToSRoute(BuildContext context, WebEntry webEntry) {
+  SRouteBase<NotSNested> webEntryToSRoute(BuildContext context, WebEntry webEntry) {
     final currentHistoryIndex = SBrowser.instance.historyIndex;
 
     // Try to return the current route

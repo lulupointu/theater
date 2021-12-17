@@ -3,9 +3,9 @@ import 'dart:html' as html;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import '../../../web_entry/web_entry.dart';
 import '../../s_browser.dart';
 import '../../s_url_strategy.dart';
+import '../../web_entry.dart';
 
 /// A web implementation of [SBrowserInterface]
 ///

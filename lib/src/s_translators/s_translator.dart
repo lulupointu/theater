@@ -1,27 +1,27 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../route/pushables/pushables.dart';
-import '../route/s_route_interface.dart';
-import '../web_entry/web_entry.dart';
+import '../browser/web_entry.dart';
+import '../routes/framework.dart';
+import '../routes/s_nested.dart';
 
 /// A class used to interact with the web url
 ///
 /// This class has three goals:
 ///   1. Define which type of url can access this translator
-///   2. Convert the url to a [SRoute]
-///   3. Convert the [SRoute] to a url
+///   2. Convert the url to a [SRouteBase]
+///   3. Convert the [SElement] to a url
 ///
-/// It uses the [Route] type to determine if it is its role to convert a given
-/// [SRouteInterface] to a [WebEntry]
+/// It uses the [Element] type to determine if it is its role to convert a given
+/// [SElement] to a [WebEntry]
 ///
 ///
 /// Prefer extending this class since the [routeType] type should usually keep
-/// its default value ([Route])
+/// its default value ([Element])
 @immutable
-abstract class STranslator<Route extends SRouteInterface<P>, P extends MaybeSPushable> {
+abstract class STranslator<Element extends SElement<N>, Route extends SRouteBase<N>,
+    N extends MaybeSNested> {
   /// This constructor checks that the [Route] generic (stored in [routeType])
-  /// is resolved at runtime (i.e. that it is NOT [SRoute] but the
+  /// is resolved at runtime (i.e. that it is NOT [SRouteBase] but the
   /// name of a route class you created)
   ///
   ///
@@ -35,9 +35,9 @@ abstract class STranslator<Route extends SRouteInterface<P>, P extends MaybeSPus
   /// ```
   STranslator() {
     assert(() {
-      if (routeType == SRouteInterface) {
+      if (routeType == SRouteBase) {
         final translatorType =
-            runtimeType.toString().replaceFirst('<SRouteInterface<dynamic>>', '');
+            runtimeType.toString().replaceFirst('<SRouteBase<dynamic>>', '');
         print('''\x1B[31m
 The [SRoute] type of $runtimeType could not be resolved.
 
@@ -57,10 +57,11 @@ $translatorType(...)
     }());
   }
 
-  /// This attributes describe which [SRoute] is associated with this
+  /// This attributes describe which [SElement] is associated with this
   /// [STranslator] :
-  ///   - When this [SRoute] is pushed in [SRouter], the translator with which
-  ///   ^ is is associated will be used to convert it to a [WebEntry]
+  ///   - When this [SRouteBase] associated with this [SElement] is pushed in
+  ///   ^ [SRouter], the translator with which is is associated will be used to
+  ///   ^ convert it to a [WebEntry]
   ///   - When a [WebEntry] matches this translator, it is this translator job
   ///   ^ to convert it to an [SRoute] instance
   ///
@@ -73,15 +74,15 @@ $translatorType(...)
   ///
   ///
   /// It must be resolved at runtime, this means that if its value is
-  /// [SRouteInterface<MaybeSPushable>], an assertion error will be raised.
+  /// [SRouteBase<MaybeSNested>], an assertion error will be raised.
   /// We impose this constraint so that developers don't forget to specify the
   /// generic type (i.e. use STranslator<MySRoute, ...>(), NOT STranslator())
   /// This is checked by the assert in this class' constructor
   final Type routeType = Route;
 
-  /// Converts the associated [SRoute] into a string representing
+  /// Converts the associated [SElement] and [SRoute] into a string representing
   /// the url
-  WebEntry sRouteToWebEntry(BuildContext context, Route route);
+  WebEntry sElementToWebEntry(BuildContext context, Element element, Route sRoute);
 
   /// Converts the given url into the associated [SRoute]
   ///

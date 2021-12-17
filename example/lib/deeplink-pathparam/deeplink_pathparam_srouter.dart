@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/s_route_interface.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
@@ -29,15 +28,14 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Books App',
       home: SRouter(
         initialRoute: BooksListScreenSRoute(books: _books),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListScreenSRoute, SPushable>(
+          SPathTranslator<BooksListScreenSRoute, NotSNested>(
             path: '/',
             route: BooksListScreenSRoute(books: _books),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
+          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
             path: '/book/:id',
             matchToRoute: (match) => BookDetailsSRoute(
               books: _books,
@@ -52,7 +50,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListScreenSRoute extends SRoute<SPushable> {
+class BooksListScreenSRoute extends SRoute<NotSNested> {
   final List<Book> books;
 
   BooksListScreenSRoute({required this.books});
@@ -61,7 +59,7 @@ class BooksListScreenSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => BooksListScreen(books: books);
 }
 
-class BookDetailsSRoute extends SRoute<SPushable> {
+class BookDetailsSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final int selectedBook;
 
@@ -74,7 +72,7 @@ class BookDetailsSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => BookDetailsScreen(book: books[selectedBook]);
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) =>
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) =>
       BooksListScreenSRoute(books: books);
 }
 

@@ -10,7 +10,7 @@
 /// user manually types in a new url within your website:
 ///   - If you are using [SUrlStrategy.hash], the application will update
 ///   - If you are using [SUrlStrategy.history], the browser will fetch your
-///   ^ application from your server, which will cause it to restart entirely
+///     application from your server, which will cause it to restart entirely
 /// Both will result in the same outcome, the second will simply be slower due
 /// to the app having to be re-fetched from your server
 /// This is the only difference I know (apart from the presence/absence of the #
@@ -24,6 +24,6 @@ enum SUrlStrategy {
   /// Follow the instructions here: [https://router.vuejs.org/guide/essentials/history-mode.html#example-server-configurations]
   ///
   ///
-  /// DO read the IMPORTANT CONSIDERATION above before choosing this option
+  /// DO read the "IMPORTANT CONSIDERATION" above before choosing this option
   history,
 }

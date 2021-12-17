@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
-import '../../../web_entry/web_entry.dart';
 import '../../s_browser.dart';
 import '../../s_url_strategy.dart';
+import '../../web_entry.dart';
 
 /// A non web implementation of [SBrowserInterface]
 ///

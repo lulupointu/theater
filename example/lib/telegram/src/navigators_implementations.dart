@@ -40,7 +40,10 @@ class SettingsNavigatorImplementation implements SettingsNavigator {
     context.sRouter.to(
       TabsWrapperSRoute.from(
         context,
-        tabLeftRoute: TabsWrapperSRoute.initialTabSRoutes[MyTab.left],
+        tabLeftRoute: ChatsListSRoute(
+          navigator: ChatsListNavigatorImplementation(),
+          chats: chats,
+        ),
       ),
       isReplacement: true,
     );
@@ -67,7 +70,7 @@ class ChatNavigatorImplementation implements ChatNavigator {
     BuildContext context, {
     required Contact contact,
   }) {
-    var selectedChats = context.read<TabsWrapperScreenState>().widget.selectedChats;
+    var selectedChats = context.read<TabsWrapperScreenState>().widget.chats;
     final newChat = chats.firstWhere(
       (element) => element.members.length == 1 && element.members.first == contact,
     );
@@ -101,7 +104,7 @@ class MembersDetailsNavigatorImplementation implements MembersDetailsNavigator {
     BuildContext context, {
     required Contact contact,
   }) {
-    var selectedChats = context.read<TabsWrapperScreenState>().widget.selectedChats;
+    var selectedChats = context.read<TabsWrapperScreenState>().widget.chats;
     final newChat = chats.firstWhere(
       (element) => element.members.length == 1 && element.members.first == contact,
     );

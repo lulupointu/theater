@@ -3,7 +3,7 @@ import 'package:srouter/srouter.dart';
 
 import 'multi_stack_srouter.dart';
 
-class SettingsSRoute extends SRoute<SPushable> {
+class SettingsSRoute extends SRoute<NotSNested> {
   final TabItem tabItem;
 
   SettingsSRoute({required this.tabItem});
@@ -20,86 +20,41 @@ class SettingsSRoute extends SRoute<SPushable> {
   _withCapitalLetter(String word) => word[0].toUpperCase() + word.substring(1);
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) {
-    return AppSRoute(activeTab: tabItem);
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
+    return AppSRoute(
+      (state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem)),
+    );
   }
 }
 
-class AppSRoute extends STabbedRoute<TabItem, SPushable> {
-  static final initialTabsRoute = {
-    TabItem.red: RedListSRoute(),
-    TabItem.green: GreenListSRoute(),
-    TabItem.blue: BlueListSRoute(),
-  };
+class AppSRoute extends S2TabsRoute<NotSNested> {
+  AppSRoute(StateBuilder<S2TabsState> stateBuilder) : super(stateBuilder);
 
-  AppSRoute({
-    required this.activeTab,
-    SRouteInterface<NonSPushable>? tabRedRoute,
-    SRouteInterface<NonSPushable>? tabGreenRoute,
-    SRouteInterface<NonSPushable>? tabBlueRoute,
-  }) : super(
-          sTabs: {
-            TabItem.red: STab(
-              (tab) => tabRedRoute ?? tab,
-              initialSRoute: initialTabsRoute[TabItem.red]!,
-            ),
-            TabItem.green: STab(
-              (tab) => tabGreenRoute ?? tab,
-              initialSRoute: initialTabsRoute[TabItem.green]!,
-            ),
-            TabItem.blue: STab(
-              (tab) => tabBlueRoute ?? tab,
-              initialSRoute: initialTabsRoute[TabItem.blue]!,
-            ),
-          },
-        );
-
-  // This factory is used in [onTabPop] and may used in the [STabbedTranslator]
-  factory AppSRoute.toTab({
-    required TabItem activeTab,
-    SRouteInterface<NonSPushable>? newTabRoute,
-  }) {
-    return AppSRoute(
-      activeTab: activeTab,
-      tabRedRoute: activeTab == TabItem.red ? newTabRoute : null,
-      tabGreenRoute: activeTab == TabItem.green ? newTabRoute : null,
-      tabBlueRoute: activeTab == TabItem.blue ? newTabRoute : null,
+  @override
+  Widget build(BuildContext context, S2TabsState state) {
+    return App(
+      activeTab: TabItem.values[state.activeIndex],
+      tabs: {TabItem.red: state.tabs[0], TabItem.green: state.tabs[1]},
     );
   }
 
   @override
-  final TabItem activeTab;
-
-  @override
-  Widget tabsBuilder(BuildContext context, Map<TabItem, Widget> tabs) {
-    return App(activeTab: activeTab, tabs: tabs);
-  }
-
-  @override
-  STabbedRoute<TabItem, SPushable>? onTabPop(
-    BuildContext context,
-    SRouteInterface<NonSPushable> activeTabSRouteBellow,
-  ) {
-    return AppSRoute.toTab(
-      activeTab: activeTab,
-      newTabRoute: activeTabSRouteBellow,
-    );
-  }
+  S2TabsState get initialState => S2TabsState(
+        activeIndex: 0,
+        tab1SRoute: RedListSRoute(),
+        tab2SRoute: GreenListSRoute(),
+      );
 }
 
 class RedListSRoute extends ColoredListSRoute {
   RedListSRoute() : super(TabItem.red);
 }
 
-class BlueListSRoute extends ColoredListSRoute {
-  BlueListSRoute() : super(TabItem.blue);
-}
-
 class GreenListSRoute extends ColoredListSRoute {
   GreenListSRoute() : super(TabItem.green);
 }
 
-abstract class ColoredListSRoute extends SRoute<NonSPushable> {
+abstract class ColoredListSRoute extends SRoute<SNested> {
   final TabItem tabItem;
 
   ColoredListSRoute(this.tabItem);
@@ -111,23 +66,18 @@ abstract class ColoredListSRoute extends SRoute<NonSPushable> {
       color: activeTabColor[tabItem]!,
       title: tabName[tabItem]!,
       onPush: (materialIndex) => context.sRouter.to(
-        AppSRoute.toTab(
-          activeTab: tabItem,
-          newTabRoute: _detailSRoute(tabItem: tabItem, materialIndex: materialIndex),
+        AppSRoute(
+          (state) => state.copyWith(
+            activeIndex: TabItem.values.indexOf(tabItem),
+            tab1SRoute:
+                tabItem == TabItem.red ? RedDetailSRoute(materialIndex: materialIndex) : null,
+            tab2SRoute: tabItem == TabItem.green
+                ? GreenDetailSRoute(materialIndex: materialIndex)
+                : null,
+          ),
         ),
       ),
     );
-  }
-
-  _detailSRoute({required TabItem tabItem, required int materialIndex}) {
-    switch (tabItem) {
-      case TabItem.red:
-        return RedDetailSRoute(materialIndex: materialIndex);
-      case TabItem.green:
-        return GreenDetailSRoute(materialIndex: materialIndex);
-      case TabItem.blue:
-        return BlueDetailSRoute(materialIndex: materialIndex);
-    }
   }
 }
 
@@ -137,19 +87,13 @@ class RedDetailSRoute extends ColoredDetailSRoute {
   RedDetailSRoute({required this.materialIndex}) : super(TabItem.red);
 }
 
-class BlueDetailSRoute extends ColoredDetailSRoute {
-  final int materialIndex;
-
-  BlueDetailSRoute({required this.materialIndex}) : super(TabItem.blue);
-}
-
 class GreenDetailSRoute extends ColoredDetailSRoute {
   final int materialIndex;
 
   GreenDetailSRoute({required this.materialIndex}) : super(TabItem.green);
 }
 
-abstract class ColoredDetailSRoute extends SRoute<NonSPushable> {
+abstract class ColoredDetailSRoute extends SRoute<SNested> {
   int get materialIndex;
 
   final TabItem tabItem;
@@ -167,14 +111,12 @@ abstract class ColoredDetailSRoute extends SRoute<NonSPushable> {
   }
 
   @override
-  SRouteInterface<NonSPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<SNested>? createSRouteBellow(BuildContext context) {
     switch (tabItem) {
       case TabItem.red:
         return RedListSRoute();
       case TabItem.green:
         return GreenListSRoute();
-      case TabItem.blue:
-        return BlueListSRoute();
     }
   }
 }

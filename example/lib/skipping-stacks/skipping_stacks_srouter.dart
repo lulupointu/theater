@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/s_route_interface.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
@@ -60,15 +59,14 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Books App',
       home: SRouter(
         initialRoute: BooksListSRoute(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, SPushable>(
+          SPathTranslator<BooksListSRoute, NotSNested>(
             path: '/',
             route: BooksListSRoute(books: books, toBook: toBook),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
+          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
             path: '/book/:id',
             matchToRoute: (match) => BookDetailsSRoute(
               books: books,
@@ -79,11 +77,11 @@ class BooksApp extends StatelessWidget {
             routeToWebEntry: (route) =>
                 WebEntry(path: '/book/${route.books.indexOf(route.book)}'),
           ),
-          SPathTranslator<AuthorsListSRoute, SPushable>(
+          SPathTranslator<AuthorsListSRoute, NotSNested>(
             path: '/authors',
             route: AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
-          SPathTranslator<AuthorDetailsSRoute, SPushable>.parse(
+          SPathTranslator<AuthorDetailsSRoute, NotSNested>.parse(
             path: '/author/:id',
             matchToRoute: (match) => AuthorDetailsSRoute(
               authors: authors,
@@ -101,7 +99,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListSRoute extends SRoute<SPushable> {
+class BooksListSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final void Function(BuildContext context, Book book) toBook;
 
@@ -111,7 +109,7 @@ class BooksListSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => BooksListScreen(books: books, toBook: toBook);
 }
 
-class BookDetailsSRoute extends SRoute<SPushable> {
+class BookDetailsSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final Book book;
   final void Function(BuildContext context, Author author) toAuthor;
@@ -130,12 +128,12 @@ class BookDetailsSRoute extends SRoute<SPushable> {
   }
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
     return BooksListSRoute(books: books, toBook: toBook);
   }
 }
 
-class AuthorsListSRoute extends SRoute<SPushable> {
+class AuthorsListSRoute extends SRoute<NotSNested> {
   final List<Author> authors;
   final void Function(BuildContext context, Author author) toAuthor;
   final void Function(BuildContext context) toBooks;
@@ -152,7 +150,7 @@ class AuthorsListSRoute extends SRoute<SPushable> {
   }
 }
 
-class AuthorDetailsSRoute extends SRoute<SPushable> {
+class AuthorDetailsSRoute extends SRoute<NotSNested> {
   final List<Author> authors;
   final Author author;
   final void Function(BuildContext context, Author author) toAuthor;
@@ -169,7 +167,7 @@ class AuthorDetailsSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => AuthorDetailsScreen(author: author);
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext _) {
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext _) {
     return AuthorsListSRoute(authors: authors, toAuthor: toAuthor, toBooks: toBooks);
   }
 }

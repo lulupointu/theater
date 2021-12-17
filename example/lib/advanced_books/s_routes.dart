@@ -3,14 +3,14 @@ import 'package:srouter/srouter.dart';
 
 import 'advanced_books_srouter.dart';
 
-class HomeSRoute extends SRoute<SPushable> {
+class HomeSRoute extends SRoute<NotSNested> {
   @override
   Widget build(BuildContext context) {
     return HomeScreen();
   }
 }
 
-class BooksSRoute extends SRoute<SPushable> {
+class BooksSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final String? searchedGenre;
   final String? searchedName;
@@ -37,12 +37,12 @@ class BooksSRoute extends SRoute<SPushable> {
   }
 
   @override
-  SRouteInterface<SPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
     return HomeSRoute();
   }
 }
 
-class BookDetailsSRoute extends SRoute<SPushable> {
+class BookDetailsSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final Book book;
   final String title;
@@ -55,12 +55,12 @@ class BookDetailsSRoute extends SRoute<SPushable> {
   }
 
   @override
-  SRouteInterface<SPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
     return BooksSRoute(books: books);
   }
 }
 
-class BookBuySRoute extends SRoute<SPushable> {
+class BookBuySRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final Book book;
   final String title;
@@ -73,12 +73,12 @@ class BookBuySRoute extends SRoute<SPushable> {
   }
 
   @override
-  SRouteInterface<SPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
     return BookDetailsSRoute(books: books, book: book);
   }
 }
 
-class BookGenresSRoute extends SRoute<SPushable> {
+class BookGenresSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final Book book;
   final String title;
@@ -92,7 +92,7 @@ class BookGenresSRoute extends SRoute<SPushable> {
   }
 
   @override
-  SRouteInterface<SPushable>? buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested>? createSRouteBellow(BuildContext context) {
     return BookDetailsSRoute(books: books, book: book);
   }
 }

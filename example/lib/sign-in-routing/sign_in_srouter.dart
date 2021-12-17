@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/s_route_interface.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
@@ -75,18 +74,17 @@ class _BooksAppState extends State<BooksApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Books App',
       home: SRouter(
         initialRoute: SignInSRoute(onSignedIn: authState.signIn),
         builder: (_, child) => AuthStateUpdateHandler(child: child, authState: authState),
         translatorsBuilder: (_) => [
           ...authState.isSignedIn
               ? [
-                  SPathTranslator<HomeSRoute, SPushable>(
+                  SPathTranslator<HomeSRoute, NotSNested>(
                     path: '/',
                     route: HomeSRoute(onSignOut: authState.signOut),
                   ),
-                  SPathTranslator<BooksListSRoute, SPushable>(
+                  SPathTranslator<BooksListSRoute, NotSNested>(
                     path: '/books',
                     route: BooksListSRoute(onSignOut: authState.signOut),
                   ),
@@ -96,7 +94,7 @@ class _BooksAppState extends State<BooksApp> {
                   ),
                 ]
               : [
-                  SPathTranslator<SignInSRoute, SPushable>(
+                  SPathTranslator<SignInSRoute, NotSNested>(
                     path: '/signin',
                     route: SignInSRoute(onSignedIn: authState.signIn),
                   ),
@@ -146,7 +144,7 @@ class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class HomeSRoute extends SRoute<SPushable> {
+class HomeSRoute extends SRoute<NotSNested> {
   final VoidCallback onSignOut;
 
   HomeSRoute({required this.onSignOut});
@@ -155,7 +153,7 @@ class HomeSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => HomeScreen(onSignOut: onSignOut);
 }
 
-class SignInSRoute extends SRoute<SPushable> {
+class SignInSRoute extends SRoute<NotSNested> {
   final ValueChanged<Credentials> onSignedIn;
 
   SignInSRoute({required this.onSignedIn});
@@ -164,7 +162,7 @@ class SignInSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => SignInScreen(onSignedIn: onSignedIn);
 }
 
-class BooksListSRoute extends SRoute<SPushable> {
+class BooksListSRoute extends SRoute<NotSNested> {
   final VoidCallback onSignOut;
 
   BooksListSRoute({required this.onSignOut});
@@ -173,7 +171,7 @@ class BooksListSRoute extends SRoute<SPushable> {
   Widget build(BuildContext context) => BooksListScreen();
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) =>
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) =>
       HomeSRoute(onSignOut: onSignOut);
 }
 

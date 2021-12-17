@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:srouter/src/route/s_route_interface.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
@@ -19,8 +18,8 @@ class MyApp extends StatelessWidget {
       home: SRouter(
         initialRoute: LogInSRoute(),
         translatorsBuilder: (_) => [
-          SPathTranslator<LogInSRoute, SPushable>(path: '/', route: LogInSRoute()),
-          SPathTranslator<MainSRoute, SPushable>.parse(
+          SPathTranslator<LogInSRoute, NotSNested>(path: '/', route: LogInSRoute()),
+          SPathTranslator<MainSRoute, NotSNested>.parse(
             path: '*',
             matchToRoute: (_) => MainSRoute(),
             routeToWebEntry: (_) => WebEntry(path: '/user/0'),
@@ -31,17 +30,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LogInSRoute extends SRoute<SPushable> {
+class LogInSRoute extends SRoute<NotSNested> {
   @override
   Widget build(BuildContext context) => LoginScreen();
 }
 
-class MainSRoute extends SRoute<SPushable> {
+class MainSRoute extends SRoute<NotSNested> {
   @override
   Widget build(BuildContext context) => MainScreen();
 
   @override
-  SRouteInterface<SPushable> buildSRouteBellow(BuildContext context) {
+  SRouteBase<NotSNested> createSRouteBellow(BuildContext context) {
     return LogInSRoute();
   }
 }
@@ -50,7 +49,7 @@ abstract class SRouteWithUserId {
   String get userId;
 }
 
-class UserSRoute extends SRoute<SPushable> implements SRouteWithUserId {
+class UserSRoute extends SRoute<NotSNested> implements SRouteWithUserId {
   final String userId;
 
   UserSRoute({required this.userId});
@@ -59,7 +58,7 @@ class UserSRoute extends SRoute<SPushable> implements SRouteWithUserId {
   Widget build(BuildContext context) => UserScreen(userId: userId);
 }
 
-class SettingsSRoute extends SRoute<SPushable> implements SRouteWithUserId {
+class SettingsSRoute extends SRoute<NotSNested> implements SRouteWithUserId {
   final String userId;
 
   SettingsSRoute({required this.userId});
@@ -88,12 +87,12 @@ class MainScreen extends StatelessWidget {
     return SRouter(
       initialRoute: UserSRoute(userId: '0'),
       translatorsBuilder: (_) => [
-        SPathTranslator<UserSRoute, SPushable>.parse(
+        SPathTranslator<UserSRoute, NotSNested>.parse(
           path: '/user/:id',
           matchToRoute: (match) => UserSRoute(userId: match.pathParams['id']!),
           routeToWebEntry: (route) => WebEntry(path: 'user/${route.userId}'),
         ),
-        SPathTranslator<SettingsSRoute, SPushable>.parse(
+        SPathTranslator<SettingsSRoute, NotSNested>.parse(
           path: '/settings',
           matchToRoute: (match) => SettingsSRoute(userId: match.historyState['id'] ?? '0'),
           routeToWebEntry: (route) =>

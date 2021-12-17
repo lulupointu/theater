@@ -28,7 +28,6 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Books App',
       home: SRouter(
         initialRoute: BooksListSRoute(
           books: books,
@@ -36,7 +35,7 @@ class BooksApp extends StatelessWidget {
           filter: null,
         ),
         translatorsBuilder: (_) => [
-          SPathTranslator<BooksListSRoute, SPushable>.parse(
+          SPathTranslator<BooksListSRoute, NotSNested>.parse(
             path: '/',
             matchToRoute: (match) => BooksListSRoute(
               books: books,
@@ -62,7 +61,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListSRoute extends SRoute<SPushable> {
+class BooksListSRoute extends SRoute<NotSNested> {
   final List<Book> books;
   final String? filter;
   final void Function(BuildContext context, String filter) onFilterChanged;

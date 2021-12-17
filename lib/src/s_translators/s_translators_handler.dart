@@ -1,18 +1,17 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../route/pushables/pushables.dart';
-import '../route/s_route_interface.dart';
-import '../web_entry/web_entry.dart';
+import '../browser/web_entry.dart';
+import '../routes/framework.dart';
+import '../routes/s_nested.dart';
 import 's_translator.dart';
 
 /// This will use the given [STranslator]s to convert a web entry
 /// to a [SRoute] and vise versa
 @immutable
-class STranslatorsHandler<P extends MaybeSPushable> {
+class STranslatorsHandler<N extends MaybeSNested> {
   /// The list of [STranslator]s which will be used to convert a web
   /// to a [SRoute] and vise versa
-  final List<STranslator<SRouteInterface<P>, P>> translators;
+  final List<STranslator<SElement<N>, SRouteBase<N>, N>> translators;
 
   // ignore: public_member_api_docs
   const STranslatorsHandler({required this.translators});
@@ -21,7 +20,7 @@ class STranslatorsHandler<P extends MaybeSPushable> {
   ///
   ///
   /// If no translator returns a route from the [webEntry], return null
-  SRouteInterface<P>? getRouteFromWebEntry(BuildContext context, WebEntry webEntry) {
+  SRouteBase<N>? getRouteFromWebEntry(BuildContext context, WebEntry webEntry) {
     // We search which translator from [translators] returns a [SRoute]
     // considering the given web entry
     for (var translator in translators) {
@@ -40,9 +39,9 @@ class STranslatorsHandler<P extends MaybeSPushable> {
   ///
   ///
   /// If no translator can translate the route to a web entry, return null
-  WebEntry? getWebEntryFromRoute<R extends SRouteInterface<P>>(
+  WebEntry? getWebEntryFromSElement<Element extends SElement<N>, Route extends SRouteBase<N>>(
     BuildContext context,
-    R route,
+    Element sElement,
   ) {
     // We explicitly allow [dynamic] so that a route can implement matching
     // everything (on mobile with [UniversalWebEntryMatcherTranslator] for
@@ -51,7 +50,8 @@ class STranslatorsHandler<P extends MaybeSPushable> {
     // If there is no match, return null
     if (!translators.any(
       (translator) =>
-          translator.routeType == route.runtimeType || translator.routeType == dynamic,
+          translator.routeType == sElement.sWidget.sRoute.runtimeType ||
+          translator.routeType == dynamic,
     )) {
       return null;
     }
@@ -64,9 +64,14 @@ class STranslatorsHandler<P extends MaybeSPushable> {
     // example)
     final translator = translators.firstWhere(
       (translator) =>
-          translator.routeType == route.runtimeType || translator.routeType == dynamic,
+          translator.routeType == sElement.sWidget.sRoute.runtimeType ||
+          translator.routeType == dynamic,
     );
 
-    return translator.sRouteToWebEntry(context, route);
+    return translator.sElementToWebEntry(
+      context,
+      sElement,
+      sElement.sWidget.sRoute as Route,
+    );
   }
 }

@@ -38,7 +38,7 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += 'implementations/main/kotlin'
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {

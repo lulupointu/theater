@@ -1,16 +1,15 @@
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../route/pushables/pushables.dart';
-import '../../route/s_route_interface.dart';
+import '../../browser/web_entry.dart';
+import '../../routes/framework.dart';
+import '../../routes/s_nested.dart';
 import '../../s_router/s_router.dart';
-import '../../web_entry/web_entry.dart';
-import '../s_translator.dart';
+import '../s_route_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// A translator which can be used to redirect from a [path] to a [SRoute]
-class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPushable> {
+class SRedirectorTranslator<N extends MaybeSNested> extends SRouteTranslator<SRouteBase<N>, N> {
   /// Redirect a static [WebEntry] to a [SRoute]
   ///
   ///
@@ -31,7 +30,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
   ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   SRedirectorTranslator({
     required String path,
-    required SRouteInterface<SPushable> route,
+    required SRouteBase<N> route,
     this.replace = true,
   })  : _matcher = WebEntryMatcher(path: path),
         matchToRoute = ((_, __) => route);
@@ -85,7 +84,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
         );
 
   /// The [SRoute] to redirect to
-  final SRouteInterface<SPushable> Function(BuildContext context, WebEntryMatch match)
+  final SRouteBase<N> Function(BuildContext context, WebEntryMatch match)
       matchToRoute;
 
   /// Whether the path we navigate to should replace the current history entry
@@ -98,7 +97,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
   final WebEntryMatcher _matcher;
 
   @override
-  SRouteInterface<SPushable>? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
+  SRouteBase<N>? webEntryToSRoute(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
     // If the web entry does not match, return null
@@ -106,15 +105,11 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
       return null;
     }
 
-    final destinationSRoute = matchToRoute(context, match);
 
-    // We need to wait one frame since this might be called inside
-    // [SRouter] build phase
-    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
-      SRouter.of(context, listen: false).to(destinationSRoute, isReplacement: replace);
-    });
-
-    return destinationSRoute;
+    // We can redirect the route even if the url is not right since after
+    // [webEntryToSRoute] [sRouteToWebEntry] is always called, meaning that
+    // [match] will be converted into the right url
+    return matchToRoute(context, match);
   }
 
   /// We must override the [routeType] so that this translator is never matched
@@ -123,7 +118,7 @@ class SRedirectorTranslator extends STranslator<SRouteInterface<SPushable>, SPus
   Type get routeType => Null;
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, SRouteInterface route) {
+  WebEntry sRouteToWebEntry(BuildContext context, SRouteBase route) {
     throw 'This should never be called';
   }
 }

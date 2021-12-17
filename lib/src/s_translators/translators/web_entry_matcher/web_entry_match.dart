@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../web_entry/web_entry.dart';
+import '../../../browser/web_entry.dart';
 import 'web_entry_matcher.dart';
 
 /// The class returned by [WebEntryMatcher.match]

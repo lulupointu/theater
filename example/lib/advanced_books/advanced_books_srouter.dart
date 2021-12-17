@@ -17,12 +17,12 @@ class MyApp extends StatelessWidget {
       home: SRouter(
         initialRoute: HomeSRoute(),
         translatorsBuilder: (_) => [
-          SPathTranslator<HomeSRoute, SPushable>(
+          SPathTranslator<HomeSRoute, NotSNested>(
             path: '/',
             route: HomeSRoute(),
             title: 'Home',
           ),
-          SPathTranslator<BooksSRoute, SPushable>.parse(
+          SPathTranslator<BooksSRoute, NotSNested>.parse(
             path: '/books',
             matchToRoute: (match) => BooksSRoute(
               books: books,
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookDetailsSRoute, SPushable>.parse(
+          SPathTranslator<BookDetailsSRoute, NotSNested>.parse(
             path: '/books/:bookId',
             matchToRoute: (match) => BookDetailsSRoute(
               books: books,
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookBuySRoute, SPushable>.parse(
+          SPathTranslator<BookBuySRoute, NotSNested>.parse(
             path: '/books/:bookId/buy',
             matchToRoute: (match) => BookBuySRoute(
               books: books,
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          SPathTranslator<BookGenresSRoute, SPushable>.parse(
+          SPathTranslator<BookGenresSRoute, NotSNested>.parse(
             path: '/books/:bookId/genres',
             matchToRoute: (match) => BookGenresSRoute(
               books: books,

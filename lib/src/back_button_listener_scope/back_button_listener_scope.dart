@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../s_router/s_router.dart';
+
 /// A widget to place at the top of the widget tree
 ///
 ///
@@ -22,31 +24,32 @@ class BackButtonListenerScope extends StatefulWidget {
 }
 
 class _BackButtonListenerScopeState extends State<BackButtonListenerScope> {
-  late BackButtonDispatcher? parentBackButtonDispatcher;
+  late Router _router;
 
   @override
   void didChangeDependencies() {
-    parentBackButtonDispatcher = Router.maybeOf(context)?.backButtonDispatcher;
-    super.didChangeDependencies();
-  }
+    final _parentBackButtonDispatcher = Router.maybeOf(context)?.backButtonDispatcher;
 
-  @override
-  Widget build(BuildContext context) {
-    return Router(
+    _router = Router(
       // Creates the back button dispatcher:
       //  - If there is already a back button dispatcher above, create a
       //  ^ [ChildBackButtonDispatcher]
       //  - If there is no back button dispatcher above, create a
       //  ^ [RootBackButtonDispatcher]
-      backButtonDispatcher: parentBackButtonDispatcher == null
+      backButtonDispatcher: _parentBackButtonDispatcher == null
           ? RootBackButtonDispatcher()
-          : ChildBackButtonDispatcher(parentBackButtonDispatcher!),
+          : ChildBackButtonDispatcher(_parentBackButtonDispatcher),
       // We use a [RouterDelegate] because we don't have the choice but it
       // really does nothing apart from telling [Router] that [widget.child]
       // should be used as a child
-      routerDelegate: _BackButtonListenerScopeRouterDelegate(child: widget.child),
+      routerDelegate: _BackButtonListenerScopeRouterDelegate(builder: () => widget.child),
     );
+
+    super.didChangeDependencies();
   }
+
+  @override
+  Widget build(BuildContext context) => _router;
 }
 
 /// This is a perfectly useless [RouterDelegate] which does nothing apart from
@@ -54,12 +57,20 @@ class _BackButtonListenerScopeState extends State<BackButtonListenerScope> {
 // ignore: prefer_mixin
 class _BackButtonListenerScopeRouterDelegate extends RouterDelegate with ChangeNotifier {
   /// The child of [BackButtonListenerScope]
-  final Widget child;
+  ///
+  ///
+  /// We need a builder otherwise we won't have the right child
+  final Widget Function() builder;
 
-  _BackButtonListenerScopeRouterDelegate({required this.child});
+  _BackButtonListenerScopeRouterDelegate({required this.builder});
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(BuildContext context) {
+    // Rebuild each time SRouter updates
+    SRouter.of(context,listen: true);
+
+    return builder();
+  }
 
   // Never handle the request here
   @override

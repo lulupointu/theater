@@ -7,6 +7,6 @@
     <!-- <item>
         <bitmap
             android:gravity="center"
-            android:implementations="@mipmap/launch_image" />
+            android:src="@mipmap/launch_image" />
     </item> -->
 </layer-list>
