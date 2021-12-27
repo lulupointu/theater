@@ -11,29 +11,29 @@ class Multi4TabsState extends MultiTabState {
   /// {@macro srouter.framework.STabsState.constructor}
   Multi4TabsState({
     required this.activeIndex,
-    required this.tab1SRoute,
-    required this.tab2SRoute,
-    required this.tab3SRoute,
-    required this.tab4SRoute,
+    required this.tab1PageStack,
+    required this.tab2PageStack,
+    required this.tab3PageStack,
+    required this.tab4PageStack,
   }) : super(
           activeIndex: activeIndex,
-          tabsPageStacks: [tab1SRoute, tab2SRoute, tab3SRoute, tab4SRoute].lock,
+          tabsPageStacks: [tab1PageStack, tab2PageStack, tab3PageStack, tab4PageStack].lock,
         );
 
   @override
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1SRoute;
+  final PageStackBase<NestedStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2SRoute;
+  final PageStackBase<NestedStack> tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3SRoute;
+  final PageStackBase<NestedStack> tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase<NestedStack> tab4SRoute;
+  final PageStackBase<NestedStack> tab4PageStack;
 
   /// A list of 4 widgets, one for each tab
   ///
@@ -48,17 +48,17 @@ class Multi4TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi4TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1SRoute,
-    PageStackBase<NestedStack>? tab2SRoute,
-    PageStackBase<NestedStack>? tab3SRoute,
-    PageStackBase<NestedStack>? tab4SRoute,
+    PageStackBase<NestedStack>? tab1PageStack,
+    PageStackBase<NestedStack>? tab2PageStack,
+    PageStackBase<NestedStack>? tab3PageStack,
+    PageStackBase<NestedStack>? tab4PageStack,
   }) {
     return Multi4TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
-      tab1SRoute: tab1SRoute ?? this.tab1SRoute,
-      tab2SRoute: tab2SRoute ?? this.tab2SRoute,
-      tab3SRoute: tab3SRoute ?? this.tab3SRoute,
-      tab4SRoute: tab4SRoute ?? this.tab4SRoute,
+      tab1PageStack: tab1PageStack ?? this.tab1PageStack,
+      tab2PageStack: tab2PageStack ?? this.tab2PageStack,
+      tab3PageStack: tab3PageStack ?? this.tab3PageStack,
+      tab4PageStack: tab4PageStack ?? this.tab4PageStack,
     );
   }
 
@@ -69,10 +69,10 @@ class Multi4TabsState extends MultiTabState {
   ) =>
       Multi4TabsState(
         activeIndex: activeIndex,
-        tab1SRoute: sRoutes[0],
-        tab2SRoute: sRoutes[1],
-        tab3SRoute: sRoutes[2],
-        tab4SRoute: sRoutes[3],
+        tab1PageStack: sRoutes[0],
+        tab2PageStack: sRoutes[1],
+        tab3PageStack: sRoutes[2],
+        tab4PageStack: sRoutes[3],
       );
 }
 

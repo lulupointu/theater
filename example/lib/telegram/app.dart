@@ -16,8 +16,6 @@ import 'src/sroutes.dart';
 /// This app is optimized for big screen (i.e. desktop screens) only
 
 void main() {
-  initializeSRouter();
-
   runApp(MyApp());
 }
 
@@ -47,22 +45,22 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(subtitle1: TextStyle(color: Colors.white.withOpacity(0.9))),
         scaffoldBackgroundColor: Colors.black87,
       ),
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: TabsWrapperPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi3TabsTranslator<TabsWrapperPageStack, NonNestedStack>(
-            route: TabsWrapperPageStack.new,
+            pageStack: TabsWrapperPageStack.new,
             tab1Translators: [],
             tab2Translators: [
               PathTranslator<ChatsListPageStack, NestedStack>.parse(
                 path: '*',
-                matchToRoute: (match) => ChatsListPageStack(
+                matchToPageStack: (match) => ChatsListPageStack(
                   navigator: ChatsListNavigatorImplementation(),
                   chats: match.pathSegments
                       .map((id) => chats.firstWhere((chat) => chat.id == id))
                       .toList(),
                 ),
-                routeToWebEntry: (route) => WebEntry(
+                pageStackToWebEntry: (route) => WebEntry(
                   pathSegments: route.chats.map((e) => e.id).toList(),
                   title: 'Chat ${route.chats.last.title}',
                 ),

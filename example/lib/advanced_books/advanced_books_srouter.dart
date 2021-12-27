@@ -4,8 +4,6 @@ import 'package:srouter/srouter.dart';
 import 's_routes.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(MyApp());
 }
 
@@ -14,22 +12,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: HomePageStack(),
         translatorsBuilder: (_) => [
           PathTranslator<HomePageStack, NonNestedStack>(
             path: '/',
-            route: HomePageStack(),
+            pageStack: HomePageStack(),
             title: 'Home',
           ),
           PathTranslator<BooksPageStack, NonNestedStack>.parse(
             path: '/books',
-            matchToRoute: (match) => BooksPageStack(
+            matchToPageStack: (match) => BooksPageStack(
               books: books,
               searchedGenre: match.queryParams['genre'],
               searchedName: match.queryParams['name'],
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               pathSegments: ['books'],
               queryParams: {
                 if (route.searchedGenre != null) 'genre': route.searchedGenre!,
@@ -40,33 +38,33 @@ class MyApp extends StatelessWidget {
           ),
           PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/books/:bookId',
-            matchToRoute: (match) => BookDetailsPageStack(
+            matchToPageStack: (match) => BookDetailsPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               pathSegments: ['books', route.book.id],
               title: route.title,
             ),
           ),
           PathTranslator<BookBuyPageStack, NonNestedStack>.parse(
             path: '/books/:bookId/buy',
-            matchToRoute: (match) => BookBuyPageStack(
+            matchToPageStack: (match) => BookBuyPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               pathSegments: ['books', route.book.id, 'buy'],
               title: route.title,
             ),
           ),
           PathTranslator<BookGenresPageStack, NonNestedStack>.parse(
             path: '/books/:bookId/genres',
-            matchToRoute: (match) => BookGenresPageStack(
+            matchToPageStack: (match) => BookGenresPageStack(
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               pathSegments: ['books', route.book.id, 'genres'],
               title: route.title,
             ),

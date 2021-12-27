@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import '../../s_browser.dart';
@@ -14,7 +15,7 @@ import '../../web_entry.dart';
 /// reports a new route
 class SBrowser extends SBrowserInterface {
   /// Prevent direct instantiation;
-  SBrowser._({required this.sUrlStrategy}) {
+  SBrowser._({required SUrlStrategy sUrlStrategy}) : super(sUrlStrategy) {
     _onBrowserUpdateListener = html.window.onPopState.listen((_) {
       notifyListeners();
     });
@@ -32,13 +33,6 @@ class SBrowser extends SBrowserInterface {
       );
     }
   }
-
-  /// Whether a fragment should be displayed at the beginning of the application
-  /// url or not
-  ///
-  ///
-  /// See [SUrlStrategy] for more details
-  final SUrlStrategy sUrlStrategy;
 
   /// This information is impossible to have on the web platform due for
   /// security reasons
@@ -213,7 +207,7 @@ class SBrowser extends SBrowserInterface {
   /// Gets the current (and unique) instance of [SBrowser]
   ///
   ///
-  /// DO make sure that you called [initialize] before
+  /// DO make sure that you called [maybeInitialize] before
   static SBrowserInterface get instance {
     if (_instance == null) {
       throw AssertionError('''
@@ -229,7 +223,7 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   ///
   ///
   /// This must only be called once
-  static void initialize({required SUrlStrategy sUrlStrategy}) {
+  static void maybeInitialize({required SUrlStrategy sUrlStrategy}) {
     if (_instance != null) {
       throw 'initialize can only be called once';
     }
@@ -238,5 +232,16 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
     setUrlStrategy(null);
 
     _instance = SBrowser._(sUrlStrategy: sUrlStrategy);
+  }
+
+  /// Reset this singleton instance
+  ///
+  ///
+  /// Only useful when testing
+  @visibleForTesting
+  static void reset() {
+    if (_instance != null) {
+      _instance = SBrowser._(sUrlStrategy: _instance!.sUrlStrategy);
+    }
   }
 }

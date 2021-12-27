@@ -5,6 +5,7 @@ import 'package:move_to_background/move_to_background.dart';
 
 import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../browser/s_browser.dart';
+import '../browser/s_url_strategy.dart';
 import '../browser/web_entry.dart';
 import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
 import '../page_stack/framework.dart';
@@ -28,23 +29,32 @@ import 's_router_interface.dart';
 /// The state of this class (used to navigate) can be accessed using
 /// [SRouter.of] or [content.sRouter]
 class SRouter extends StatefulWidget {
-  /// The [initialPageStack] is required but can be null on the web since it won't
-  /// be used. It has to be non-null on other platform.
+  /// {@template srouter.srouter.constructor}
   ///
-  /// [translatorsBuilder] are optional but must be given to support the web platform,
-  /// otherwise [SRouter] can't turn the url into [PageStack]s
+  /// The [initialPageStack] describes the first [PageStack] to be shown before
+  /// any navigation has taken place
+  ///
+  /// [translatorsBuilder] are optional but must be given to support the web
+  /// platform, otherwise [SRouter] can't turn the url into [PageStack]s
   ///
   /// [key] can be useful if you need to use [to] and friends without
   /// a [BuildContext]. In which case you would create
   /// [routerKey = GlobalKey<SRouterState>] and use it to access the [SRouter]
-  /// methods using [routerKey.currentState.push]
+  /// methods using [routerKey.currentState.to]
   ///
-  /// [navigatorKey] is often only useful if you need the overlay associated
-  /// with the created navigator.
-  SRouter({
+  /// [navigatorKey] is often useful if you need the overlay associated with
+  /// the created navigator.
+  /// You could get it using [navigatorKey.currentState.overlay]
+  ///
+  /// {@endtemplate}
+  ///
+  ///
+  /// PREFER using [SRouter.build]
+  const SRouter({
     Key? key,
     required this.initialPageStack,
     this.translatorsBuilder,
+    this.sUrlStrategy = SUrlStrategy.hash,
     this.builder,
     this.navigatorKey,
     this.navigatorObservers = const [],
@@ -53,64 +63,68 @@ class SRouter extends StatefulWidget {
   })  : assert(!kIsWeb || translatorsBuilder != null, '''
 You must define [translators] when you are on the web, otherwise SRouter can't know which [PageStack] correspond to which url
 '''),
-        super(key: key) {
-    _debugCheckPageStackInitialized();
-  }
+        super(key: key);
 
-  /// Checks that [initializeSRouter] has been called
-  static void _debugCheckPageStackInitialized() {
-    assert(
-      () {
-        try {
-          SBrowser.instance;
-          // ignore: avoid_catching_errors, we catch it to display a better error message so it's ok
-        } on AssertionError catch (_) {
-          print('''\x1B[31m
-[initializeSRouter] was not called, please call it in app.dart:
-
-```
-main() {
-  initializeSRouter();
-
-  runApp(MyApp());
-}
-```
-```
-\x1B[0m''');
-          return false;
-        }
-
-        return true;
-      }(),
-      '''
-[initializeSRouter] was not called, please call it in app.dart:
-
-```
-main() {
-  initializeSRouter();
-
-  runApp(MyApp());
-}
-```
-''',
-    );
-  }
-
-  /// The list of [STranslator]s which will be used to convert a web
-  /// to a [PageStack] and vise versa
+  /// A useful builder of [SRouter] to use in [WidgetsApp.builder],
+  /// [MaterialApp.builder] or [CupertinoApp.builder]
   ///
-  ///
-  /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
-  /// might be null since the conversion from page stack to web entry or vise 
-  /// versa is not done
-  final List<STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>> Function(
-      BuildContext context)? translatorsBuilder;
+  /// {@macro srouter.srouter.constructor}
+  static SRouter Function(BuildContext context, Widget? child) build({
+    Key? key,
+    required PageStackBase<NonNestedStack> initialPageStack,
+    List<STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>>
+            Function(BuildContext context)?
+        translatorsBuilder,
+    SUrlStrategy sUrlStrategy = SUrlStrategy.hash,
+    Widget Function(BuildContext, Widget)? builder,
+    GlobalKey<NavigatorState>? navigatorKey,
+    List<NavigatorObserver> navigatorObservers = const [],
+    bool disableSendAppToBackground = false,
+    bool disableUniversalTranslator = false,
+  }) =>
+      (context, child) {
+        assert(
+          child == null,
+          'You should not provide a "home" parameter to the WidgetsApp (or MaterialApp or CupertinoApp) in which [SRouter] is created',
+        );
+
+        return SRouter(
+          initialPageStack: initialPageStack,
+          translatorsBuilder: translatorsBuilder,
+          sUrlStrategy: sUrlStrategy,
+          builder: builder,
+          navigatorKey: navigatorKey,
+          navigatorObservers: navigatorObservers,
+          disableSendAppToBackground: disableSendAppToBackground,
+          disableUniversalTranslator: disableUniversalTranslator,
+        );
+      };
 
   /// The initial [PageStack] to display
   ///
   ///
   /// This will be ignored if we are deep-linking
   final PageStackBase<NonNestedStack> initialPageStack;
+
+  /// The list of [STranslator]s which will be used to convert a web
+  /// to a [PageStack] and vise versa
+  ///
+  ///
+  /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
+  /// might be null since the conversion from page stack to web entry or vise
+  /// versa is not done
+  final List<
+          STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>>
+      Function(BuildContext context)? translatorsBuilder;
+
+  /// Only used in Flutter web to describe whether a hash (#) should be used
+  /// at the beginning of your url path.
+  ///
+  /// Defaults to [SUrlStrategy.hash]
+  ///
+  ///
+  /// Read the [SUrlStrategy] class documentation for more details.
+  final SUrlStrategy sUrlStrategy;
 
   /// A callback to build a widget around the [Navigator] created by this
   /// widget
@@ -119,7 +133,7 @@ main() {
   /// [SRouter] will be accessible in the given context
   final Widget Function(BuildContext context, Widget child)? builder;
 
-  /// The key of the navigator
+  /// The key of the navigator created by [SRouter]
   ///
   ///
   /// We force it to be global since using a regular key would not be of any
@@ -290,6 +304,18 @@ main() {
 
     return currentElement;
   }
+
+  /// Resets the singleton used to internally represent the web browser
+  ///
+  /// Only use this method for testing, usually in [setUp]
+  /// ```dart
+  /// setUp(() {
+  ///   SRouter.reset();
+  /// })
+  /// ```
+  @visibleForTesting
+  // ignore: invalid_use_of_visible_for_testing_member
+  static void reset() => SBrowser.reset();
 }
 
 /// The state for a [SRouter] widget.
@@ -302,7 +328,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
-  /// might be null since the conversion from page stack to web entry or vise 
+  /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
   TranslatorsHandler<NonNestedStack> get _translatorsHandler => TranslatorsHandler(
         translators: [
@@ -322,7 +348,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
       );
 
   /// The interface representing the browser in which this application run
-  final SBrowserInterface _sBrowser = SBrowser.instance;
+  late final SBrowserInterface _sBrowser = SBrowser.instance;
 
   /// Whether this [SRouter] is nested in another one
   ///
@@ -363,7 +389,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///   - It can be null when [SRouter] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
   ///   ^ a value (i.e. NOT be null) during all [build] phases
-  ///   - It will have an outdated value when a new [WebEntry] or a new page 
+  ///   - It will have an outdated value when a new [WebEntry] or a new page
   ///   ^ stack it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
@@ -507,7 +533,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// This must be called when [_sBrowser] notify its listeners
-  _updateHistoryWithCurrentWebEntry() {
+  void _updateHistoryWithCurrentWebEntry() {
     // Grab the current webEntry using [SBrowserInterface]
     final webEntry = _sBrowser.webEntry;
 
@@ -583,6 +609,11 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   @override
   void initState() {
     super.initState();
+
+    // If we have not nested, initialize with the given [SUrlStrategy]
+    if (!_isNested) {
+      SBrowser.maybeInitialize(sUrlStrategy: widget.sUrlStrategy);
+    }
 
     // If we are nested, the update should only happen during the [build] phase
     // i.e. NOT during browser call
@@ -709,10 +740,8 @@ class UnknownPageStackError implements Exception {
 
   @override
   String toString() => '''
-The [PageStack] of type ${pageStack.runtimeType} could not be translated to a web entry.
-
-If you are on the web, did you forget to add the translator corresponding to the [PageStack] of type ${pageStack.runtimeType} ?
-
-If you are NOT on the web, this should never happen, please fill an issue.
+The [PageStack] of type "${pageStack.runtimeType}" could not be translated to a web entry:
+  - If you are on the web, did you forget to add the translator corresponding to the [PageStack] of type "${pageStack.runtimeType}" ?
+  - If you are NOT on the web, this should never happen, please fill an issue.
 ''';
 }

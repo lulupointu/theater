@@ -1,9 +1,10 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
-import '../../../page_stack/nested_stack.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_3_tabs_page_stack.dart';
+import '../../../page_stack/nested_stack.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -11,14 +12,14 @@ import '../web_entry_matcher/web_entry_match.dart';
 import '../web_entry_matcher/web_entry_matcher.dart';
 
 /// A translator which should be used with a [STabbedRoute]
-class Multi3TabsTranslator<Route extends Multi3TabsPageStack<N>, N extends MaybeNestedStack>
-    extends MultiTabTranslator<Route, Multi3TabsState, N> {
+class Multi3TabsTranslator<PS extends Multi3TabsPageStack<N>, N extends MaybeNestedStack>
+    extends MultiTabTranslator<PS, Multi3TabsState, N> {
   /// {@macro srouter.multi_tab_translators.constructor}
   ///
   /// See also:
   ///   - [Multi3TabsTranslator.parse] for a way to match the path dynamically
   Multi3TabsTranslator({
-    required Route Function(StateBuilder<Multi3TabsState> stateBuilder) route,
+    required PS Function(StateBuilder<Multi3TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
     // The type seem quite complex but what it means is that the [STranslator]
@@ -31,7 +32,7 @@ class Multi3TabsTranslator<Route extends Multi3TabsPageStack<N>, N extends Maybe
     required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
     tab3Translators,
   })  : matchToPageStack =
-  ((_, stateBuilder) => stateBuilder == null ? null : route(stateBuilder)),
+  ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
         translatorsHandlers = [
           TranslatorsHandler(translators: tab1Translators),
@@ -76,7 +77,7 @@ class Multi3TabsTranslator<Route extends Multi3TabsPageStack<N>, N extends Maybe
         ];
 
   @override
-  final Route? Function(WebEntryMatch match, StateBuilder<Multi3TabsState>? stateBuilder)
+  final PS? Function(WebEntryMatch match, StateBuilder<Multi3TabsState>? stateBuilder)
   matchToPageStack;
 
   @override
@@ -84,7 +85,7 @@ class Multi3TabsTranslator<Route extends Multi3TabsPageStack<N>, N extends Maybe
 
   @override
   final WebEntry Function(
-      Route route,
+      PS pageStack,
       Multi3TabsState state,
       WebEntry? activeTabWebEntry,
       ) pageStackToWebEntry;
@@ -93,24 +94,25 @@ class Multi3TabsTranslator<Route extends Multi3TabsPageStack<N>, N extends Maybe
   final List<TranslatorsHandler<NestedStack>> translatorsHandlers;
 
   static WebEntry _defaultRouteToWebEntry(
-      Multi3TabsPageStack route,
+      Multi3TabsPageStack pageStack,
       Multi3TabsState state,
       WebEntry? activeTabWebEntry,
       ) {
     if (activeTabWebEntry == null) {
-      throw UnknownPageStackError(pageStack: route);
+      throw UnknownPageStackError(pageStack: pageStack);
     }
 
     return activeTabWebEntry;
   }
 
   @override
-  Multi3TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> sRoutes) {
+  @nonVirtual
+  Multi3TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> pageStacks) {
     return Multi3TabsState(
       activeIndex: activeIndex,
-      tab1SRoute: sRoutes[0],
-      tab2SRoute: sRoutes[1],
-      tab3SRoute: sRoutes[2],
+      tab1PageStack: pageStacks[0],
+      tab2PageStack: pageStacks[1],
+      tab3PageStack: pageStacks[2],
     );
   }
 }

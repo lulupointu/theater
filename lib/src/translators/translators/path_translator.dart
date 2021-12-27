@@ -10,15 +10,15 @@ import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// An implementation of [STranslator] which makes it easy determine if a
 /// [WebEntry] is matched
-class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
-    extends PageStackTranslator<Route, P> {
+class PathTranslator<PS extends PageStackBase<P>, P extends MaybeNestedStack>
+    extends PageStackTranslator<PS, P> {
   /// Converts a static [WebEntry] into a [PageStack]
   ///
   ///
   /// [path] describes the path that should be matched. Wildcards and path
-  /// parameters are accepted but cannot be used to create the [route].
+  /// parameters are accepted but cannot be used to create the [pageStack].
   ///
-  /// [route] is the [PageStack] of the associated [Route] type that will be used
+  /// [pageStack] is the [PageStack] of the associated [PS] type that will be used
   /// in [SRouter] if the path patches the given one
   ///
   ///
@@ -35,10 +35,10 @@ class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
   ///   - [SPathTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   PathTranslator({
     required String path,
-    required Route route,
+    required PS pageStack,
     String? title,
-  })  : routeToWebEntry = ((_) => WebEntry(path: path, title: title)),
-        matchToRoute = ((_) => route),
+  })  : pageStackToWebEntry = ((_) => WebEntry(path: path, title: title)),
+        matchToPageStack = ((_) => pageStack),
         _matcher = WebEntryMatcher(path: path);
 
   /// Converts a [WebEntry] to a [PageStack] and vise versa, by parsing dynamic
@@ -48,12 +48,12 @@ class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted
   ///
-  /// [matchToRoute] is called when the current path matches [path], and must
-  /// return a [PageStack] of the associated [Route] type.
+  /// [matchToPageStack] is called when the current path matches [path], and must
+  /// return a [PageStack] of the associated [PS] type.
   /// Use the given match object to access the different parameters of the
   /// matched path. See example bellow.
   ///
-  /// [routeToWebEntry] converts the [PageStack] of the associated [Route] type to
+  /// [pageStackToWebEntry] converts the [PageStack] of the associated [PS] type to
   /// a [WebEntry] (i.e. a representation of the url)
   ///
   ///
@@ -77,8 +77,8 @@ class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
   ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
   PathTranslator.parse({
     required String path,
-    required this.matchToRoute,
-    required this.routeToWebEntry,
+    required this.matchToPageStack,
+    required this.pageStackToWebEntry,
 
     // Functions used to validate the different components of the url
     final bool Function(Map<String, String> pathParams)? validatePathParams,
@@ -95,17 +95,17 @@ class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
 
   /// A callback used to convert a [WebEntryMatch] (which is basically
   /// a [WebEntry] with the parsed path parameters) to a [PageStack]
-  final Route Function(WebEntryMatch match) matchToRoute;
+  final PS Function(WebEntryMatch match) matchToPageStack;
 
   @override
-  Route? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
+  PS? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
     if (match == null) {
       return null;
     }
 
-    return matchToRoute(match);
+    return matchToPageStack(match);
   }
 
   /// A class which determined whether a given [WebEntry] is valid
@@ -113,8 +113,8 @@ class PathTranslator<Route extends PageStackBase<P>, P extends MaybeNestedStack>
 
   /// Converts the associated [PageStack] into a string representing
   /// the url
-  final WebEntry Function(Route route) routeToWebEntry;
+  final WebEntry Function(PS pageStack) pageStackToWebEntry;
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, Route route) => routeToWebEntry(route);
+  WebEntry sRouteToWebEntry(BuildContext context, PS route) => pageStackToWebEntry(route);
 }

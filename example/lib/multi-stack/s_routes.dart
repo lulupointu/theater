@@ -41,8 +41,8 @@ class AppPageStack extends Multi2TabsPageStack<NonNestedStack> {
   @override
   Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: RedListPageStack(),
-        tab2SRoute: GreenListPageStack(),
+        tab1PageStack: RedListPageStack(),
+        tab2PageStack: GreenListPageStack(),
       );
 }
 
@@ -69,9 +69,9 @@ abstract class ColoredListPageStack extends PageStack<NestedStack> {
         AppPageStack(
           (state) => state.copyWith(
             activeIndex: TabItem.values.indexOf(tabItem),
-            tab1SRoute:
+            tab1PageStack:
                 tabItem == TabItem.red ? RedDetailPageStack(materialIndex: materialIndex) : null,
-            tab2SRoute: tabItem == TabItem.green
+            tab2PageStack: tabItem == TabItem.green
                 ? GreenDetailPageStack(materialIndex: materialIndex)
                 : null,
           ),

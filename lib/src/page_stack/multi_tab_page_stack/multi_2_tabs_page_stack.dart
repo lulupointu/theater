@@ -11,21 +11,21 @@ class Multi2TabsState extends MultiTabState {
   /// {@macro srouter.framework.STabsState.constructor}
   Multi2TabsState({
     required this.activeIndex,
-    required this.tab1SRoute,
-    required this.tab2SRoute,
+    required this.tab1PageStack,
+    required this.tab2PageStack,
   }) : super(
           activeIndex: activeIndex,
-          tabsPageStacks: [tab1SRoute, tab2SRoute].lock,
+          tabsPageStacks: [tab1PageStack, tab2PageStack].lock,
         );
 
   @override
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1SRoute;
+  final PageStackBase<NestedStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2SRoute;
+  final PageStackBase<NestedStack> tab2PageStack;
 
   /// A list of 2 widgets, one for each tab
   ///
@@ -40,13 +40,13 @@ class Multi2TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi2TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1SRoute,
-    PageStackBase<NestedStack>? tab2SRoute,
+    PageStackBase<NestedStack>? tab1PageStack,
+    PageStackBase<NestedStack>? tab2PageStack,
   }) {
     return Multi2TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
-      tab1SRoute: tab1SRoute ?? this.tab1SRoute,
-      tab2SRoute: tab2SRoute ?? this.tab2SRoute,
+      tab1PageStack: tab1PageStack ?? this.tab1PageStack,
+      tab2PageStack: tab2PageStack ?? this.tab2PageStack,
     );
   }
 
@@ -57,8 +57,8 @@ class Multi2TabsState extends MultiTabState {
   ) =>
       Multi2TabsState(
         activeIndex: activeIndex,
-        tab1SRoute: sRoutes[0],
-        tab2SRoute: sRoutes[1],
+        tab1PageStack: sRoutes[0],
+        tab2PageStack: sRoutes[1],
       );
 }
 

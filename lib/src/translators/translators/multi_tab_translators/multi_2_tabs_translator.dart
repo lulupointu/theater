@@ -1,9 +1,10 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
-import '../../../page_stack/nested_stack.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
+import '../../../page_stack/nested_stack.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -25,11 +26,11 @@ import '../web_entry_matcher/web_entry_matcher.dart';
 /// MultiTabTranslator
 
 /// A translator which should be used with a [STabbedRoute]
-class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends MaybeNestedStack>
-    extends MultiTabTranslator<Route, Multi2TabsState, N> {
+class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNestedStack>
+    extends MultiTabTranslator<PS, Multi2TabsState, N> {
   /// {@template srouter.multi_tab_translators.constructor}
   ///
-  /// [route] builds the associated [MultiTabPageStack] from a [StateBuilder],
+  /// [pageStack] builds the associated [MultiTabPageStack] from a [StateBuilder],
   /// Use MySTabsRoute.new
   ///
   /// There are also one list of [STranslator] per tab, which you should use to
@@ -46,7 +47,7 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
   /// ```
   ///
   ///
-  /// If a [MultiTabPageStack] of the associated type [Route] is given to [SRouter]
+  /// If a [MultiTabPageStack] of the associated type [PS] is given to [SRouter]
   /// but the active tab could not be converted to a [WebEntry], an
   /// [UnknownPageStackError] will be thrown
   ///
@@ -55,7 +56,7 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
   /// See also:
   ///   - [Multi2TabsTranslator.parse] for a way to match the path dynamically
   Multi2TabsTranslator({
-    required Route Function(StateBuilder<Multi2TabsState> stateBuilder) route,
+    required PS Function(StateBuilder<Multi2TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
     // The type seem quite complex but what it means is that the [STranslator]
@@ -66,7 +67,7 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
     required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
         tab2Translators,
   })  : matchToPageStack =
-            ((_, stateBuilder) => stateBuilder == null ? null : route(stateBuilder)),
+            ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
         translatorsHandlers = [
           TranslatorsHandler(translators: tab1Translators),
@@ -83,17 +84,17 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
   /// parameters are accepted
   ///
   /// [matchToPageStack] is called when the current path matches [path], and must
-  /// return a [MultiTabPageStack] of the associated [Route] type.
+  /// return a [MultiTabPageStack] of the associated [PS] type.
   /// Use the given match object to access the different parameters of the
   /// matched path.
   /// The given stateBuilder value depends on whether a [tabXTranslators]
-  /// converted the [WebEntry] to a [SRouteBase]:
-  ///   - If a [tabXTranslators] converted the [WebEntry] to tabSRoute then the
+  /// converted the [WebEntry] to a [PageStackBase]:
+  ///   - If a [tabXTranslators] converted the [WebEntry] to tabPageStack then the
   ///     stateBuilder is:
-  ///     `((state) => state.copyWith(activeIndex: x, tabXRoute: tabSRoute)`
+  ///     `((state) => state.copyWith(activeIndex: x, tabXRoute: tabPageStack)`
   ///   - If no [tabXTranslators] matched, stateBuilder is null
   ///
-  /// [pageStackToWebEntry] converts the [PageStack] of the associated [Route] type to
+  /// [pageStackToWebEntry] converts the [PageStack] of the associated [PS] type to
   /// a [WebEntry] (i.e. a representation of the url)
   /// The [state] tab is the [MultiTabPageStack] state
   /// The [activeTabWebEntry] variable gives you access to the [WebEntry]
@@ -149,7 +150,7 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
         ];
 
   @override
-  final Route? Function(WebEntryMatch match, StateBuilder<Multi2TabsState>? stateBuilder)
+  final PS? Function(WebEntryMatch match, StateBuilder<Multi2TabsState>? stateBuilder)
       matchToPageStack;
 
   @override
@@ -157,7 +158,7 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
 
   @override
   final WebEntry Function(
-    Route route,
+    PS pageStack,
     Multi2TabsState state,
     WebEntry? activeTabWebEntry,
   ) pageStackToWebEntry;
@@ -166,23 +167,24 @@ class Multi2TabsTranslator<Route extends Multi2TabsPageStack<N>, N extends Maybe
   final List<TranslatorsHandler<NestedStack>> translatorsHandlers;
 
   static WebEntry _defaultRouteToWebEntry(
-    Multi2TabsPageStack route,
+    Multi2TabsPageStack pageStack,
     Multi2TabsState state,
     WebEntry? activeTabWebEntry,
   ) {
     if (activeTabWebEntry == null) {
-      throw UnknownPageStackError(pageStack: route);
+      throw UnknownPageStackError(pageStack: pageStack);
     }
 
     return activeTabWebEntry;
   }
 
   @override
-  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> sRoutes) {
+  @nonVirtual
+  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> pageStacks) {
     return Multi2TabsState(
       activeIndex: activeIndex,
-      tab1SRoute: sRoutes[0],
-      tab2SRoute: sRoutes[1],
+      tab1PageStack: pageStacks[0],
+      tab2PageStack: pageStacks[1],
     );
   }
 }

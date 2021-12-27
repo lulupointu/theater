@@ -3,7 +3,6 @@ library srouter;
 export 'src/browser/s_browser.dart';
 export 'src/browser/s_url_strategy.dart';
 export 'src/browser/web_entry.dart';
-export 'src/initialize/initialize_s_router.dart';
 export 'src/page_stack/framework.dart';
 export 'src/page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
 export 'src/page_stack/multi_tab_page_stack/multi_3_tabs_page_stack.dart';

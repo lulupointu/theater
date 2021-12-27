@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(BooksApp());
 }
 
@@ -74,7 +72,7 @@ class _BooksAppState extends State<BooksApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: SignInPageStack(onSignedIn: authState.signIn),
         builder: (_, child) => AuthStateUpdateHandler(child: child, authState: authState),
         translatorsBuilder: (_) => [
@@ -82,11 +80,11 @@ class _BooksAppState extends State<BooksApp> {
               ? [
                   PathTranslator<HomePageStack, NonNestedStack>(
                     path: '/',
-                    route: HomePageStack(onSignOut: authState.signOut),
+                    pageStack: HomePageStack(onSignOut: authState.signOut),
                   ),
                   PathTranslator<BooksListPageStack, NonNestedStack>(
                     path: '/books',
-                    route: BooksListPageStack(onSignOut: authState.signOut),
+                    pageStack: BooksListPageStack(onSignOut: authState.signOut),
                   ),
                   RedirectorTranslator(
                     path: '*',
@@ -96,7 +94,7 @@ class _BooksAppState extends State<BooksApp> {
               : [
                   PathTranslator<SignInPageStack, NonNestedStack>(
                     path: '/signin',
-                    route: SignInPageStack(onSignedIn: authState.signIn),
+                    pageStack: SignInPageStack(onSignedIn: authState.signIn),
                   ),
                   RedirectorTranslator(
                     path: '*',

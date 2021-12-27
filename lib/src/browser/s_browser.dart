@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 's_url_strategy.dart';
 
 import 'web_entry.dart';
 
@@ -14,6 +15,9 @@ export 'src/non_web/s_browser.dart' if (dart.library.html) 'src/web/s_browser.da
 ///   - [WebSBrowser] for the web implementation
 ///   - [NonWebSBrowser] for the non web implementation
 abstract class SBrowserInterface extends ChangeNotifier {
+  /// Instantiate [SBrowserInterface] with the given [sUrlStrategy]
+  SBrowserInterface(this.sUrlStrategy);
+
   /// The current index on which we are in the browser history
   int get historyIndex;
 
@@ -23,6 +27,13 @@ abstract class SBrowserInterface extends ChangeNotifier {
   /// The first web entry which will be reported by the browser if the
   /// application is NOT deep-linking
   WebEntry get initialWebEntry;
+
+  /// Whether a fragment should be displayed at the beginning of the application
+  /// url or not
+  ///
+  ///
+  /// See [SUrlStrategy] for more details
+  final SUrlStrategy sUrlStrategy;
 
   /// Pushes a new history entry
   void push(WebEntry webEntry);

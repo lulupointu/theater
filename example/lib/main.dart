@@ -1,11 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter(sUrlStrategy: SUrlStrategy.history);
-
   runApp(MyApp());
 }
 
@@ -15,14 +11,26 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: LogInPageStack(),
+        sUrlStrategy: SUrlStrategy.history,
         translatorsBuilder: (_) => [
-          PathTranslator<LogInPageStack, NonNestedStack>(path: '/', route: LogInPageStack()),
-          PathTranslator<MainPageStack, NonNestedStack>.parse(
-            path: '*',
-            matchToRoute: (_) => MainPageStack(),
-            routeToWebEntry: (_) => WebEntry(path: '/user/0'),
+          PathTranslator<LogInPageStack, NonNestedStack>(
+              path: '/', pageStack: LogInPageStack()),
+          Multi2TabsTranslator<MainPageStack, NonNestedStack>(
+            pageStack: MainPageStack.new,
+            tab1Translators: [
+              PathTranslator<UserPageStack, NestedStack>(
+                path: '/user',
+                pageStack: UserPageStack(),
+              ),
+            ],
+            tab2Translators: [
+              PathTranslator<SettingsPageStack, NestedStack>(
+                path: '/settings',
+                pageStack: SettingsPageStack(),
+              ),
+            ],
           ),
         ],
       ),
@@ -35,36 +43,34 @@ class LogInPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => LoginScreen();
 }
 
-class MainPageStack extends PageStack<NonNestedStack> {
+class MainPageStack extends Multi2TabsPageStack<NonNestedStack> {
+  MainPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
+
   @override
-  Widget build(BuildContext context) => MainScreen();
+  Widget build(BuildContext context, Multi2TabsState state) =>
+      MainScreen(currentIndex: state.activeIndex, child: state.tabs[state.activeIndex]);
 
   @override
   PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
     return LogInPageStack();
   }
-}
-
-abstract class SRouteWithUserId {
-  String get userId;
-}
-
-class UserPageStack extends PageStack<NonNestedStack> implements SRouteWithUserId {
-  final String userId;
-
-  UserPageStack({required this.userId});
 
   @override
-  Widget build(BuildContext context) => UserScreen(userId: userId);
+  Multi2TabsState get initialState => Multi2TabsState(
+        activeIndex: 0,
+        tab1PageStack: UserPageStack(),
+        tab2PageStack: SettingsPageStack(),
+      );
 }
 
-class SettingsPageStack extends PageStack<NonNestedStack> implements SRouteWithUserId {
-  final String userId;
-
-  SettingsPageStack({required this.userId});
-
+class UserPageStack extends PageStack<NestedStack> {
   @override
-  Widget build(BuildContext context) => SettingsScreen(userId: userId);
+  Widget build(BuildContext context) => UserScreen();
+}
+
+class SettingsPageStack extends PageStack<NestedStack> {
+  @override
+  Widget build(BuildContext context) => SettingsScreen();
 }
 
 class LoginScreen extends StatelessWidget {
@@ -74,7 +80,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        onPressed: () => context.sRouter.to(MainPageStack()),
+        onPressed: () => context.sRouter.to(MainPageStack((state) => state)),
         child: Text('Click to log in'),
       ),
     );
@@ -82,64 +88,54 @@ class LoginScreen extends StatelessWidget {
 }
 
 class MainScreen extends StatelessWidget {
+  final Widget child;
+  final int currentIndex;
+
+  const MainScreen({
+    Key? key,
+    required this.currentIndex,
+    required this.child,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return SRouter(
-      initialPageStack: UserPageStack(userId: '0'),
-      translatorsBuilder: (_) => [
-        PathTranslator<UserPageStack, NonNestedStack>.parse(
-          path: '/user/:id',
-          matchToRoute: (match) => UserPageStack(userId: match.pathParams['id']!),
-          routeToWebEntry: (route) => WebEntry(path: 'user/${route.userId}'),
-        ),
-        PathTranslator<SettingsPageStack, NonNestedStack>.parse(
-          path: '/settings',
-          matchToRoute: (match) => SettingsPageStack(userId: match.historyState['id'] ?? '0'),
-          routeToWebEntry: (route) =>
-              WebEntry(path: '/settings', historyState: {'id': route.userId}),
-        ),
-        RedirectorTranslator(path: '*', route: UserPageStack(userId: '0')),
-      ],
-      builder: (context, child) {
-        return Scaffold(
-          body: child,
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: SRouter.of(context).currentHistoryEntry!.pageStack is UserPageStack ? 0 : 1,
-            onTap: (index) {
-              final userId =
-                  (SRouter.of(context).currentHistoryEntry!.pageStack as SRouteWithUserId).userId;
-              if (index == 0) {
-                context.sRouter.to(UserPageStack(userId: userId));
-              } else {
-                context.sRouter.to(SettingsPageStack(userId: userId));
-              }
-            },
-            items: [
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'user'),
-              BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'settings'),
-            ],
-          ),
-        );
-      },
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          if (index == 0) {
+            context.sRouter.to(
+              MainPageStack((state) => state.copyWith(activeIndex: 0)),
+            );
+          } else {
+            context.sRouter.to(
+              MainPageStack((state) => state.copyWith(activeIndex: 1)),
+            );
+          }
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'user'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'settings'),
+        ],
+      ),
     );
   }
 }
 
 class UserScreen extends StatelessWidget {
-  final String userId;
-
-  UserScreen({required this.userId});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('User, id: $userId')),
+      appBar: AppBar(title: Text('User')),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.to(SettingsPageStack(userId: userId)),
+              onPressed: () => context.sRouter.to(MainPageStack(
+                (state) => state.copyWith(activeIndex: 1),
+              )),
               child: Text('Go to settings'),
             ),
             SizedBox(height: 100),
@@ -155,10 +151,6 @@ class UserScreen extends StatelessWidget {
 }
 
 class SettingsScreen extends StatelessWidget {
-  final String userId;
-
-  SettingsScreen({required this.userId});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,13 +160,16 @@ class SettingsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () => context.sRouter.to(UserPageStack(userId: userId)),
-              child: Text('Go to user $userId'),
+              onPressed: () => context.sRouter.to(MainPageStack(
+                (state) => state.copyWith(activeIndex: 0),
+              )),
+              child: Text('Go to user'),
             ),
             SizedBox(height: 100),
             ElevatedButton(
-              onPressed: () =>
-                  context.sRouter.to(SettingsPageStack(userId: '${Random().nextInt(100)}')),
+              onPressed: () => context.sRouter.to(MainPageStack(
+                (state) => state.copyWith(activeIndex: 1),
+              )),
               child: Text('Change user id'),
             ),
           ],

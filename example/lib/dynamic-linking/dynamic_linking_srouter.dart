@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(WishlistApp());
 }
 
@@ -41,22 +39,22 @@ class _WishlistAppState extends State<WishlistApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
           PathTranslator<WishlistListPageStack, NonNestedStack>(
             path: '/',
-            route: WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist),
+            pageStack: WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist),
           ),
           PathTranslator<WishlistPageStack, NonNestedStack>.parse(
             path: '/wishlist/:id',
-            matchToRoute: (match) {
+            matchToPageStack: (match) {
               final wishlist = Wishlist(match.pathParams['id']!);
               _addWishlistIfNotPresent(wishlist);
               return WishlistPageStack(
                   wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist);
             },
-            routeToWebEntry: (route) => WebEntry(path: '/wishlist/${route.wishlist.id}'),
+            pageStackToWebEntry: (route) => WebEntry(path: '/wishlist/${route.wishlist.id}'),
           ),
           RedirectorTranslator(
             path: '*',

@@ -18,9 +18,9 @@ import '../page_stack/nested_stack.dart';
 /// Prefer extending this class since the [routeType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class STranslator<Element extends SElement<N>, Route extends PageStackBase<N>,
+abstract class STranslator<Element extends SElement<N>, PS extends PageStackBase<N>,
     N extends MaybeNestedStack> {
-  /// This constructor checks that the [Route] generic (stored in [routeType])
+  /// This constructor checks that the [PS] generic (stored in [routeType])
   /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)
   ///
@@ -78,16 +78,16 @@ $translatorType(...)
   /// We impose this constraint so that developers don't forget to specify the
   /// generic type (i.e. use STranslator<MySRoute, ...>(), NOT STranslator())
   /// This is checked by the assert in this class' constructor
-  final Type routeType = Route;
+  final Type routeType = PS;
 
   /// Converts the associated [SElement] and [PageStack] into a string representing
   /// the url
-  WebEntry sElementToWebEntry(BuildContext context, Element element, Route sRoute);
+  WebEntry sElementToWebEntry(BuildContext context, Element element, PS sRoute);
 
   /// Converts the given url into the associated [PageStack]
   ///
   ///
   /// If the returned value is null, it means that the given url can't
   /// be used to create such a route
-  Route? webEntryToPageStack(BuildContext context, WebEntry webEntry);
+  PS? webEntryToPageStack(BuildContext context, WebEntry webEntry);
 }

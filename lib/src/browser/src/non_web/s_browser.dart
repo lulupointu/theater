@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../s_browser.dart';
 import '../../s_url_strategy.dart';
@@ -13,10 +14,11 @@ import '../../web_entry.dart';
 /// length and index since it does not need to interact with the system
 class SBrowser extends SBrowserInterface {
   /// Prevent direct instantiation;
-  SBrowser._()
+  SBrowser._({required SUrlStrategy sUrlStrategy})
       : _webEntries = [
           WebEntry.fromUri(uri: Uri.parse(PlatformDispatcher.instance.defaultRouteName)),
-        ].lock;
+        ].lock,
+        super(sUrlStrategy);
 
   @override
   int get historyIndex => _historyIndex;
@@ -80,7 +82,7 @@ Use [canGo($delta)] to check if it is actually possible to change the history in
   /// Gets the current (and unique) instance of [SBrowser]
   ///
   ///
-  /// DO make sure that you called [initialize] before
+  /// DO make sure that you called [maybeInitialize] before
   static SBrowserInterface get instance {
     if (_instance == null) {
       throw AssertionError('''
@@ -95,11 +97,29 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   /// Creates the unique instance of this class
   ///
   ///
-  /// This must only be called once
-  static void initialize({required SUrlStrategy sUrlStrategy}) {
-    if (_instance != null) {
-      throw 'initialize can only be called once';
+  /// If an instance has already been created, does nothing
+  static void maybeInitialize({required SUrlStrategy sUrlStrategy}) {
+    if (_instance == null) {
+      _instance = SBrowser._(sUrlStrategy: sUrlStrategy);
+    } else {
+      assert(
+        sUrlStrategy == _instance!.sUrlStrategy,
+        '[SBrowser] was first initialized with the [SUrlStrategy] '
+        '"${_instance!.sUrlStrategy}" and is now trying to be initialized with '
+        '"$sUrlStrategy".\n'
+        'You must always use the same [SUrlStrategy]',
+      );
     }
-    _instance = SBrowser._();
+  }
+
+  /// Reset this singleton instance
+  ///
+  ///
+  /// Only useful when testing
+  @visibleForTesting
+  static void reset() {
+    if (_instance != null) {
+      _instance = SBrowser._(sUrlStrategy: _instance!.sUrlStrategy);
+    }
   }
 }

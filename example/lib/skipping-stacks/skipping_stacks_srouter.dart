@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(BooksApp());
 }
 
@@ -59,37 +57,37 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: BooksListPageStack(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
           PathTranslator<BooksListPageStack, NonNestedStack>(
             path: '/',
-            route: BooksListPageStack(books: books, toBook: toBook),
+            pageStack: BooksListPageStack(books: books, toBook: toBook),
           ),
           PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/book/:id',
-            matchToRoute: (match) => BookDetailsPageStack(
+            matchToPageStack: (match) => BookDetailsPageStack(
               books: books,
               book: books[int.parse(match.pathParams['id']!)],
               toBook: toBook,
               toAuthor: toAuthor,
             ),
-            routeToWebEntry: (route) =>
+            pageStackToWebEntry: (route) =>
                 WebEntry(path: '/book/${route.books.indexOf(route.book)}'),
           ),
           PathTranslator<AuthorsListPageStack, NonNestedStack>(
             path: '/authors',
-            route: AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
+            pageStack: AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
           PathTranslator<AuthorDetailsPageStack, NonNestedStack>.parse(
             path: '/author/:id',
-            matchToRoute: (match) => AuthorDetailsPageStack(
+            matchToPageStack: (match) => AuthorDetailsPageStack(
               authors: authors,
               author: authors[int.parse(match.pathParams['id']!)],
               toAuthor: toAuthor,
               toBooks: toBooks,
             ),
-            routeToWebEntry: (route) =>
+            pageStackToWebEntry: (route) =>
                 WebEntry(path: '/author/${authors.indexOf(route.author)}'),
           ),
           RedirectorTranslator(path: '*', route: BooksListPageStack(books: books, toBook: toBook)),

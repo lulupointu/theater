@@ -4,8 +4,6 @@ import 'package:srouter/srouter.dart';
 import 's_routes.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(MyApp());
 }
 
@@ -14,22 +12,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: AppPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<AppPageStack, NonNestedStack>(
-            route: AppPageStack.new,
+            pageStack: AppPageStack.new,
             tab1Translators: _getTranslatorOfTab(TabItem.red),
             tab2Translators: _getTranslatorOfTab(TabItem.green),
           ),
           PathTranslator<SettingsPageStack, NonNestedStack>.parse(
             path: '/:color/settings',
-            matchToRoute: (match) => SettingsPageStack(
+            matchToPageStack: (match) => SettingsPageStack(
               tabItem: tabName.entries
                   .firstWhere((element) => element.value == match.pathParams['color'])
                   .key,
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               pathSegments: [tabName[route.tabItem]!, 'settings'],
             ),
           ),
@@ -44,14 +42,14 @@ class MyApp extends StatelessWidget {
         return [
           PathTranslator<RedListPageStack, NestedStack>(
             path: '${tabName[tabItem]!}',
-            route: RedListPageStack(),
+            pageStack: RedListPageStack(),
           ),
           PathTranslator<RedDetailPageStack, NestedStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToRoute: (match) => RedDetailPageStack(
+            matchToPageStack: (match) => RedDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
             ),
-            routeToWebEntry: (route) =>
+            pageStackToWebEntry: (route) =>
                 WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
           ),
         ];
@@ -59,14 +57,14 @@ class MyApp extends StatelessWidget {
         return [
           PathTranslator<GreenListPageStack, NestedStack>(
             path: '${tabName[tabItem]!}',
-            route: GreenListPageStack(),
+            pageStack: GreenListPageStack(),
           ),
           PathTranslator<GreenDetailPageStack, NestedStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToRoute: (match) => GreenDetailPageStack(
+            matchToPageStack: (match) => GreenDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
             ),
-            routeToWebEntry: (route) =>
+            pageStackToWebEntry: (route) =>
                 WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
           ),
         ];
@@ -103,8 +101,8 @@ class App extends StatelessWidget {
         AppPageStack(
           (state) => state.copyWith(
             activeIndex: TabItem.values.indexOf(tabItem),
-            tab1SRoute: tabItem == TabItem.red ? RedListPageStack() : null,
-            tab2SRoute: tabItem == TabItem.green ? GreenListPageStack() : null,
+            tab1PageStack: tabItem == TabItem.red ? RedListPageStack() : null,
+            tab2PageStack: tabItem == TabItem.green ? GreenListPageStack() : null,
           ),
         ),
       );

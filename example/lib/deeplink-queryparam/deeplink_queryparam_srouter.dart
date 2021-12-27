@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(BooksApp());
 }
 
@@ -28,7 +26,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: BooksListPageStack(
           books: books,
           onFilterChanged: onFilterChanged,
@@ -37,12 +35,12 @@ class BooksApp extends StatelessWidget {
         translatorsBuilder: (_) => [
           PathTranslator<BooksListPageStack, NonNestedStack>.parse(
             path: '/',
-            matchToRoute: (match) => BooksListPageStack(
+            matchToPageStack: (match) => BooksListPageStack(
               books: books,
               onFilterChanged: onFilterChanged,
               filter: match.queryParams['filter'],
             ),
-            routeToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (route) => WebEntry(
               path: '/',
               queryParams: {if (route.filter != null) 'filter': route.filter!},
             ),

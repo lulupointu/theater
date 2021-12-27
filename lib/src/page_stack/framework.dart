@@ -468,7 +468,7 @@ class MultiTabState {
 class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends SElement<N> {
   /// Initialize the [state] with the initial state of the [MultiTabPageStack]
   STabsSElement(_STabsSWidget<S, N> sWidget)
-      : _initialState = sWidget._MultiTabPageStack.initialState,
+      : _initialState = sWidget._multiTabPageStack.initialState,
         super(sWidget);
 
   @override
@@ -531,7 +531,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
   ///   ^  [Navigator]
   @override
   Page buildPage(BuildContext context) {
-    return sWidget._MultiTabPageStack.buildPage(context, state);
+    return sWidget._multiTabPageStack.buildPage(context, state);
   }
 
   /// This must be called after each [state] update
@@ -584,7 +584,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
                 final newTabPageStack = tabSElements[tabSElements.length - 2].sWidget.pageStack;
                 _updateState(
                   context,
-                  newState: sWidget._MultiTabPageStack._buildFromMultiTabState(
+                  newState: sWidget._multiTabPageStack._buildFromMultiTabState(
                     state.activeIndex,
                     state._pageStacks.replace(state.activeIndex, newTabPageStack),
                   ),
@@ -605,7 +605,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
     // We need to update the state even now because the initial 
     // [_MultiTabPageStack] also has a state builder which must
     // be taken into account
-    _updateState(context, newState: sWidget._MultiTabPageStack._stateBuilder(_initialState));
+    _updateState(context, newState: sWidget._multiTabPageStack._stateBuilder(_initialState));
   }
 
   /// Updates:
@@ -619,7 +619,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
     // Since [MultiTabState] is immutable, we receive a new instance where
     // the tabs have not been populated. This is why we can set the tabs in
     // [buildPage] even if [MultiTabState.tabs] is final
-    _updateState(context, newState: newSWidget._MultiTabPageStack._stateBuilder(state));
+    _updateState(context, newState: newSWidget._multiTabPageStack._stateBuilder(state));
   }
 
   /// TODO: add comment
@@ -645,7 +645,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
         // PageStack
         _updateState(
           context,
-          newState: sWidget._MultiTabPageStack._buildFromMultiTabState(
+          newState: sWidget._multiTabPageStack._buildFromMultiTabState(
             state.activeIndex,
             state._pageStacks.replace(state.activeIndex, tabPageStackBellow),
           ),
@@ -662,11 +662,11 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
 ///
 /// It uses [MultiTabPageStack] as its configuration
 class _STabsSWidget<S extends MultiTabState, N extends MaybeNestedStack> extends SWidget<N> {
-  /// Passes the [key] to the super constructor and initializes [_MultiTabPageStack]
-  const _STabsSWidget(this._MultiTabPageStack, {Key? key}) : super(_MultiTabPageStack, key: key);
+  /// Passes the [key] to the super constructor and initializes [_multiTabPageStack]
+  const _STabsSWidget(this._multiTabPageStack, {Key? key}) : super(_multiTabPageStack, key: key);
 
   /// The configuration of this widget
-  final MultiTabPageStack<S, N> _MultiTabPageStack;
+  final MultiTabPageStack<S, N> _multiTabPageStack;
 
   @override
   SElement<N> createSElement() => STabsSElement<S, N>(this);

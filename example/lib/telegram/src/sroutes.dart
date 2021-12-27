@@ -164,8 +164,8 @@ class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
 
     return TabsWrapperPageStack(
       (state) => state.copyWith(
-        tab1SRoute: tabLeftRoute,
-        tab2SRoute: StackedChatsPageStack(
+        tab1PageStack: tabLeftRoute,
+        tab2PageStack: StackedChatsPageStack(
           navigator: ChatNavigatorImplementation(),
           chats: selectedChats ?? previousState?.widget.chats ?? [chats.first],
         ),
@@ -179,7 +179,7 @@ class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
   Widget build(BuildContext context, Multi3TabsState state) {
     return TabsWrapperScreen(
       tabs: state.tabs,
-      chats: (state.tab2SRoute as ChatsListPageStack).chats,
+      chats: (state.tab2PageStack as ChatsListPageStack).chats,
       showMemberDetails: showMemberDetails,
       maybeShowLeftTab: maybeShowLeftTab,
     );
@@ -188,15 +188,15 @@ class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
   @override
   Multi3TabsState get initialState => Multi3TabsState(
         activeIndex: 1,
-        tab1SRoute: ChatsListPageStack(
+        tab1PageStack: ChatsListPageStack(
           navigator: ChatsListNavigatorImplementation(),
           chats: chats,
         ),
-        tab2SRoute: StackedChatsPageStack(
+        tab2PageStack: StackedChatsPageStack(
           navigator: ChatNavigatorImplementation(),
           chats: [chats.first],
         ),
-        tab3SRoute: MembersDetailsPageStack(
+        tab3PageStack: MembersDetailsPageStack(
           navigator: MembersDetailsNavigatorImplementation(),
         ),
       );

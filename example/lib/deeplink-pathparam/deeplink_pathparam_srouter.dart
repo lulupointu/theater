@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(BooksApp());
 }
 
@@ -28,20 +26,20 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: BooksListScreenPageStack(books: _books),
         translatorsBuilder: (_) => [
           PathTranslator<BooksListScreenPageStack, NonNestedStack>(
             path: '/',
-            route: BooksListScreenPageStack(books: _books),
+            pageStack: BooksListScreenPageStack(books: _books),
           ),
           PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
             path: '/book/:id',
-            matchToRoute: (match) => BookDetailsPageStack(
+            matchToPageStack: (match) => BookDetailsPageStack(
               books: _books,
               selectedBook: int.parse(match.pathParams['id']!),
             ),
-            routeToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
+            pageStackToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
           ),
           RedirectorTranslator(path: '*', route: BooksListScreenPageStack(books: _books)),
         ],

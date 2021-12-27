@@ -11,21 +11,21 @@ class Multi6TabsState extends MultiTabState {
   /// {@macro srouter.framework.STabsState.constructor}
   Multi6TabsState({
     required this.activeIndex,
-    required this.tab1SRoute,
-    required this.tab2SRoute,
-    required this.tab3SRoute,
-    required this.tab4SRoute,
-    required this.tab5SRoute,
-    required this.tab6SRoute,
+    required this.tab1PageStack,
+    required this.tab2PageStack,
+    required this.tab3PageStack,
+    required this.tab4PageStack,
+    required this.tab5PageStack,
+    required this.tab6PageStack,
   }) : super(
           activeIndex: activeIndex,
           tabsPageStacks: [
-            tab1SRoute,
-            tab2SRoute,
-            tab3SRoute,
-            tab4SRoute,
-            tab5SRoute,
-            tab6SRoute,
+            tab1PageStack,
+            tab2PageStack,
+            tab3PageStack,
+            tab4PageStack,
+            tab5PageStack,
+            tab6PageStack,
           ].lock,
         );
 
@@ -33,22 +33,22 @@ class Multi6TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1SRoute;
+  final PageStackBase<NestedStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2SRoute;
+  final PageStackBase<NestedStack> tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3SRoute;
+  final PageStackBase<NestedStack> tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase<NestedStack> tab4SRoute;
+  final PageStackBase<NestedStack> tab4PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 4)
-  final PageStackBase<NestedStack> tab5SRoute;
+  final PageStackBase<NestedStack> tab5PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 5)
-  final PageStackBase<NestedStack> tab6SRoute;
+  final PageStackBase<NestedStack> tab6PageStack;
 
   /// A list of 6 widgets, one for each tab
   ///
@@ -63,21 +63,21 @@ class Multi6TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi6TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1SRoute,
-    PageStackBase<NestedStack>? tab2SRoute,
-    PageStackBase<NestedStack>? tab3SRoute,
-    PageStackBase<NestedStack>? tab4SRoute,
-    PageStackBase<NestedStack>? tab5SRoute,
-    PageStackBase<NestedStack>? tab6SRoute,
+    PageStackBase<NestedStack>? tab1PageStack,
+    PageStackBase<NestedStack>? tab2PageStack,
+    PageStackBase<NestedStack>? tab3PageStack,
+    PageStackBase<NestedStack>? tab4PageStack,
+    PageStackBase<NestedStack>? tab5PageStack,
+    PageStackBase<NestedStack>? tab6PageStack,
   }) {
     return Multi6TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
-      tab1SRoute: tab1SRoute ?? this.tab1SRoute,
-      tab2SRoute: tab2SRoute ?? this.tab2SRoute,
-      tab3SRoute: tab3SRoute ?? this.tab3SRoute,
-      tab4SRoute: tab4SRoute ?? this.tab4SRoute,
-      tab5SRoute: tab5SRoute ?? this.tab5SRoute,
-      tab6SRoute: tab6SRoute ?? this.tab6SRoute,
+      tab1PageStack: tab1PageStack ?? this.tab1PageStack,
+      tab2PageStack: tab2PageStack ?? this.tab2PageStack,
+      tab3PageStack: tab3PageStack ?? this.tab3PageStack,
+      tab4PageStack: tab4PageStack ?? this.tab4PageStack,
+      tab5PageStack: tab5PageStack ?? this.tab5PageStack,
+      tab6PageStack: tab6PageStack ?? this.tab6PageStack,
     );
   }
 
@@ -88,12 +88,12 @@ class Multi6TabsState extends MultiTabState {
   ) =>
       Multi6TabsState(
         activeIndex: activeIndex,
-        tab1SRoute: sRoutes[0],
-        tab2SRoute: sRoutes[1],
-        tab3SRoute: sRoutes[2],
-        tab4SRoute: sRoutes[3],
-        tab5SRoute: sRoutes[4],
-        tab6SRoute: sRoutes[5],
+        tab1PageStack: sRoutes[0],
+        tab2PageStack: sRoutes[1],
+        tab3PageStack: sRoutes[2],
+        tab4PageStack: sRoutes[3],
+        tab5PageStack: sRoutes[4],
+        tab6PageStack: sRoutes[5],
       );
 }
 

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:srouter/srouter.dart';
 
 void main() {
-  initializeSRouter();
-
   runApp(BooksApp());
 }
 
@@ -15,24 +13,24 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SRouter(
+      builder: SRouter.build(
         initialPageStack: ScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<ScaffoldPageStack, NonNestedStack>(
-            route: ScaffoldPageStack.new,
+            pageStack: ScaffoldPageStack.new,
             tab1Translators: [
               Multi2TabsTranslator<BooksViewPageStack, NestedStack>(
-                route: BooksViewPageStack.new,
+                pageStack: BooksViewPageStack.new,
                 tab1Translators: [
                   PathTranslator<NewBooksPageStack, NestedStack>(
                     path: '/books/new',
-                    route: NewBooksPageStack(),
+                    pageStack: NewBooksPageStack(),
                   ),
                 ],
                 tab2Translators: [
                   PathTranslator<AllBooksPageStack, NestedStack>(
                     path: '/books/all',
-                    route: AllBooksPageStack(),
+                    pageStack: AllBooksPageStack(),
                   ),
                 ],
               ),
@@ -40,7 +38,7 @@ class BooksApp extends StatelessWidget {
             tab2Translators: [
               PathTranslator<SettingsPageStack, NestedStack>(
                 path: '/settings',
-                route: SettingsPageStack(),
+                pageStack: SettingsPageStack(),
               ),
             ],
           ),
@@ -68,8 +66,8 @@ class ScaffoldPageStack extends Multi2TabsPageStack<NonNestedStack> {
   @override
   Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: BooksViewPageStack((state) => state),
-        tab2SRoute: SettingsPageStack(),
+        tab1PageStack: BooksViewPageStack((state) => state),
+        tab2PageStack: SettingsPageStack(),
       );
 }
 
@@ -84,8 +82,8 @@ class BooksViewPageStack extends Multi2TabsPageStack<NestedStack> {
   @override
   Multi2TabsState get initialState => Multi2TabsState(
         activeIndex: 0,
-        tab1SRoute: NewBooksPageStack(),
-        tab2SRoute: AllBooksPageStack(),
+        tab1PageStack: NewBooksPageStack(),
+        tab2PageStack: AllBooksPageStack(),
       );
 }
 
@@ -189,7 +187,7 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
           onTap: (index) => context.sRouter.to(
             ScaffoldPageStack(
               (state) => state.copyWith(
-                tab1SRoute: BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
+                tab1PageStack: BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
               ),
             ),
           ),
