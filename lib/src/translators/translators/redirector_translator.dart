@@ -16,13 +16,13 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted but cannot be used to create the [route].
   ///
-  /// [route] is the [PageStack] of the associated [Route] type that will be used
+  /// [route] is the [PageStack] of the associated [PageStack] type that will be used
   /// in [SRouter] if the path patches the given one
   ///
   ///
   /// # Example
   /// ```dart
-  /// SRedirectorTranslator(path: '*', route: HomeSRoute())
+  /// SRedirectorTranslator(path: '*', pageStack: HomeSPageStack())
   /// ```
   ///
   ///
@@ -30,10 +30,10 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   RedirectorTranslator({
     required String path,
-    required PageStackBase<N> route,
+    required PageStackBase<N> pageStack,
     this.replace = true,
   })  : _matcher = WebEntryMatcher(path: path),
-        matchToRoute = ((_, __) => route);
+        matchToPageStack = ((_, __) => pageStack);
 
   /// Converts a [WebEntry] to a [PageStack] to redirect to, by parsing dynamic
   /// element of the [WebEntry] (such as path parameters, query parameters, ...)
@@ -42,7 +42,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   /// [path] describes the path that should be matched. Wildcards and path
   /// parameters are accepted
   ///
-  /// [matchToRoute] is called when the current path matches [path], and must
+  /// [matchToPageStack] is called when the current path matches [path], and must
   /// return a [PageStack] which will then be used to create the new [WebEntry].
   /// Use the given match object to access the different parameters of the
   /// matched path. See example bellow.
@@ -52,7 +52,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   /// ```dart
   /// SRedirectorTranslator.parse(
   ///   path: '/user/:id',
-  ///   matchToRoute: (match) => UserSRoute(id: match.pathParams['id']),
+  ///   matchToPageStack: (match) => UserSPageStack(id: match.pathParams['id']),
   /// )
   /// ```
   ///
@@ -67,7 +67,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   ///   - [WebEntryMatcher.path] for a precise description of how [path] can be used
   RedirectorTranslator.parse({
     required String path,
-    required this.matchToRoute,
+    required this.matchToPageStack,
     this.replace = true,
 
     // Functions used to validate the different components of the url
@@ -85,7 +85,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
 
   /// The [PageStack] to redirect to
   final PageStackBase<N> Function(BuildContext context, WebEntryMatch match)
-      matchToRoute;
+      matchToPageStack;
 
   /// Whether the path we navigate to should replace the current history entry
   ///
@@ -106,16 +106,16 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
     }
 
 
-    // We can redirect the route even if the url is not right since after
-    // [webEntryToSRoute] [sRouteToWebEntry] is always called, meaning that
+    // We can redirect the pageStack even if the url is not right since after
+    // [webEntryToSPageStack] [sPageStackToWebEntry] is always called, meaning that
     // [match] will be converted into the right url
-    return matchToRoute(context, match);
+    return matchToPageStack(context, match);
   }
 
-  /// We must override the [routeType] so that this translator is never matched
+  /// We must override the [pageStackType] so that this translator is never matched
   /// when trying to convert a [PageStack] to a [WebEntry]
   @override
-  Type get routeType => Null;
+  Type get pageStackType => Null;
 
   @override
   WebEntry sRouteToWebEntry(BuildContext context, PageStackBase route) {

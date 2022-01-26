@@ -88,7 +88,7 @@ class _BooksAppState extends State<BooksApp> {
                   ),
                   RedirectorTranslator(
                     path: '*',
-                    route: HomePageStack(onSignOut: authState.signOut),
+                    pageStack: HomePageStack(onSignOut: authState.signOut),
                   ),
                 ]
               : [
@@ -98,7 +98,7 @@ class _BooksAppState extends State<BooksApp> {
                   ),
                   RedirectorTranslator(
                     path: '*',
-                    route: SignInPageStack(onSignedIn: authState.signIn),
+                    pageStack: SignInPageStack(onSignedIn: authState.signIn),
                   ),
                 ],
         ],

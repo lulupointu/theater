@@ -26,7 +26,7 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase<NonNes
   ///
   /// You should never have to do this
   @override
-  Type get routeType => dynamic;
+  Type get pageStackType => dynamic;
 
   /// The initial [PageStack] to display when the [SRouter] is initialized
   final PageStackBase<NonNestedStack> initialPageStack;

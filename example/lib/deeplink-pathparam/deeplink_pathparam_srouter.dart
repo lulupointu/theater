@@ -41,7 +41,7 @@ class BooksApp extends StatelessWidget {
             ),
             pageStackToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
           ),
-          RedirectorTranslator(path: '*', route: BooksListScreenPageStack(books: _books)),
+          RedirectorTranslator(path: '*', pageStack: BooksListScreenPageStack(books: _books)),
         ],
       ),
     );

@@ -129,21 +129,11 @@ class UserScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('User')),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () => context.sRouter.to(MainPageStack(
-                (state) => state.copyWith(activeIndex: 1),
-              )),
-              child: Text('Go to settings'),
-            ),
-            SizedBox(height: 100),
-            ElevatedButton(
-              onPressed: () => SRouter.of(context, findRoot: true).to(LogInPageStack()),
-              child: Text('Go back to login'),
-            ),
-          ],
+        child: ElevatedButton(
+          onPressed: () => context.sRouter.to(
+            MainPageStack((state) => state.copyWith(activeIndex: 1)),
+          ),
+          child: Text('Go to settings'),
         ),
       ),
     );
@@ -156,23 +146,11 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () => context.sRouter.to(MainPageStack(
-                (state) => state.copyWith(activeIndex: 0),
-              )),
-              child: Text('Go to user'),
-            ),
-            SizedBox(height: 100),
-            ElevatedButton(
-              onPressed: () => context.sRouter.to(MainPageStack(
-                (state) => state.copyWith(activeIndex: 1),
-              )),
-              child: Text('Change user id'),
-            ),
-          ],
+        child: ElevatedButton(
+          onPressed: () => context.sRouter.to(
+            MainPageStack((state) => state.copyWith(activeIndex: 0)),
+          ),
+          child: Text('Go to user'),
         ),
       ),
     );

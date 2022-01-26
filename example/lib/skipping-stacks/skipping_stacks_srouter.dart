@@ -77,7 +77,8 @@ class BooksApp extends StatelessWidget {
           ),
           PathTranslator<AuthorsListPageStack, NonNestedStack>(
             path: '/authors',
-            pageStack: AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
+            pageStack:
+                AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
           PathTranslator<AuthorDetailsPageStack, NonNestedStack>.parse(
             path: '/author/:id',
@@ -90,7 +91,10 @@ class BooksApp extends StatelessWidget {
             pageStackToWebEntry: (route) =>
                 WebEntry(path: '/author/${authors.indexOf(route.author)}'),
           ),
-          RedirectorTranslator(path: '*', route: BooksListPageStack(books: books, toBook: toBook)),
+          RedirectorTranslator(
+            path: '*',
+            pageStack: BooksListPageStack(books: books, toBook: toBook),
+          ),
         ],
       ),
     );

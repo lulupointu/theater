@@ -44,6 +44,12 @@ class AppPageStack extends Multi2TabsPageStack<NonNestedStack> {
         tab1PageStack: RedListPageStack(),
         tab2PageStack: GreenListPageStack(),
       );
+
+  @override
+  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+    // TODO: implement createPageStackBellow
+    return super.createPageStackBellow(context);
+  }
 }
 
 class RedListPageStack extends ColoredListPageStack {

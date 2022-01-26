@@ -15,12 +15,12 @@ import '../page_stack/nested_stack.dart';
 /// [SElement] to a [WebEntry]
 ///
 ///
-/// Prefer extending this class since the [routeType] type should usually keep
+/// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
 abstract class STranslator<Element extends SElement<N>, PS extends PageStackBase<N>,
     N extends MaybeNestedStack> {
-  /// This constructor checks that the [PS] generic (stored in [routeType])
+  /// This constructor checks that the [PS] generic (stored in [pageStackType])
   /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)
   ///
@@ -35,7 +35,7 @@ abstract class STranslator<Element extends SElement<N>, PS extends PageStackBase
   /// ```
   STranslator() {
     assert(() {
-      if (routeType == PageStackBase) {
+      if (pageStackType == PageStackBase) {
         final translatorType =
             runtimeType.toString().replaceFirst('<SRouteBase<dynamic>>', '');
         print('''\x1B[31m
@@ -78,7 +78,7 @@ $translatorType(...)
   /// We impose this constraint so that developers don't forget to specify the
   /// generic type (i.e. use STranslator<MySRoute, ...>(), NOT STranslator())
   /// This is checked by the assert in this class' constructor
-  final Type routeType = PS;
+  final Type pageStackType = PS;
 
   /// Converts the associated [SElement] and [PageStack] into a string representing
   /// the url

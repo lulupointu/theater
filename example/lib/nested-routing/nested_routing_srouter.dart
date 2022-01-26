@@ -44,7 +44,7 @@ class BooksApp extends StatelessWidget {
           ),
           RedirectorTranslator(
             path: '*',
-            route: ScaffoldPageStack((state) => state),
+            pageStack: ScaffoldPageStack((state) => state),
           ),
         ],
       ),

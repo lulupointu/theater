@@ -58,7 +58,7 @@ class _WishlistAppState extends State<WishlistApp> {
           ),
           RedirectorTranslator(
             path: '*',
-            route: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
+            pageStack: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
           ),
         ],
       ),

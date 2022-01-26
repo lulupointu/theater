@@ -16,7 +16,7 @@ import 'translator.dart';
 /// [SElement] to a [WebEntry]
 ///
 ///
-/// Prefer extending this class since the [routeType] type should usually keep
+/// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
 abstract class PageStackTranslator<Route extends PageStackBase<N>, N extends MaybeNestedStack>

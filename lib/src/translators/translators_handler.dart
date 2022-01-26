@@ -50,8 +50,8 @@ class TranslatorsHandler<N extends MaybeNestedStack> {
     // If there is no match, return null
     if (!translators.any(
       (translator) =>
-          translator.routeType == sElement.sWidget.pageStack.runtimeType ||
-          translator.routeType == dynamic,
+          translator.pageStackType == sElement.sWidget.pageStack.runtimeType ||
+          translator.pageStackType == dynamic,
     )) {
       return null;
     }
@@ -64,8 +64,8 @@ class TranslatorsHandler<N extends MaybeNestedStack> {
     // example)
     final translator = translators.firstWhere(
       (translator) =>
-          translator.routeType == sElement.sWidget.pageStack.runtimeType ||
-          translator.routeType == dynamic,
+          translator.pageStackType == sElement.sWidget.pageStack.runtimeType ||
+          translator.pageStackType == dynamic,
     );
 
     return translator.sElementToWebEntry(
