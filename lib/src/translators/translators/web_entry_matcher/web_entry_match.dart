@@ -39,7 +39,7 @@ class WebEntryMatch {
   /// The historyState is not mandatory and will default to
   /// an empty map
   const WebEntryMatch({
-    required this. webEntry,
+    required this.webEntry,
     required this.pathParams,
   });
 

@@ -447,19 +447,15 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
   void toWebEntry(WebEntry webEntry, {bool isReplacement = false}) {
-    final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
-
-    // We must call [_toCallback] instead of just calling [_sBrowser.push]
-    // because calling [_sBrowser.replace] will not cause
+    // We must call [to] instead of just calling [_sBrowser.push/replace]
+    // because calling [_sBrowser.push/replace] will not cause
     // [_updateHistoryWithCurrentWebEntry] to be triggered since
-    // [_sBrowser.push] only notify its listener when the browser changes its
+    // [_sBrowser] only notify its listener when the browser changes its
     // state (contrary to when itself changes the state of the browser)
-    return _toCallback(
-      HistoryEntry(
-        webEntry: webEntry,
-        pageStack: _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
-            (throw UnknownWebEntryError(webEntry: webEntry)),
-      ),
+    return to(
+      _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
+          (throw UnknownWebEntryError(webEntry: webEntry)),
+      isReplacement: isReplacement,
     );
   }
 
