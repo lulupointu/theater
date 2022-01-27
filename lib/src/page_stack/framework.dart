@@ -589,6 +589,9 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
                     state._pageStacks.replace(state.activeIndex, newTabPageStack),
                   ),
                 );
+
+                // Update SRouter
+                (SRouter.of(context) as SRouterState).update();
               }
 
               return didPop;

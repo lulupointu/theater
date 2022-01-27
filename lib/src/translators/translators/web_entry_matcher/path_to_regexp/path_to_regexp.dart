@@ -52,7 +52,7 @@ RegExp pathToRegExp(
 /// [parameters] can be obtained in place using [pathToRegExp]
 Map<String, String> extract(List<String> parameters, Match match) => {
       for (var i = 0; i < parameters.length; ++i)
-        parameters[i]: match.group(i + 1)!,
+        parameters[i]: Uri.decodeComponent(match.group(i + 1)!),
       // Offset by 1 since 0 is the entire match
     };
 

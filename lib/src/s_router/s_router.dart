@@ -426,13 +426,27 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
       pageStack: pageStack,
     );
 
+    return _toSElements(_sElements, isReplacement: isReplacement);
+  }
+
+  /// Updates the [WebEntry] based on the current [_sElements]
+  ///
+  /// This should be called when [_sElements] is updated by another widget
+  void update() => _toSElements(_sElements);
+
+  /// Pushes a new entry with the given [sElements]
+  ///
+  ///
+  /// Set [isReplacement] to true if you want the current history entry to
+  /// be replaced by the newly created one
+  void _toSElements(IList<SElement<NonNestedStack>> sElements, {bool isReplacement = false}) {
     final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
     return _toCallback(
       HistoryEntry(
-        webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
-            (throw UnknownPageStackError(pageStack: pageStack)),
-        pageStack: pageStack,
+        webEntry: _translatorsHandler.getWebEntryFromSElement(context, sElements.last) ??
+            (throw UnknownPageStackError(pageStack: sElements.last.sWidget.pageStack)),
+        pageStack: sElements.last.sWidget.pageStack,
       ),
     );
   }
@@ -545,14 +559,11 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
         return to(widget.initialPageStack, isReplacement: true);
       }
     }
-    // Get the page stack from the translators
-    final pageStack = _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
-        (throw UnknownWebEntryError(webEntry: webEntry));
 
-    // Call replace with the page stack instead of directly storing the
+    // Call replace with the webEntry instead of directly storing the
     // corresponding [SHistoryEntry] because the title might need to be set and
     // this is only accessible by converting the page stack to a [WebEntry]
-    to(pageStack, isReplacement: true);
+    toWebEntry(webEntry, isReplacement: true);
   }
 
   /// This function must end up removing the last page in the list of pages
