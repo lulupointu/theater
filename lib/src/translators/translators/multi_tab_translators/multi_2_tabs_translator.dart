@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
-import '../../../page_stack/nested_stack.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -26,8 +25,8 @@ import '../web_entry_matcher/web_entry_matcher.dart';
 /// MultiTabTranslator
 
 /// A translator which should be used with a [STabbedRoute]
-class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNestedStack>
-    extends MultiTabTranslator<PS, Multi2TabsState, N> {
+class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
+    extends MultiTabTranslator<PS, Multi2TabsState> {
   /// {@template srouter.multi_tab_translators.constructor}
   ///
   /// [pageStack] builds the associated [MultiTabPageStack] from a [StateBuilder],
@@ -62,9 +61,9 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNes
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
         tab1Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
         tab2Translators,
   })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -133,9 +132,9 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNes
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
         tab1Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
         tab2Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
@@ -164,7 +163,7 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNes
   ) pageStackToWebEntry;
 
   @override
-  final List<TranslatorsHandler<NestedStack>> translatorsHandlers;
+  final List<TranslatorsHandler> translatorsHandlers;
 
   static WebEntry _defaultRouteToWebEntry(
     Multi2TabsPageStack pageStack,
@@ -180,7 +179,7 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack<N>, N extends MaybeNes
 
   @override
   @nonVirtual
-  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase<NestedStack>> pageStacks) {
+  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
     return Multi2TabsState(
       activeIndex: activeIndex,
       tab1PageStack: pageStacks[0],

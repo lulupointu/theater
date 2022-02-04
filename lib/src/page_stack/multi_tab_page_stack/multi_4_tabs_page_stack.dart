@@ -2,7 +2,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import '../nested_stack.dart';
 
 /// The state of [Multi4TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi4TabsPageStack] is pushed)
@@ -24,16 +23,16 @@ class Multi4TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1PageStack;
+  final PageStackBase tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2PageStack;
+  final PageStackBase tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3PageStack;
+  final PageStackBase tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase<NestedStack> tab4PageStack;
+  final PageStackBase tab4PageStack;
 
   /// A list of 4 widgets, one for each tab
   ///
@@ -48,10 +47,10 @@ class Multi4TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi4TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1PageStack,
-    PageStackBase<NestedStack>? tab2PageStack,
-    PageStackBase<NestedStack>? tab3PageStack,
-    PageStackBase<NestedStack>? tab4PageStack,
+    PageStackBase? tab1PageStack,
+    PageStackBase? tab2PageStack,
+    PageStackBase? tab3PageStack,
+    PageStackBase? tab4PageStack,
   }) {
     return Multi4TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -65,7 +64,7 @@ class Multi4TabsState extends MultiTabState {
   /// Creates a [Multi4TabsState] from a [_STabsState], internal use only
   factory Multi4TabsState._fromSTabsState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> sRoutes,
+    IList<PageStackBase> sRoutes,
   ) =>
       Multi4TabsState(
         activeIndex: activeIndex,
@@ -80,7 +79,7 @@ class Multi4TabsState extends MultiTabState {
 /// with 4 tabs.
 ///
 /// {@macro srouter.framework.STabsRoute}
-abstract class Multi4TabsPageStack<N extends MaybeNestedStack> extends MultiTabPageStack<Multi4TabsState, N> {
+abstract class Multi4TabsPageStack extends MultiTabPageStack<Multi4TabsState> {
   /// {@macro srouter.framework.STabsRoute.constructor}
   @mustCallSuper
   Multi4TabsPageStack(StateBuilder<Multi4TabsState> stateBuilder)

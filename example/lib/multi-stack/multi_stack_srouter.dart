@@ -15,12 +15,12 @@ class MyApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: AppPageStack((state) => state),
         translatorsBuilder: (_) => [
-          Multi2TabsTranslator<AppPageStack, NonNestedStack>(
+          Multi2TabsTranslator<AppPageStack>(
             pageStack: AppPageStack.new,
             tab1Translators: _getTranslatorOfTab(TabItem.red),
             tab2Translators: _getTranslatorOfTab(TabItem.green),
           ),
-          PathTranslator<SettingsPageStack, NonNestedStack>.parse(
+          PathTranslator<SettingsPageStack>.parse(
             path: '/:color/settings',
             matchToPageStack: (match) => SettingsPageStack(
               tabItem: tabName.entries
@@ -36,15 +36,15 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  List<PageStackTranslator<PageStackBase<NestedStack>, NestedStack>> _getTranslatorOfTab(TabItem tabItem) {
+  List<PageStackTranslator<PageStackBase>> _getTranslatorOfTab(TabItem tabItem) {
     switch (tabItem) {
       case TabItem.red:
         return [
-          PathTranslator<RedListPageStack, NestedStack>(
+          PathTranslator<RedListPageStack>(
             path: '${tabName[tabItem]!}',
             pageStack: RedListPageStack(),
           ),
-          PathTranslator<RedDetailPageStack, NestedStack>.parse(
+          PathTranslator<RedDetailPageStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToPageStack: (match) => RedDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),
@@ -55,11 +55,11 @@ class MyApp extends StatelessWidget {
         ];
       case TabItem.green:
         return [
-          PathTranslator<GreenListPageStack, NestedStack>(
+          PathTranslator<GreenListPageStack>(
             path: '${tabName[tabItem]!}',
             pageStack: GreenListPageStack(),
           ),
-          PathTranslator<GreenDetailPageStack, NestedStack>.parse(
+          PathTranslator<GreenDetailPageStack>.parse(
             path: '${tabName[tabItem]!}/details_:materialIndex',
             matchToPageStack: (match) => GreenDetailPageStack(
               materialIndex: int.parse(match.pathParams['materialIndex']!),

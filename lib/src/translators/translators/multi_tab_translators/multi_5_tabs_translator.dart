@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_5_tabs_page_stack.dart';
-import '../../../page_stack/nested_stack.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -12,8 +11,8 @@ import '../web_entry_matcher/web_entry_match.dart';
 import '../web_entry_matcher/web_entry_matcher.dart';
 
 /// A translator which should be used with a [STabbedRoute]
-class Multi5TabsTranslator<PS extends Multi5TabsPageStack<N>, N extends MaybeNestedStack>
-    extends MultiTabTranslator<PS, Multi5TabsState, N> {
+class Multi5TabsTranslator<PS extends Multi5TabsPageStack>
+    extends MultiTabTranslator<PS, Multi5TabsState> {
   /// {@macro srouter.multi_tab_translators.constructor}
   ///
   /// See also:
@@ -25,15 +24,15 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack<N>, N extends MaybeNes
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab1Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab2Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab3Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab4Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab5Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -63,15 +62,15 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack<N>, N extends MaybeNes
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab1Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab2Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab3Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab4Translators,
-    required List<STranslator<SElement<NestedStack>, PageStackBase<NestedStack>, NestedStack>>
+    required List<STranslator<SElement, PageStackBase>>
     tab5Translators,
   })  : matcher = WebEntryMatcher(
     path: path,
@@ -103,7 +102,7 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack<N>, N extends MaybeNes
       ) pageStackToWebEntry;
 
   @override
-  final List<TranslatorsHandler<NestedStack>> translatorsHandlers;
+  final List<TranslatorsHandler> translatorsHandlers;
 
   static WebEntry _defaultRouteToWebEntry(
       Multi5TabsPageStack pageStack,
@@ -121,7 +120,7 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack<N>, N extends MaybeNes
   @nonVirtual
   Multi5TabsState buildFromMultiTabState(
       int activeIndex,
-      IList<PageStackBase<NestedStack>> pageStacks,
+      IList<PageStackBase> pageStacks,
       ) {
     return Multi5TabsState(
       activeIndex: activeIndex,

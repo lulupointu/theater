@@ -29,11 +29,11 @@ class BooksApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: BooksListScreenPageStack(books: _books),
         translatorsBuilder: (_) => [
-          PathTranslator<BooksListScreenPageStack, NonNestedStack>(
+          PathTranslator<BooksListScreenPageStack>(
             path: '/',
             pageStack: BooksListScreenPageStack(books: _books),
           ),
-          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
+          PathTranslator<BookDetailsPageStack>.parse(
             path: '/book/:id',
             matchToPageStack: (match) => BookDetailsPageStack(
               books: _books,
@@ -48,7 +48,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListScreenPageStack extends PageStack<NonNestedStack> {
+class BooksListScreenPageStack extends PageStack {
   final List<Book> books;
 
   BooksListScreenPageStack({required this.books});
@@ -57,7 +57,7 @@ class BooksListScreenPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => BooksListScreen(books: books);
 }
 
-class BookDetailsPageStack extends PageStack<NonNestedStack> {
+class BookDetailsPageStack extends PageStack {
   final List<Book> books;
   final int selectedBook;
 
@@ -70,7 +70,7 @@ class BookDetailsPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => BookDetailsScreen(book: books[selectedBook]);
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) =>
+  PageStackBase createPageStackBellow(BuildContext context) =>
       BooksListScreenPageStack(books: books);
 }
 

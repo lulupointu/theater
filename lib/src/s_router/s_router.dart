@@ -9,7 +9,6 @@ import '../browser/s_url_strategy.dart';
 import '../browser/web_entry.dart';
 import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
 import '../page_stack/framework.dart';
-import '../page_stack/nested_stack.dart';
 import '../translators/translator.dart';
 import '../translators/translators/universal_web_entry_translator.dart';
 import '../translators/translators_handler.dart';
@@ -71,8 +70,8 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// {@macro srouter.srouter.constructor}
   static SRouter Function(BuildContext context, Widget? child) build({
     Key? key,
-    required PageStackBase<NonNestedStack> initialPageStack,
-    List<STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>>
+    required PageStackBase initialPageStack,
+    List<STranslator<SElement, PageStackBase>>
             Function(BuildContext context)?
         translatorsBuilder,
     SUrlStrategy sUrlStrategy = SUrlStrategy.hash,
@@ -104,7 +103,7 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   ///
   ///
   /// This will be ignored if we are deep-linking
-  final PageStackBase<NonNestedStack> initialPageStack;
+  final PageStackBase initialPageStack;
 
   /// The list of [STranslator]s which will be used to convert a web
   /// to a [PageStack] and vise versa
@@ -114,7 +113,7 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
   final List<
-          STranslator<SElement<NonNestedStack>, PageStackBase<NonNestedStack>, NonNestedStack>>
+          STranslator<SElement, PageStackBase>>
       Function(BuildContext context)? translatorsBuilder;
 
   /// Only used in Flutter web to describe whether a hash (#) should be used
@@ -330,7 +329,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
   /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
-  TranslatorsHandler<NonNestedStack> get _translatorsHandler => TranslatorsHandler(
+  TranslatorsHandler get _translatorsHandler => TranslatorsHandler(
         translators: [
           ...widget.translatorsBuilder?.call(context) ?? [],
 
@@ -412,14 +411,14 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// It will be updated each time [to] is called
-  IList<SElement<NonNestedStack>> _sElements = IList();
+  IList<SElement> _sElements = IList();
 
   /// Pushes a new entry with the given page stack
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(PageStackBase<NonNestedStack> pageStack, {bool isReplacement = false}) {
+  void to(PageStackBase pageStack, {bool isReplacement = false}) {
     _sElements = updatePageStackBaseSElements(
       context,
       oldSElements: _sElements,
@@ -439,7 +438,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void _toSElements(IList<SElement<NonNestedStack>> sElements, {bool isReplacement = false}) {
+  void _toSElements(IList<SElement> sElements, {bool isReplacement = false}) {
     final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
     return _toCallback(

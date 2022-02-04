@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
-import '../page_stack/nested_stack.dart';
 
 /// A class used to interact with the web url
 ///
@@ -18,8 +17,7 @@ import '../page_stack/nested_stack.dart';
 /// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class STranslator<Element extends SElement<N>, PS extends PageStackBase<N>,
-    N extends MaybeNestedStack> {
+abstract class STranslator<Element extends SElement, PS extends PageStackBase> {
   /// This constructor checks that the [PS] generic (stored in [pageStackType])
   /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)

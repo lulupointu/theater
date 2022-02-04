@@ -78,11 +78,11 @@ class _BooksAppState extends State<BooksApp> {
         translatorsBuilder: (_) => [
           ...authState.isSignedIn
               ? [
-                  PathTranslator<HomePageStack, NonNestedStack>(
+                  PathTranslator<HomePageStack>(
                     path: '/',
                     pageStack: HomePageStack(onSignOut: authState.signOut),
                   ),
-                  PathTranslator<BooksListPageStack, NonNestedStack>(
+                  PathTranslator<BooksListPageStack>(
                     path: '/books',
                     pageStack: BooksListPageStack(onSignOut: authState.signOut),
                   ),
@@ -92,7 +92,7 @@ class _BooksAppState extends State<BooksApp> {
                   ),
                 ]
               : [
-                  PathTranslator<SignInPageStack, NonNestedStack>(
+                  PathTranslator<SignInPageStack>(
                     path: '/signin',
                     pageStack: SignInPageStack(onSignedIn: authState.signIn),
                   ),
@@ -142,7 +142,7 @@ class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class HomePageStack extends PageStack<NonNestedStack> {
+class HomePageStack extends PageStack {
   final VoidCallback onSignOut;
 
   HomePageStack({required this.onSignOut});
@@ -151,7 +151,7 @@ class HomePageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => HomeScreen(onSignOut: onSignOut);
 }
 
-class SignInPageStack extends PageStack<NonNestedStack> {
+class SignInPageStack extends PageStack {
   final ValueChanged<Credentials> onSignedIn;
 
   SignInPageStack({required this.onSignedIn});
@@ -160,7 +160,7 @@ class SignInPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => SignInScreen(onSignedIn: onSignedIn);
 }
 
-class BooksListPageStack extends PageStack<NonNestedStack> {
+class BooksListPageStack extends PageStack {
   final VoidCallback onSignOut;
 
   BooksListPageStack({required this.onSignOut});
@@ -169,7 +169,7 @@ class BooksListPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => BooksListScreen();
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) =>
+  PageStackBase createPageStackBellow(BuildContext context) =>
       HomePageStack(onSignOut: onSignOut);
 }
 

@@ -2,7 +2,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import '../nested_stack.dart';
 
 /// The state of [Multi2TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi2TabsPageStack] is pushed)
@@ -22,10 +21,10 @@ class Multi2TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1PageStack;
+  final PageStackBase tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2PageStack;
+  final PageStackBase tab2PageStack;
 
   /// A list of 2 widgets, one for each tab
   ///
@@ -40,8 +39,8 @@ class Multi2TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi2TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1PageStack,
-    PageStackBase<NestedStack>? tab2PageStack,
+    PageStackBase? tab1PageStack,
+    PageStackBase? tab2PageStack,
   }) {
     return Multi2TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -53,7 +52,7 @@ class Multi2TabsState extends MultiTabState {
   /// Creates a [Multi2TabsState] from a [_STabsState], internal use only
   factory Multi2TabsState._fromSTabsState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> sRoutes,
+    IList<PageStackBase> sRoutes,
   ) =>
       Multi2TabsState(
         activeIndex: activeIndex,
@@ -66,7 +65,7 @@ class Multi2TabsState extends MultiTabState {
 /// with 2 tabs.
 ///
 /// {@macro srouter.framework.STabsRoute}
-abstract class Multi2TabsPageStack<N extends MaybeNestedStack> extends MultiTabPageStack<Multi2TabsState, N> {
+abstract class Multi2TabsPageStack extends MultiTabPageStack<Multi2TabsState> {
   /// {@macro srouter.framework.STabsRoute.constructor}
   @mustCallSuper
   Multi2TabsPageStack(StateBuilder<Multi2TabsState> stateBuilder)

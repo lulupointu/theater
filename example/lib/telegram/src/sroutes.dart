@@ -20,7 +20,7 @@ import 'navigators_implementations.dart';
 /// because only the [STabbedRoute] can directly be pushed into [SRouter]
 
 // Left side
-class ChatsListPageStack extends PageStack<NestedStack> {
+class ChatsListPageStack extends PageStack {
   final ChatsListNavigator navigator;
   final List<Chat> chats;
 
@@ -38,7 +38,7 @@ class ChatsListPageStack extends PageStack<NestedStack> {
   }
 }
 
-class SettingsPageStack extends PageStack<NestedStack> {
+class SettingsPageStack extends PageStack {
   final SettingsNavigator settingsNavigator;
   final ChatsListNavigator chatsListNavigator;
   final List<Chat> chats;
@@ -55,7 +55,7 @@ class SettingsPageStack extends PageStack<NestedStack> {
   }
 
   @override
-  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return ChatsListPageStack(
       navigator: chatsListNavigator,
       chats: chats,
@@ -64,7 +64,7 @@ class SettingsPageStack extends PageStack<NestedStack> {
 }
 
 // Middle side
-class StackedChatsPageStack extends PageStack<NestedStack> {
+class StackedChatsPageStack extends PageStack {
   final ChatNavigator navigator;
   final List<Chat> chats;
 
@@ -114,7 +114,7 @@ class StackedChatsPageStack extends PageStack<NestedStack> {
   }
 
   @override
-  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return chats.length <= 1
         ? null
         : StackedChatsPageStack(chats: List.from(chats)..removeLast(), navigator: navigator);
@@ -122,7 +122,7 @@ class StackedChatsPageStack extends PageStack<NestedStack> {
 }
 
 // Right side
-class MembersDetailsPageStack extends PageStack<NestedStack> {
+class MembersDetailsPageStack extends PageStack {
   final MembersDetailsNavigator navigator;
 
   MembersDetailsPageStack({
@@ -143,7 +143,7 @@ class MembersDetailsPageStack extends PageStack<NestedStack> {
 // The [chats] global variable is used directly but since it's a global
 // dependency something like a [Provider] should be put on top on [SRouter] and
 // be accessed here (or even in the screens directly)
-class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
+class TabsWrapperPageStack extends Multi3TabsPageStack {
   final bool showMemberDetails;
   final bool maybeShowLeftTab;
 
@@ -158,7 +158,7 @@ class TabsWrapperPageStack extends Multi3TabsPageStack<NonNestedStack> {
     bool? showMemberDetails,
     bool? maybeShowLeftTab,
     List<Chat>? selectedChats,
-    PageStackBase<NestedStack>? tabLeftRoute,
+    PageStackBase? tabLeftRoute,
   }) {
     final previousState = context.read<TabsWrapperScreenState?>();
 

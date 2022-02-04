@@ -3,14 +3,14 @@ import 'package:srouter/srouter.dart';
 
 import 'advanced_books_srouter.dart';
 
-class HomePageStack extends PageStack<NonNestedStack> {
+class HomePageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return HomeScreen();
   }
 }
 
-class BooksPageStack extends PageStack<NonNestedStack> {
+class BooksPageStack extends PageStack {
   final List<Book> books;
   final String? searchedGenre;
   final String? searchedName;
@@ -37,12 +37,12 @@ class BooksPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return HomePageStack();
   }
 }
 
-class BookDetailsPageStack extends PageStack<NonNestedStack> {
+class BookDetailsPageStack extends PageStack {
   final List<Book> books;
   final Book book;
   final String title;
@@ -55,12 +55,12 @@ class BookDetailsPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return BooksPageStack(books: books);
   }
 }
 
-class BookBuyPageStack extends PageStack<NonNestedStack> {
+class BookBuyPageStack extends PageStack {
   final List<Book> books;
   final Book book;
   final String title;
@@ -73,12 +73,12 @@ class BookBuyPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return BookDetailsPageStack(books: books, book: book);
   }
 }
 
-class BookGenresPageStack extends PageStack<NonNestedStack> {
+class BookGenresPageStack extends PageStack {
   final List<Book> books;
   final Book book;
   final String title;
@@ -92,7 +92,7 @@ class BookGenresPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return BookDetailsPageStack(books: books, book: book);
   }
 }

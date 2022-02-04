@@ -1,6 +1,5 @@
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
-import '../page_stack/nested_stack.dart';
 import '../translators/translator.dart';
 import 'history_entry.dart';
 import 's_router.dart';
@@ -33,7 +32,7 @@ abstract class SRouterInterface {
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void to(PageStackBase<NonNestedStack> pageStack, {bool isReplacement = false});
+  void to(PageStackBase pageStack, {bool isReplacement = false});
 
   /// Pushes a new [WebEntry] which will eventually be converted in its
   /// corresponding [PageStack]

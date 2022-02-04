@@ -15,12 +15,12 @@ class MyApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: HomePageStack(),
         translatorsBuilder: (_) => [
-          PathTranslator<HomePageStack, NonNestedStack>(
+          PathTranslator<HomePageStack>(
             path: '/',
             pageStack: HomePageStack(),
             title: 'Home',
           ),
-          PathTranslator<BooksPageStack, NonNestedStack>.parse(
+          PathTranslator<BooksPageStack>.parse(
             path: '/books',
             matchToPageStack: (match) => BooksPageStack(
               books: books,
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
+          PathTranslator<BookDetailsPageStack>.parse(
             path: '/books/:bookId',
             matchToPageStack: (match) => BookDetailsPageStack(
               books: books,
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          PathTranslator<BookBuyPageStack, NonNestedStack>.parse(
+          PathTranslator<BookBuyPageStack>.parse(
             path: '/books/:bookId/buy',
             matchToPageStack: (match) => BookBuyPageStack(
               books: books,
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
               title: route.title,
             ),
           ),
-          PathTranslator<BookGenresPageStack, NonNestedStack>.parse(
+          PathTranslator<BookGenresPageStack>.parse(
             path: '/books/:bookId/genres',
             matchToPageStack: (match) => BookGenresPageStack(
               books: books,

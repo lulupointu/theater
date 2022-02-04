@@ -3,7 +3,7 @@ import 'package:srouter/srouter.dart';
 
 import 'multi_stack_srouter.dart';
 
-class SettingsPageStack extends PageStack<NonNestedStack> {
+class SettingsPageStack extends PageStack {
   final TabItem tabItem;
 
   SettingsPageStack({required this.tabItem});
@@ -20,14 +20,14 @@ class SettingsPageStack extends PageStack<NonNestedStack> {
   _withCapitalLetter(String word) => word[0].toUpperCase() + word.substring(1);
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+  PageStackBase createPageStackBellow(BuildContext context) {
     return AppPageStack(
       (state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem)),
     );
   }
 }
 
-class AppPageStack extends Multi2TabsPageStack<NonNestedStack> {
+class AppPageStack extends Multi2TabsPageStack {
   AppPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
@@ -46,7 +46,7 @@ class AppPageStack extends Multi2TabsPageStack<NonNestedStack> {
       );
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     // TODO: implement createPageStackBellow
     return super.createPageStackBellow(context);
   }
@@ -60,7 +60,7 @@ class GreenListPageStack extends ColoredListPageStack {
   GreenListPageStack() : super(TabItem.green);
 }
 
-abstract class ColoredListPageStack extends PageStack<NestedStack> {
+abstract class ColoredListPageStack extends PageStack {
   final TabItem tabItem;
 
   ColoredListPageStack(this.tabItem);
@@ -99,7 +99,7 @@ class GreenDetailPageStack extends ColoredDetailPageStack {
   GreenDetailPageStack({required this.materialIndex}) : super(TabItem.green);
 }
 
-abstract class ColoredDetailPageStack extends PageStack<NestedStack> {
+abstract class ColoredDetailPageStack extends PageStack {
   int get materialIndex;
 
   final TabItem tabItem;
@@ -117,7 +117,7 @@ abstract class ColoredDetailPageStack extends PageStack<NestedStack> {
   }
 
   @override
-  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     switch (tabItem) {
       case TabItem.red:
         return RedListPageStack();

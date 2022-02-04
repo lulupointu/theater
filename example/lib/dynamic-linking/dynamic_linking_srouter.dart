@@ -42,11 +42,11 @@ class _WishlistAppState extends State<WishlistApp> {
       builder: SRouter.build(
         initialPageStack: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
-          PathTranslator<WishlistListPageStack, NonNestedStack>(
+          PathTranslator<WishlistListPageStack>(
             path: '/',
             pageStack: WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist),
           ),
-          PathTranslator<WishlistPageStack, NonNestedStack>.parse(
+          PathTranslator<WishlistPageStack>.parse(
             path: '/wishlist/:id',
             matchToPageStack: (match) {
               final wishlist = Wishlist(match.pathParams['id']!);
@@ -66,7 +66,7 @@ class _WishlistAppState extends State<WishlistApp> {
   }
 }
 
-class WishlistListPageStack extends PageStack<NonNestedStack> {
+class WishlistListPageStack extends PageStack {
   final List<Wishlist> wishlists;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
 
@@ -78,7 +78,7 @@ class WishlistListPageStack extends PageStack<NonNestedStack> {
   }
 }
 
-class WishlistPageStack extends PageStack<NonNestedStack> {
+class WishlistPageStack extends PageStack {
   final List<Wishlist> wishlists;
   final Wishlist wishlist;
   final void Function(BuildContext context, Wishlist wishlist) toWishlist;
@@ -89,7 +89,7 @@ class WishlistPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => WishlistScreen(wishlist: wishlist);
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+  PageStackBase createPageStackBellow(BuildContext context) {
     return WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist);
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import '../../browser/s_browser.dart';
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
-import '../../page_stack/nested_stack.dart';
 import '../../s_router/history_entry.dart';
 import '../../s_router/s_router.dart';
 import '../page_stack_translator.dart';
@@ -20,7 +19,7 @@ import '../translator.dart';
 /// This should be used on mobile at the bottom of the [translator] so that if
 /// a [SRouter] navigates somewhere, the response of other [SRouter]s will be
 /// to re-render the same route
-class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase<NonNestedStack>, NonNestedStack> {
+class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
   /// This is a trick to please our assert which checks that the generic type
   /// of [STranslator] is available at runtime
   ///
@@ -29,7 +28,7 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase<NonNes
   Type get pageStackType => dynamic;
 
   /// The initial [PageStack] to display when the [SRouter] is initialized
-  final PageStackBase<NonNestedStack> initialPageStack;
+  final PageStackBase initialPageStack;
 
   /// The history of the [SRouterState] associating history indexes to
   /// [HistoryEntry]
@@ -39,14 +38,14 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase<NonNes
   UniversalNonWebTranslator({required this.initialPageStack, required this.history});
 
   @override
-  WebEntry sRouteToWebEntry(BuildContext context, PageStackBase<NonNestedStack> route) {
+  WebEntry sRouteToWebEntry(BuildContext context, PageStackBase route) {
     // Use SBrowser directly because the currentWebEntry may not be
     // set at this point
     return SBrowser.instance.webEntry;
   }
 
   @override
-  PageStackBase<NonNestedStack> webEntryToPageStack(BuildContext context, WebEntry webEntry) {
+  PageStackBase webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final currentHistoryIndex = SBrowser.instance.historyIndex;
 
     // Try to return the current route

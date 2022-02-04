@@ -2,7 +2,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import '../nested_stack.dart';
 
 /// The state of [Multi6TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi6TabsPageStack] is pushed)
@@ -33,22 +32,22 @@ class Multi6TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1PageStack;
+  final PageStackBase tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2PageStack;
+  final PageStackBase tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3PageStack;
+  final PageStackBase tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase<NestedStack> tab4PageStack;
+  final PageStackBase tab4PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 4)
-  final PageStackBase<NestedStack> tab5PageStack;
+  final PageStackBase tab5PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 5)
-  final PageStackBase<NestedStack> tab6PageStack;
+  final PageStackBase tab6PageStack;
 
   /// A list of 6 widgets, one for each tab
   ///
@@ -63,12 +62,12 @@ class Multi6TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi6TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1PageStack,
-    PageStackBase<NestedStack>? tab2PageStack,
-    PageStackBase<NestedStack>? tab3PageStack,
-    PageStackBase<NestedStack>? tab4PageStack,
-    PageStackBase<NestedStack>? tab5PageStack,
-    PageStackBase<NestedStack>? tab6PageStack,
+    PageStackBase? tab1PageStack,
+    PageStackBase? tab2PageStack,
+    PageStackBase? tab3PageStack,
+    PageStackBase? tab4PageStack,
+    PageStackBase? tab5PageStack,
+    PageStackBase? tab6PageStack,
   }) {
     return Multi6TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -84,7 +83,7 @@ class Multi6TabsState extends MultiTabState {
   /// Creates a [Multi6TabsState] from a [_STabsState], internal use only
   factory Multi6TabsState._fromSTabsState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> sRoutes,
+    IList<PageStackBase> sRoutes,
   ) =>
       Multi6TabsState(
         activeIndex: activeIndex,
@@ -101,7 +100,7 @@ class Multi6TabsState extends MultiTabState {
 /// with 6 tabs.
 ///
 /// {@macro srouter.framework.STabsRoute}
-abstract class Multi6TabsPageStack<N extends MaybeNestedStack> extends MultiTabPageStack<Multi6TabsState, N> {
+abstract class Multi6TabsPageStack extends MultiTabPageStack<Multi6TabsState> {
   /// {@macro srouter.framework.STabsRoute.constructor}
   @mustCallSuper
   Multi6TabsPageStack(StateBuilder<Multi6TabsState> stateBuilder)

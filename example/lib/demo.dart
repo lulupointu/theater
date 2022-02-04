@@ -14,15 +14,15 @@ class MyApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: UserPageStack(),
         translatorsBuilder: (_) => [
-          PathTranslator<UserPageStack, NonNestedStack>(
+          PathTranslator<UserPageStack>(
             path: '/user',
             pageStack: UserPageStack(),
           ),
-          PathTranslator<SettingsPageStack, NonNestedStack>(
+          PathTranslator<SettingsPageStack>(
             path: '/settings',
             pageStack: SettingsPageStack(),
           ),
-          RedirectorTranslator<NonNestedStack>(path: '*', pageStack: UserPageStack()),
+          RedirectorTranslator(path: '*', pageStack: UserPageStack()),
         ],
       ),
     );
@@ -56,21 +56,21 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class UserPageStack extends PageStack<NonNestedStack> {
+class UserPageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return UserScreen();
   }
 }
 
-class SettingsPageStack extends PageStack<NonNestedStack> {
+class SettingsPageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return SettingsScreen();
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return UserPageStack();
   }
 }

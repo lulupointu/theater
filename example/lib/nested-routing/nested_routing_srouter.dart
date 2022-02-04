@@ -16,19 +16,19 @@ class BooksApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: ScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
-          Multi2TabsTranslator<ScaffoldPageStack, NonNestedStack>(
+          Multi2TabsTranslator<ScaffoldPageStack>(
             pageStack: ScaffoldPageStack.new,
             tab1Translators: [
-              Multi2TabsTranslator<BooksViewPageStack, NestedStack>(
+              Multi2TabsTranslator<BooksViewPageStack>(
                 pageStack: BooksViewPageStack.new,
                 tab1Translators: [
-                  PathTranslator<NewBooksPageStack, NestedStack>(
+                  PathTranslator<NewBooksPageStack>(
                     path: '/books/new',
                     pageStack: NewBooksPageStack(),
                   ),
                 ],
                 tab2Translators: [
-                  PathTranslator<AllBooksPageStack, NestedStack>(
+                  PathTranslator<AllBooksPageStack>(
                     path: '/books/all',
                     pageStack: AllBooksPageStack(),
                   ),
@@ -36,7 +36,7 @@ class BooksApp extends StatelessWidget {
               ),
             ],
             tab2Translators: [
-              PathTranslator<SettingsPageStack, NestedStack>(
+              PathTranslator<SettingsPageStack>(
                 path: '/settings',
                 pageStack: SettingsPageStack(),
               ),
@@ -52,7 +52,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class ScaffoldPageStack extends Multi2TabsPageStack<NonNestedStack> {
+class ScaffoldPageStack extends Multi2TabsPageStack {
   ScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
@@ -71,7 +71,7 @@ class ScaffoldPageStack extends Multi2TabsPageStack<NonNestedStack> {
       );
 }
 
-class BooksViewPageStack extends Multi2TabsPageStack<NestedStack> {
+class BooksViewPageStack extends Multi2TabsPageStack {
   BooksViewPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
@@ -87,17 +87,17 @@ class BooksViewPageStack extends Multi2TabsPageStack<NestedStack> {
       );
 }
 
-class NewBooksPageStack extends PageStack<NestedStack> {
+class NewBooksPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => NewBooksScreen();
 }
 
-class AllBooksPageStack extends PageStack<NestedStack> {
+class AllBooksPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => AllBooksScreen();
 }
 
-class SettingsPageStack extends PageStack<NestedStack> {
+class SettingsPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }

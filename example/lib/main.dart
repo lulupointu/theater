@@ -15,18 +15,14 @@ class MyApp extends StatelessWidget {
         initialPageStack: LogInPageStack(),
         sUrlStrategy: SUrlStrategy.history,
         translatorsBuilder: (_) => [
-          PathTranslator<LogInPageStack, NonNestedStack>(
-              path: '/', pageStack: LogInPageStack()),
-          Multi2TabsTranslator<MainPageStack, NonNestedStack>(
+          PathTranslator<LogInPageStack>(path: '/', pageStack: LogInPageStack()),
+          Multi2TabsTranslator<MainPageStack>(
             pageStack: MainPageStack.new,
             tab1Translators: [
-              PathTranslator<UserPageStack, NestedStack>(
-                path: '/user',
-                pageStack: UserPageStack(),
-              ),
+              PathTranslator<UserPageStack>(path: '/user', pageStack: UserPageStack()),
             ],
             tab2Translators: [
-              PathTranslator<SettingsPageStack, NestedStack>(
+              PathTranslator<SettingsPageStack>(
                 path: '/settings',
                 pageStack: SettingsPageStack(),
               ),
@@ -38,12 +34,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LogInPageStack extends PageStack<NonNestedStack> {
+class LogInPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => LoginScreen();
 }
 
-class MainPageStack extends Multi2TabsPageStack<NonNestedStack> {
+class MainPageStack extends Multi2TabsPageStack {
   MainPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
@@ -51,7 +47,7 @@ class MainPageStack extends Multi2TabsPageStack<NonNestedStack> {
       MainScreen(currentIndex: state.activeIndex, child: state.tabs[state.activeIndex]);
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+  PageStackBase createPageStackBellow(BuildContext context) {
     return LogInPageStack();
   }
 
@@ -63,12 +59,12 @@ class MainPageStack extends Multi2TabsPageStack<NonNestedStack> {
       );
 }
 
-class UserPageStack extends PageStack<NestedStack> {
+class UserPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => UserScreen();
 }
 
-class SettingsPageStack extends PageStack<NestedStack> {
+class SettingsPageStack extends PageStack {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }

@@ -9,7 +9,6 @@ import '../translators/translator.dart';
 import '../translators/translators/web_entry_matcher/web_entry_match.dart';
 import '../translators/translators/web_entry_matcher/web_entry_matcher.dart';
 import '../translators/translators_handler.dart';
-import 'nested_stack.dart';
 import 'system_pop_result/system_pop_result.dart';
 
 /// This is the base objects which constitute SRouter.
@@ -45,7 +44,7 @@ import 'system_pop_result/system_pop_result.dart';
 /// [SElement.buildPage]
 
 // TODO: write doc
-abstract class SElement<N extends MaybeNestedStack> {
+abstract class SElement {
   /// Creates an element that uses the given [SWidget] as its configuration.
   ///
   /// Typically called by an override of [SWidget.createSElement].
@@ -54,8 +53,8 @@ abstract class SElement<N extends MaybeNestedStack> {
   /// The configuration of this [SElement]
   ///
   /// This is updated in [update]
-  SWidget<N> get sWidget => _sWidget;
-  SWidget<N> _sWidget;
+  SWidget get sWidget => _sWidget;
+  SWidget _sWidget;
 
   /// Builds the [Page] associated with this [SElement]
   ///
@@ -83,7 +82,7 @@ abstract class SElement<N extends MaybeNestedStack> {
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
   @mustCallSuper
-  void update(covariant SWidget<N> newSWidget, BuildContext context) => _sWidget = newSWidget;
+  void update(covariant SWidget newSWidget, BuildContext context) => _sWidget = newSWidget;
 
   /// A function which is called by a parent [SElement] when the android back
   /// button is pressed
@@ -116,13 +115,13 @@ abstract class SElement<N extends MaybeNestedStack> {
 /// [SElement] is updated by calling [SElement.update] with the [SWidget] as a
 /// parameter
 @immutable
-abstract class SWidget<N extends MaybeNestedStack> {
+abstract class SWidget {
   /// An identifier of the [SWidget] used in [canUpdate] to know if a [SElement]
   /// is associated with this [SWidget] or not
   final Key? key;
 
   /// The configuration of this widget
-  final PageStackBase<N> pageStack;
+  final PageStackBase pageStack;
 
   /// Initializes [key] for subclasses.
   ///
@@ -134,7 +133,7 @@ abstract class SWidget<N extends MaybeNestedStack> {
   /// This can be called several time or never depending on whether a new
   /// [SElement] needs to be instantiated. Read this class description for
   /// more details.
-  SElement<N> createSElement();
+  SElement createSElement();
 
   /// Whether two [SWidget]s are considered to be the "same" from the point of
   /// view of an [SElement]
@@ -148,12 +147,12 @@ abstract class SWidget<N extends MaybeNestedStack> {
 
 /// An [SElement] which is entirely defined by its [StatelessSWidget]
 /// configuration
-class StatelessSElement<N extends MaybeNestedStack> extends SElement<N> {
+class StatelessSElement extends SElement {
   /// Creates an element which uses [sWidget] as its configuration
-  StatelessSElement(StatelessSWidget<N> sWidget) : super(sWidget);
+  StatelessSElement(StatelessSWidget sWidget) : super(sWidget);
 
   @override
-  StatelessSWidget<N> get sWidget => super.sWidget as StatelessSWidget<N>;
+  StatelessSWidget get sWidget => super.sWidget as StatelessSWidget;
 
   @override
   Page buildPage(BuildContext context) => sWidget.buildPage(context);
@@ -167,13 +166,13 @@ class StatelessSElement<N extends MaybeNestedStack> extends SElement<N> {
 ///
 /// [buildPage] will be use when the [SElement] needs to build its page (in
 /// [SElement.buildPage])
-abstract class StatelessSWidget<N extends MaybeNestedStack> extends SWidget<N> {
+abstract class StatelessSWidget extends SWidget {
   /// Gives the [pageStack] and [key] to its superclass
-  const StatelessSWidget(PageStackBase<N> pageStack, {Key? key}) : super(pageStack, key: key);
+  const StatelessSWidget(PageStackBase pageStack, {Key? key}) : super(pageStack, key: key);
 
   @nonVirtual
   @override
-  SElement<N> createSElement() => StatelessSElement(this);
+  SElement createSElement() => StatelessSElement(this);
 
   /// Builds the page corresponding to this [SWidget]
   Page buildPage(BuildContext context);
@@ -188,7 +187,7 @@ abstract class StatelessSWidget<N extends MaybeNestedStack> extends SWidget<N> {
 ///   - Creating a [PageStack] in [createPageStackBellow] which describes the [Page]s
 ///   ^ which are bellow the one created in [createSWidget]
 @immutable
-abstract class PageStackBase<N extends MaybeNestedStack> {
+abstract class PageStackBase {
   /// Defines a const constructor so that subclasses can be const
   const PageStackBase();
 
@@ -198,7 +197,7 @@ abstract class PageStackBase<N extends MaybeNestedStack> {
   ///
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
-  SWidget<N> createSWidget(BuildContext context);
+  SWidget createSWidget(BuildContext context);
 
   /// Creates an [PageStackBase] which describes the [Page]s to display bellow the
   /// page created by the [SWidget] in [createSWidget]
@@ -208,14 +207,14 @@ abstract class PageStackBase<N extends MaybeNestedStack> {
   ///
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
-  PageStackBase<N>? createPageStackBellow(BuildContext context);
+  PageStackBase? createPageStackBellow(BuildContext context);
 }
 
 /// An extension which allows us to easily build all the [SWidget]s generated
 /// by a [PageStack] (including the [PageStack] own [SWidget] and all those generated
 /// by the [PageStack] of [createPageStackBellow])
-extension _PageStackBaseSWidgetsBuilder<N extends MaybeNestedStack> on PageStackBase<N> {
-  IList<SWidget<N>> createSWidgets(BuildContext context) => <SWidget<N>>[
+extension _PageStackBaseSWidgetsBuilder on PageStackBase {
+  IList<SWidget> createSWidgets(BuildContext context) => <SWidget>[
         ...(createPageStackBellow(context)?.createSWidgets(context) ?? []),
         createSWidget(context),
       ].lock;
@@ -228,13 +227,13 @@ extension _PageStackBaseSWidgetsBuilder<N extends MaybeNestedStack> on PageStack
 /// It uses the same method that Flutter does, by matching the [SElement]
 /// with the [SWidget] of same runtimeType and key, else creating new
 /// [SElement] by calling [SWidget.createSElement]
-IList<SElement<N>> updatePageStackBaseSElements<N extends MaybeNestedStack>(
+IList<SElement> updatePageStackBaseSElements(
   BuildContext context, {
-  required IList<SElement<N>> oldSElements,
-  required PageStackBase<N> pageStack,
+  required IList<SElement> oldSElements,
+  required PageStackBase pageStack,
 }) {
   var _oldSElements = oldSElements;
-  var _newSElements = IList<SElement<N>>();
+  var _newSElements = IList<SElement>();
   for (final _sWidget in pageStack.createSWidgets(context)) {
     // If we have a widget match (i.e. the runtimeType are the same), we
     // update the corresponding element with the new widget
@@ -275,8 +274,7 @@ IList<SElement<N>> updatePageStackBaseSElements<N extends MaybeNestedStack>(
 /// describe a list of [SWidget]s and not a single one but it turns out that
 /// having both purpose it intuitive and effective. See [StatelessPageStack] to
 /// understand why.
-class StatelessPageStackSWidget<PS extends StatelessPageStack<N>, N extends MaybeNestedStack>
-    extends StatelessSWidget<N> {
+class StatelessPageStackSWidget<PS extends StatelessPageStack> extends StatelessSWidget {
   /// The configuration of this [SWidget]
   final PS pageStack;
 
@@ -296,7 +294,7 @@ class StatelessPageStackSWidget<PS extends StatelessPageStack<N>, N extends Mayb
 ///   ^ the [PageStack] returned by [createPageStackBellow] AND a
 ///   ^ [StatelessPageStackSWidget]
 ///   2. Is the configuration of the [StatelessPageStackSWidget]
-abstract class StatelessPageStack<N extends MaybeNestedStack> extends PageStackBase<N> {
+abstract class StatelessPageStack extends PageStackBase {
   /// Instantiate the [key] for subclasses
   const StatelessPageStack({this.key});
 
@@ -308,7 +306,7 @@ abstract class StatelessPageStack<N extends MaybeNestedStack> extends PageStackB
 
   @override
   @nonVirtual
-  SWidget<N> createSWidget(BuildContext context) =>
+  SWidget createSWidget(BuildContext context) =>
       StatelessPageStackSWidget(this, key: key ?? ValueKey(runtimeType));
 
   /// The page that will be build by the associated [StatelessPageStackSWidget]
@@ -324,10 +322,10 @@ abstract class StatelessPageStack<N extends MaybeNestedStack> extends PageStackB
   ///
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
-  PageStackBase<N>? createPageStackBellow(BuildContext context);
+  PageStackBase? createPageStackBellow(BuildContext context);
 }
 
-mixin _DefaultBuildPage<N extends MaybeNestedStack> on PageStackBase<N> {
+mixin _DefaultBuildPage on PageStackBase {
   /// A key used (if non-null) in the [Page] built in [buildPage]
   Key? get key;
 
@@ -387,8 +385,7 @@ mixin _DefaultBuildPage<N extends MaybeNestedStack> on PageStackBase<N> {
 ///
 /// You an also override [onPop] to change the behavior of when pop is called
 /// on this [PageStack]
-abstract class PageStack<N extends MaybeNestedStack> extends StatelessPageStack<N>
-    with _DefaultBuildPage<N> {
+abstract class PageStack extends StatelessPageStack with _DefaultBuildPage {
   /// Passes the given key to the super constructor.
   ///
   /// If non-null, this key will also be used in [buildPage] to identify the
@@ -408,7 +405,7 @@ abstract class PageStack<N extends MaybeNestedStack> extends StatelessPageStack<
 
   /// By default, we don't build any [Page] bellow this one
   @override
-  PageStackBase<N>? createPageStackBellow(BuildContext context) => null;
+  PageStackBase? createPageStackBellow(BuildContext context) => null;
 }
 
 /// A function to build the state [S] based on a previous value of the state
@@ -436,7 +433,7 @@ class MultiTabState {
   /// {@endtemplate}
   MultiTabState({
     required this.activeIndex,
-    required IList<PageStackBase<NestedStack>> tabsPageStacks,
+    required IList<PageStackBase> tabsPageStacks,
   }) : _pageStacks = tabsPageStacks;
 
   /// An index indicating which tab is currently active
@@ -452,7 +449,7 @@ class MultiTabState {
   ///
   ///
   /// Its length determines the number of tabs
-  final IList<PageStackBase<NestedStack>> _pageStacks;
+  final IList<PageStackBase> _pageStacks;
 
   /// The tabs as usable [Widget] to put in the widget tree
   ///
@@ -465,14 +462,14 @@ class MultiTabState {
 /// The element created by [_STabsSWidget]
 ///
 /// It manages the [MultiTabState] and all the [SElement]s it creates
-class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends SElement<N> {
+class STabsSElement<S extends MultiTabState> extends SElement {
   /// Initialize the [state] with the initial state of the [MultiTabPageStack]
-  STabsSElement(_STabsSWidget<S, N> sWidget)
+  STabsSElement(_STabsSWidget<S> sWidget)
       : _initialState = sWidget._multiTabPageStack.initialState,
         super(sWidget);
 
   @override
-  _STabsSWidget<S, N> get sWidget => super.sWidget as _STabsSWidget<S, N>;
+  _STabsSWidget<S> get sWidget => super.sWidget as _STabsSWidget<S>;
 
   /// The state of the [MultiTabPageStack]
   ///
@@ -515,8 +512,8 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
   /// This is updated each time [state] changes, by using the method described
   /// at the top of this file (the same method Flutter uses to update its
   /// widgets and elements)
-  IMap<int, IList<SElement<NestedStack>>> get tabsSElements => _tabsSElements;
-  IMap<int, IList<SElement<NestedStack>>> _tabsSElements = IMap();
+  IMap<int, IList<SElement>> get tabsSElements => _tabsSElements;
+  IMap<int, IList<SElement>> _tabsSElements = IMap();
 
   /// The [GlobalKey] of the navigator of each tab
   ///
@@ -581,7 +578,8 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
                 // the one bellow
                 //
                 // It has to exist if didPop is true
-                final newTabPageStack = tabSElements[tabSElements.length - 2].sWidget.pageStack;
+                final newTabPageStack =
+                    tabSElements[tabSElements.length - 2].sWidget.pageStack;
                 _updateState(
                   context,
                   newState: sWidget._multiTabPageStack._buildFromMultiTabState(
@@ -605,7 +603,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
   void initialize(BuildContext context) {
     super.initialize(context);
 
-    // We need to update the state even now because the initial 
+    // We need to update the state even now because the initial
     // [_MultiTabPageStack] also has a state builder which must
     // be taken into account
     _updateState(context, newState: sWidget._multiTabPageStack._stateBuilder(_initialState));
@@ -616,7 +614,7 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
   ///   - [state] using [MultiTabPageStack._stateBuilder]
   ///   - [_tabsSElements] using the [SWidget]s generating by [state._pageStacks]
   @override
-  void update(covariant _STabsSWidget<S, N> newSWidget, BuildContext context) {
+  void update(covariant _STabsSWidget<S> newSWidget, BuildContext context) {
     super.update(newSWidget, context);
 
     // Since [MultiTabState] is immutable, we receive a new instance where
@@ -639,12 +637,12 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
             activeTabSElements.getOrNull(activeTabSElements.length - 2)?.sWidget.pageStack;
 
         if (tabPageStackBellow == null) {
-          // If there is no [PageStack] bellow, delegate the system pop to the 
+          // If there is no [PageStack] bellow, delegate the system pop to the
           // parent
           return SystemPopResult.parent();
         }
 
-        // If there is a [PageStack] bellow, update the state with the new tab 
+        // If there is a [PageStack] bellow, update the state with the new tab
         // PageStack
         _updateState(
           context,
@@ -664,15 +662,16 @@ class STabsSElement<S extends MultiTabState, N extends MaybeNestedStack> extends
 /// The [SWidget] creating the [STabsSElement]
 ///
 /// It uses [MultiTabPageStack] as its configuration
-class _STabsSWidget<S extends MultiTabState, N extends MaybeNestedStack> extends SWidget<N> {
+class _STabsSWidget<S extends MultiTabState> extends SWidget {
   /// Passes the [key] to the super constructor and initializes [_multiTabPageStack]
-  const _STabsSWidget(this._multiTabPageStack, {Key? key}) : super(_multiTabPageStack, key: key);
+  const _STabsSWidget(this._multiTabPageStack, {Key? key})
+      : super(_multiTabPageStack, key: key);
 
   /// The configuration of this widget
-  final MultiTabPageStack<S, N> _multiTabPageStack;
+  final MultiTabPageStack<S> _multiTabPageStack;
 
   @override
-  SElement<N> createSElement() => STabsSElement<S, N>(this);
+  SElement createSElement() => STabsSElement<S>(this);
 }
 
 /// {@template srouter.framework.STabsRoute}
@@ -741,8 +740,8 @@ class _STabsSWidget<S extends MultiTabState, N extends MaybeNestedStack> extends
 /// a fixed number of tabs
 ///
 /// {@endtemplate}
-abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedStack> extends PageStackBase<N>
-    with _DefaultBuildPage<N> {
+abstract class MultiTabPageStack<S extends MultiTabState> extends PageStackBase
+    with _DefaultBuildPage {
   /// A const constructor initializing different attributes with the given
   /// values
   ///
@@ -799,7 +798,7 @@ abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedS
       );
 
   /// By default, we don't build any [Page] bellow this one
-  PageStackBase<N>? createPageStackBellow(BuildContext context) => null;
+  PageStackBase? createPageStackBellow(BuildContext context) => null;
 
   /// Returns a new state based on the previous value of the state
   ///
@@ -814,8 +813,8 @@ abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedS
 
   @override
   @nonVirtual
-  SWidget<N> createSWidget(BuildContext context) =>
-      _STabsSWidget<S, N>(this, key: key ?? ValueKey(runtimeType));
+  SWidget createSWidget(BuildContext context) =>
+      _STabsSWidget<S>(this, key: key ?? ValueKey(runtimeType));
 
   /// A function which build the state [S] based on the base state class
   /// [MultiTabState]
@@ -829,7 +828,7 @@ abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedS
   /// visible to the end user
   final S Function(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> tabsPageStacks,
+    IList<PageStackBase> tabsPageStacks,
   ) _buildFromMultiTabState;
 }
 
@@ -852,12 +851,12 @@ abstract class MultiTabPageStack<S extends MultiTabState, N extends MaybeNestedS
 ///
 /// DO use [Multi2TabsTranslator], [Multi2TabsTranslator], etc depending on
 /// which implementation of [MultiTabPageStack] you implemented
-abstract class MultiTabTranslator<PS extends MultiTabPageStack<S, N>, S extends MultiTabState,
-    N extends MaybeNestedStack> extends STranslator<STabsSElement<S, N>, PS, N> {
+abstract class MultiTabTranslator<PS extends MultiTabPageStack<S>, S extends MultiTabState>
+    extends STranslator<STabsSElement<S>, PS> {
   /// Returns the [MultiTabPageStack] associated with the given [WebEntry]
   ///
   ///
-  /// [match] is the match of the incoming [WebEntry] based on the 
+  /// [match] is the match of the incoming [WebEntry] based on the
   /// [WebEntryMatcher] which was given
   ///
   /// [tabsPageStacks] are the [PageStackBase]s returned by each tab's translators
@@ -892,7 +891,7 @@ abstract class MultiTabTranslator<PS extends MultiTabPageStack<S, N>, S extends 
   WebEntryMatcher get matcher;
 
   /// A [STranslatorHandler] for each tab of the state
-  List<TranslatorsHandler<NestedStack>> get translatorsHandlers;
+  List<TranslatorsHandler> get translatorsHandlers;
 
   /// A function which build the state [S] based on the base state class
   /// [MultiTabState]
@@ -906,13 +905,13 @@ abstract class MultiTabTranslator<PS extends MultiTabPageStack<S, N>, S extends 
   /// visible to the end user
   S buildFromMultiTabState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> tabsPageStacks,
+    IList<PageStackBase> tabsPageStacks,
   );
 
   @override
   WebEntry sElementToWebEntry(
     BuildContext context,
-    STabsSElement<S, N> element,
+    STabsSElement<S> element,
     PS pageStack,
   ) {
     // Get the web entry returned by the active tab
@@ -938,7 +937,7 @@ abstract class MultiTabTranslator<PS extends MultiTabPageStack<S, N>, S extends 
     }
 
     // Get the pageStack and its associated index returned from the [webEntry]
-    MapEntry<int, PageStackBase<NestedStack>>? maybeNewActiveTabPageStack;
+    MapEntry<int, PageStackBase>? maybeNewActiveTabPageStack;
     for (var i = 0; i < translatorsHandlers.length; i++) {
       final sTranslatorsHandler = translatorsHandlers[i];
 

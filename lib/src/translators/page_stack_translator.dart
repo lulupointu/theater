@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
-import '../page_stack/nested_stack.dart';
 import 'translator.dart';
 
 /// A class used to interact with the web url
@@ -19,11 +18,11 @@ import 'translator.dart';
 /// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class PageStackTranslator<Route extends PageStackBase<N>, N extends MaybeNestedStack>
-    extends STranslator<SElement<N>, Route, N> {
+abstract class PageStackTranslator<Route extends PageStackBase>
+    extends STranslator<SElement, Route> {
 
   @override
-  WebEntry sElementToWebEntry(BuildContext context, SElement<N> element, Route sRoute) {
+  WebEntry sElementToWebEntry(BuildContext context, SElement element, Route sRoute) {
     return sRouteToWebEntry(context, sRoute);
   }
 

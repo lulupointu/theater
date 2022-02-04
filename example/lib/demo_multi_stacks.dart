@@ -14,20 +14,20 @@ class MyApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: MyScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
-          Multi2TabsTranslator<MyScaffoldPageStack, NonNestedStack>(
+          Multi2TabsTranslator<MyScaffoldPageStack>(
             pageStack: MyScaffoldPageStack.new,
             tab1Translators: [
-              PathTranslator<HomePageStack, NestedStack>(
+              PathTranslator<HomePageStack>(
                 path: '/home',
                 pageStack: HomePageStack(),
               ),
             ],
             tab2Translators: [
-              PathTranslator<UserPageStack, NestedStack>(
+              PathTranslator<UserPageStack>(
                 path: '/user',
                 pageStack: UserPageStack(),
               ),
-              PathTranslator<SettingsPageStack, NestedStack>(
+              PathTranslator<SettingsPageStack>(
                 path: '/settings',
                 pageStack: SettingsPageStack(),
               ),
@@ -117,33 +117,33 @@ class MyScaffold extends StatelessWidget {
   }
 }
 
-class UserPageStack extends PageStack<NestedStack> {
+class UserPageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return UserScreen();
   }
 }
 
-class SettingsPageStack extends PageStack<NestedStack> {
+class SettingsPageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return SettingsScreen();
   }
 
   @override
-  PageStackBase<NestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     return UserPageStack();
   }
 }
 
-class HomePageStack extends PageStack<NestedStack> {
+class HomePageStack extends PageStack {
   @override
   Widget build(BuildContext context) {
     return HomeScreen();
   }
 }
 
-class MyScaffoldPageStack extends Multi2TabsPageStack<NonNestedStack> {
+class MyScaffoldPageStack extends Multi2TabsPageStack {
   MyScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override

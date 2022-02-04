@@ -60,11 +60,11 @@ class BooksApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: BooksListPageStack(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
-          PathTranslator<BooksListPageStack, NonNestedStack>(
+          PathTranslator<BooksListPageStack>(
             path: '/',
             pageStack: BooksListPageStack(books: books, toBook: toBook),
           ),
-          PathTranslator<BookDetailsPageStack, NonNestedStack>.parse(
+          PathTranslator<BookDetailsPageStack>.parse(
             path: '/book/:id',
             matchToPageStack: (match) => BookDetailsPageStack(
               books: books,
@@ -75,12 +75,12 @@ class BooksApp extends StatelessWidget {
             pageStackToWebEntry: (route) =>
                 WebEntry(path: '/book/${route.books.indexOf(route.book)}'),
           ),
-          PathTranslator<AuthorsListPageStack, NonNestedStack>(
+          PathTranslator<AuthorsListPageStack>(
             path: '/authors',
             pageStack:
                 AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
           ),
-          PathTranslator<AuthorDetailsPageStack, NonNestedStack>.parse(
+          PathTranslator<AuthorDetailsPageStack>.parse(
             path: '/author/:id',
             matchToPageStack: (match) => AuthorDetailsPageStack(
               authors: authors,
@@ -101,7 +101,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListPageStack extends PageStack<NonNestedStack> {
+class BooksListPageStack extends PageStack {
   final List<Book> books;
   final void Function(BuildContext context, Book book) toBook;
 
@@ -111,7 +111,7 @@ class BooksListPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => BooksListScreen(books: books, toBook: toBook);
 }
 
-class BookDetailsPageStack extends PageStack<NonNestedStack> {
+class BookDetailsPageStack extends PageStack {
   final List<Book> books;
   final Book book;
   final void Function(BuildContext context, Author author) toAuthor;
@@ -130,12 +130,12 @@ class BookDetailsPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext context) {
+  PageStackBase createPageStackBellow(BuildContext context) {
     return BooksListPageStack(books: books, toBook: toBook);
   }
 }
 
-class AuthorsListPageStack extends PageStack<NonNestedStack> {
+class AuthorsListPageStack extends PageStack {
   final List<Author> authors;
   final void Function(BuildContext context, Author author) toAuthor;
   final void Function(BuildContext context) toBooks;
@@ -152,7 +152,7 @@ class AuthorsListPageStack extends PageStack<NonNestedStack> {
   }
 }
 
-class AuthorDetailsPageStack extends PageStack<NonNestedStack> {
+class AuthorDetailsPageStack extends PageStack {
   final List<Author> authors;
   final Author author;
   final void Function(BuildContext context, Author author) toAuthor;
@@ -169,7 +169,7 @@ class AuthorDetailsPageStack extends PageStack<NonNestedStack> {
   Widget build(BuildContext context) => AuthorDetailsScreen(author: author);
 
   @override
-  PageStackBase<NonNestedStack> createPageStackBellow(BuildContext _) {
+  PageStackBase createPageStackBellow(BuildContext _) {
     return AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks);
   }
 }

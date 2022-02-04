@@ -2,7 +2,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import '../nested_stack.dart';
 
 /// The state of [Multi5TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi5TabsPageStack] is pushed)
@@ -31,19 +30,19 @@ class Multi5TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1PageStack;
+  final PageStackBase tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2PageStack;
+  final PageStackBase tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3PageStack;
+  final PageStackBase tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase<NestedStack> tab4PageStack;
+  final PageStackBase tab4PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 4)
-  final PageStackBase<NestedStack> tab5PageStack;
+  final PageStackBase tab5PageStack;
 
   /// A list of 5 widgets, one for each tab
   ///
@@ -58,11 +57,11 @@ class Multi5TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi5TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1PageStack,
-    PageStackBase<NestedStack>? tab2PageStack,
-    PageStackBase<NestedStack>? tab3PageStack,
-    PageStackBase<NestedStack>? tab4PageStack,
-    PageStackBase<NestedStack>? tab5PageStack,
+    PageStackBase? tab1PageStack,
+    PageStackBase? tab2PageStack,
+    PageStackBase? tab3PageStack,
+    PageStackBase? tab4PageStack,
+    PageStackBase? tab5PageStack,
   }) {
     return Multi5TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -77,7 +76,7 @@ class Multi5TabsState extends MultiTabState {
   /// Creates a [Multi5TabsState] from a [_STabsState], internal use only
   factory Multi5TabsState._fromSTabsState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> sRoutes,
+    IList<PageStackBase> sRoutes,
   ) =>
       Multi5TabsState(
         activeIndex: activeIndex,
@@ -93,7 +92,7 @@ class Multi5TabsState extends MultiTabState {
 /// with 5 tabs.
 ///
 /// {@macro srouter.framework.STabsRoute}
-abstract class Multi5TabsPageStack<N extends MaybeNestedStack> extends MultiTabPageStack<Multi5TabsState, N> {
+abstract class Multi5TabsPageStack extends MultiTabPageStack<Multi5TabsState> {
   /// {@macro srouter.framework.STabsRoute.constructor}
   @mustCallSuper
   Multi5TabsPageStack(StateBuilder<Multi5TabsState> stateBuilder)

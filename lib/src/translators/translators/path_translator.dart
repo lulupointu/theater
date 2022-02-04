@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
-import '../../page_stack/nested_stack.dart';
 import '../page_stack_translator.dart';
 import '../translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
@@ -10,8 +9,7 @@ import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// An implementation of [STranslator] which makes it easy determine if a
 /// [WebEntry] is matched
-class PathTranslator<PS extends PageStackBase<P>, P extends MaybeNestedStack>
-    extends PageStackTranslator<PS, P> {
+class PathTranslator<PS extends PageStackBase> extends PageStackTranslator<PS> {
   /// Converts a static [WebEntry] into a [PageStack]
   ///
   ///

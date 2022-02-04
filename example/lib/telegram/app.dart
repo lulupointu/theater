@@ -48,11 +48,11 @@ class MyApp extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: TabsWrapperPageStack((state) => state),
         translatorsBuilder: (_) => [
-          Multi3TabsTranslator<TabsWrapperPageStack, NonNestedStack>(
+          Multi3TabsTranslator<TabsWrapperPageStack>(
             pageStack: TabsWrapperPageStack.new,
             tab1Translators: [],
             tab2Translators: [
-              PathTranslator<ChatsListPageStack, NestedStack>.parse(
+              PathTranslator<ChatsListPageStack>.parse(
                 path: '*',
                 matchToPageStack: (match) => ChatsListPageStack(
                   navigator: ChatsListNavigatorImplementation(),

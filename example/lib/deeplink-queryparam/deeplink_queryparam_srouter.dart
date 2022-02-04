@@ -33,7 +33,7 @@ class BooksApp extends StatelessWidget {
           filter: null,
         ),
         translatorsBuilder: (_) => [
-          PathTranslator<BooksListPageStack, NonNestedStack>.parse(
+          PathTranslator<BooksListPageStack>.parse(
             path: '/',
             matchToPageStack: (match) => BooksListPageStack(
               books: books,
@@ -59,7 +59,7 @@ class BooksApp extends StatelessWidget {
   }
 }
 
-class BooksListPageStack extends PageStack<NonNestedStack> {
+class BooksListPageStack extends PageStack {
   final List<Book> books;
   final String? filter;
   final void Function(BuildContext context, String filter) onFilterChanged;

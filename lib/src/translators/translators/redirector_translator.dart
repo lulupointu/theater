@@ -2,14 +2,13 @@ import 'package:flutter/widgets.dart';
 
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
-import '../../page_stack/nested_stack.dart';
 import '../../s_router/s_router.dart';
 import '../page_stack_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
 
 /// A translator which can be used to redirect from a [path] to a [PageStack]
-class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslator<PageStackBase<N>, N> {
+class RedirectorTranslator extends PageStackTranslator<PageStackBase> {
   /// Redirect a static [WebEntry] to a [PageStack]
   ///
   ///
@@ -30,7 +29,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   ///   - [SRedirectorTranslator.parse] for a way to match dynamic path (e.g. '/user/:id')
   RedirectorTranslator({
     required String path,
-    required PageStackBase<N> pageStack,
+    required PageStackBase pageStack,
     this.replace = true,
   })  : _matcher = WebEntryMatcher(path: path),
         matchToPageStack = ((_, __) => pageStack);
@@ -84,7 +83,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
         );
 
   /// The [PageStack] to redirect to
-  final PageStackBase<N> Function(BuildContext context, WebEntryMatch match)
+  final PageStackBase Function(BuildContext context, WebEntryMatch match)
       matchToPageStack;
 
   /// Whether the path we navigate to should replace the current history entry
@@ -97,7 +96,7 @@ class RedirectorTranslator<N extends MaybeNestedStack> extends PageStackTranslat
   final WebEntryMatcher _matcher;
 
   @override
-  PageStackBase<N>? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
+  PageStackBase? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
     // If the web entry does not match, return null

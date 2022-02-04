@@ -2,7 +2,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import '../nested_stack.dart';
 
 /// The state of [Multi3TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi3TabsPageStack] is pushed)
@@ -23,13 +22,13 @@ class Multi3TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase<NestedStack> tab1PageStack;
+  final PageStackBase tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase<NestedStack> tab2PageStack;
+  final PageStackBase tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase<NestedStack> tab3PageStack;
+  final PageStackBase tab3PageStack;
 
 
   /// A list of 3 widgets, one for each tab
@@ -45,9 +44,9 @@ class Multi3TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi3TabsState copyWith({
     int? activeIndex,
-    PageStackBase<NestedStack>? tab1PageStack,
-    PageStackBase<NestedStack>? tab2PageStack,
-    PageStackBase<NestedStack>? tab3PageStack,
+    PageStackBase? tab1PageStack,
+    PageStackBase? tab2PageStack,
+    PageStackBase? tab3PageStack,
   }) {
     return Multi3TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -60,7 +59,7 @@ class Multi3TabsState extends MultiTabState {
   /// Creates a [Multi3TabsState] from a [_STabsState], internal use only
   factory Multi3TabsState._fromSTabsState(
     int activeIndex,
-    IList<PageStackBase<NestedStack>> sRoutes,
+    IList<PageStackBase> sRoutes,
   ) =>
       Multi3TabsState(
         activeIndex: activeIndex,
@@ -74,7 +73,7 @@ class Multi3TabsState extends MultiTabState {
 /// with 3 tabs.
 ///
 /// {@macro srouter.framework.STabsRoute}
-abstract class Multi3TabsPageStack<N extends MaybeNestedStack> extends MultiTabPageStack<Multi3TabsState, N> {
+abstract class Multi3TabsPageStack extends MultiTabPageStack<Multi3TabsState> {
   /// {@macro srouter.framework.STabsRoute.constructor}
   @mustCallSuper
   Multi3TabsPageStack(StateBuilder<Multi3TabsState> stateBuilder)

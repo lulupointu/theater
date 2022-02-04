@@ -15,7 +15,7 @@ class PushNoPush extends StatelessWidget {
       builder: SRouter.build(
         initialPageStack: ProfilesPageStack(profiles: [Faker().person.name()]),
         translatorsBuilder: (_) => [
-          PathTranslator<ProfilesPageStack, NonNestedStack>.parse(
+          PathTranslator<ProfilesPageStack>.parse(
             path: '*',
             matchToPageStack: (match) => ProfilesPageStack(profiles: match.pathSegments),
             pageStackToWebEntry: (pageStack) => WebEntry(pathSegments: pageStack.profiles),
@@ -26,7 +26,7 @@ class PushNoPush extends StatelessWidget {
   }
 }
 
-class ProfilesPageStack extends PageStack<NonNestedStack> {
+class ProfilesPageStack extends PageStack {
   final List<String> profiles;
 
   ProfilesPageStack({required this.profiles}) : super(key: ValueKey(profiles.length));
@@ -37,7 +37,7 @@ class ProfilesPageStack extends PageStack<NonNestedStack> {
   }
 
   @override
-  PageStackBase<NonNestedStack>? createPageStackBellow(BuildContext context) {
+  PageStackBase? createPageStackBellow(BuildContext context) {
     if (profiles.length == 1) {
       return null;
     }

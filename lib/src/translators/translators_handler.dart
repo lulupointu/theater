@@ -2,16 +2,15 @@ import 'package:flutter/widgets.dart';
 
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
-import '../page_stack/nested_stack.dart';
 import 'translator.dart';
 
 /// This will use the given [STranslator]s to convert a web entry
 /// to a [PageStack] and vise versa
 @immutable
-class TranslatorsHandler<N extends MaybeNestedStack> {
+class TranslatorsHandler {
   /// The list of [STranslator]s which will be used to convert a web
   /// to a [PageStack] and vise versa
-  final List<STranslator<SElement<N>, PageStackBase<N>, N>> translators;
+  final List<STranslator<SElement, PageStackBase>> translators;
 
   // ignore: public_member_api_docs
   const TranslatorsHandler({required this.translators});
@@ -20,7 +19,7 @@ class TranslatorsHandler<N extends MaybeNestedStack> {
   ///
   ///
   /// If no translator returns a route from the [webEntry], return null
-  PageStackBase<N>? getPageStackFromWebEntry(BuildContext context, WebEntry webEntry) {
+  PageStackBase? getPageStackFromWebEntry(BuildContext context, WebEntry webEntry) {
     // We search which translator from [translators] returns a [SRoute]
     // considering the given web entry
     for (var translator in translators) {
@@ -39,7 +38,7 @@ class TranslatorsHandler<N extends MaybeNestedStack> {
   ///
   ///
   /// If no translator can translate the route to a web entry, return null
-  WebEntry? getWebEntryFromSElement<Element extends SElement<N>, Route extends PageStackBase<N>>(
+  WebEntry? getWebEntryFromSElement<Element extends SElement, Route extends PageStackBase>(
     BuildContext context,
     Element sElement,
   ) {
