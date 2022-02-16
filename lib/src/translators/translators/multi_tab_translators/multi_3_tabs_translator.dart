@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_3_tabs_page_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -24,11 +25,11 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -56,11 +57,11 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matcher = WebEntryMatcher(
     path: path,
@@ -109,9 +110,9 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
   Multi3TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
     return Multi3TabsState(
       activeIndex: activeIndex,
-      tab1PageStack: pageStacks[0],
-      tab2PageStack: pageStacks[1],
-      tab3PageStack: pageStacks[2],
+      tab1PageStack: pageStacks[0] as Tab1In<Multi3TabsPageStack>,
+      tab2PageStack: pageStacks[1] as Tab2In<Multi3TabsPageStack>,
+      tab3PageStack: pageStacks[2] as Tab3In<Multi3TabsPageStack>,
     );
   }
 }

@@ -6,13 +6,12 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: SRouter.build(
         initialPageStack: UserPageStack(),
+        // [translatorsBuilder] is optional on non-web platforms
         translatorsBuilder: (_) => [
           PathTranslator<UserPageStack>(
             path: '/user',
@@ -70,7 +69,5 @@ class SettingsPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
-    return UserPageStack();
-  }
+  PageStackBase? get pageStackBellow => UserPageStack();
 }

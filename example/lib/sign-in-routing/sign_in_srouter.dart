@@ -169,7 +169,7 @@ class BooksListPageStack extends PageStack {
   Widget build(BuildContext context) => BooksListScreen();
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) =>
+  PageStackBase get pageStackBellow =>
       HomePageStack(onSignOut: onSignOut);
 }
 

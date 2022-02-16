@@ -2,6 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
+import 'tabXIn.dart';
 
 /// The state of [Multi3TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi3TabsPageStack] is pushed)
@@ -22,13 +23,28 @@ class Multi3TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase tab1PageStack;
+  ///
+  /// [tab1PageStack] must implement the [Tab1In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab1In<MyMulti3TabsPageStack> {...}
+  /// ```
+  final Tab1In<Multi3TabsPageStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase tab2PageStack;
+  ///
+  /// [tab2PageStack] must implement the [Tab2In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab2In<MyMulti3TabsPageStack> {...}
+  /// ```
+  final Tab2In<Multi3TabsPageStack> tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase tab3PageStack;
+  ///
+  /// [tab3PageStack] must implement the [Tab3In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab3In<MyMulti3TabsPageStack> {...}
+  /// ```
+  final Tab3In<Multi3TabsPageStack> tab3PageStack;
 
 
   /// A list of 3 widgets, one for each tab
@@ -44,9 +60,9 @@ class Multi3TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi3TabsState copyWith({
     int? activeIndex,
-    PageStackBase? tab1PageStack,
-    PageStackBase? tab2PageStack,
-    PageStackBase? tab3PageStack,
+    Tab1In<Multi3TabsPageStack>? tab1PageStack,
+    Tab2In<Multi3TabsPageStack>? tab2PageStack,
+    Tab3In<Multi3TabsPageStack>? tab3PageStack,
   }) {
     return Multi3TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -63,9 +79,9 @@ class Multi3TabsState extends MultiTabState {
   ) =>
       Multi3TabsState(
         activeIndex: activeIndex,
-        tab1PageStack: sRoutes[0],
-        tab2PageStack: sRoutes[1],
-        tab3PageStack: sRoutes[2],
+        tab1PageStack: sRoutes[0] as Tab1In<Multi3TabsPageStack>,
+        tab2PageStack: sRoutes[1] as Tab2In<Multi3TabsPageStack>,
+        tab3PageStack: sRoutes[2] as Tab3In<Multi3TabsPageStack>,
       );
 }
 

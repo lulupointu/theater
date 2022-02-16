@@ -33,7 +33,10 @@ class MyApp extends StatelessWidget {
               ),
             ],
           ),
-          RedirectorTranslator(path: '*', pageStack: MyScaffoldPageStack((state) => state)),
+          RedirectorTranslator(
+            path: '*',
+            pageStack: MyScaffoldPageStack((state) => state),
+          ),
         ],
       ),
     );
@@ -85,21 +88,21 @@ class HomeScreen extends StatelessWidget {
 }
 
 class MyScaffold extends StatelessWidget {
-  final Widget child;
+  final List<Widget> children;
   final int currentIndex;
 
   const MyScaffold({
     Key? key,
-    required this.child,
+    required this.children,
     required this.currentIndex,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: Duration(milliseconds: 200),
-        child: child,
+      body: IndexedStack(
+        index: currentIndex,
+        children: children,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
@@ -117,30 +120,24 @@ class MyScaffold extends StatelessWidget {
   }
 }
 
-class UserPageStack extends PageStack {
+class UserPageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
   @override
-  Widget build(BuildContext context) {
-    return UserScreen();
-  }
+  Widget build(BuildContext context) => UserScreen();
 }
 
-class SettingsPageStack extends PageStack {
+class SettingsPageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
   @override
   Widget build(BuildContext context) {
     return SettingsScreen();
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
-    return UserPageStack();
-  }
+  Tab2In<MyScaffoldPageStack>? get pageStackBellow => UserPageStack();
 }
 
-class HomePageStack extends PageStack {
+class HomePageStack extends PageStack with Tab1In<MyScaffoldPageStack> {
   @override
-  Widget build(BuildContext context) {
-    return HomeScreen();
-  }
+  Widget build(BuildContext context) => HomeScreen();
 }
 
 class MyScaffoldPageStack extends Multi2TabsPageStack {
@@ -148,7 +145,7 @@ class MyScaffoldPageStack extends Multi2TabsPageStack {
 
   @override
   Widget build(BuildContext context, Multi2TabsState state) {
-    return MyScaffold(child: state.tabs[state.activeIndex], currentIndex: state.activeIndex);
+    return MyScaffold(children: state.tabs, currentIndex: state.activeIndex);
   }
 
   @override

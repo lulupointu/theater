@@ -130,7 +130,7 @@ class BookDetailsPageStack extends PageStack {
   }
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) {
+  PageStackBase get pageStackBellow {
     return BooksListPageStack(books: books, toBook: toBook);
   }
 }

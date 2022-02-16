@@ -89,7 +89,7 @@ class WishlistPageStack extends PageStack {
   Widget build(BuildContext context) => WishlistScreen(wishlist: wishlist);
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) {
+  PageStackBase get pageStackBellow {
     return WishlistListPageStack(wishlists: wishlists, toWishlist: toWishlist);
   }
 }

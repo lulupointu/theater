@@ -37,7 +37,7 @@ class ProfilesPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     if (profiles.length == 1) {
       return null;
     }

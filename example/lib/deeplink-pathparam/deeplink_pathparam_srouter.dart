@@ -70,7 +70,7 @@ class BookDetailsPageStack extends PageStack {
   Widget build(BuildContext context) => BookDetailsScreen(book: books[selectedBook]);
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) =>
+  PageStackBase get pageStackBellow =>
       BooksListScreenPageStack(books: books);
 }
 

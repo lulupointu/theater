@@ -2,6 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
+import 'tabXIn.dart';
 
 /// The state of [Multi4TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi4TabsPageStack] is pushed)
@@ -23,16 +24,36 @@ class Multi4TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase tab1PageStack;
+  ///
+  /// [tab1PageStack] must implement the [Tab1In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab1In<MyMulti4TabsPageStack> {...}
+  /// ```
+  final Tab1In<Multi4TabsPageStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase tab2PageStack;
+  ///
+  /// [tab2PageStack] must implement the [Tab2In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab2In<MyMulti4TabsPageStack> {...}
+  /// ```
+  final Tab2In<Multi4TabsPageStack> tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase tab3PageStack;
+  ///
+  /// [tab3PageStack] must implement the [Tab3In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab3In<MyMulti4TabsPageStack> {...}
+  /// ```
+  final Tab3In<Multi4TabsPageStack> tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase tab4PageStack;
+  ///
+  /// [tab4PageStack] must implement the [Tab4In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab4In<MyMulti4TabsPageStack> {...}
+  /// ```
+  final Tab4In<Multi4TabsPageStack> tab4PageStack;
 
   /// A list of 4 widgets, one for each tab
   ///
@@ -47,10 +68,10 @@ class Multi4TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi4TabsState copyWith({
     int? activeIndex,
-    PageStackBase? tab1PageStack,
-    PageStackBase? tab2PageStack,
-    PageStackBase? tab3PageStack,
-    PageStackBase? tab4PageStack,
+    Tab1In<Multi4TabsPageStack>? tab1PageStack,
+    Tab2In<Multi4TabsPageStack>? tab2PageStack,
+    Tab3In<Multi4TabsPageStack>? tab3PageStack,
+    Tab4In<Multi4TabsPageStack>? tab4PageStack,
   }) {
     return Multi4TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -68,10 +89,10 @@ class Multi4TabsState extends MultiTabState {
   ) =>
       Multi4TabsState(
         activeIndex: activeIndex,
-        tab1PageStack: sRoutes[0],
-        tab2PageStack: sRoutes[1],
-        tab3PageStack: sRoutes[2],
-        tab4PageStack: sRoutes[3],
+        tab1PageStack: sRoutes[0] as Tab1In<Multi4TabsPageStack>,
+        tab2PageStack: sRoutes[1] as Tab2In<Multi4TabsPageStack>,
+        tab3PageStack: sRoutes[2] as Tab3In<Multi4TabsPageStack>,
+        tab4PageStack: sRoutes[3] as Tab4In<Multi4TabsPageStack>,
       );
 }
 

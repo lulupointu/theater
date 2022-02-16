@@ -17,8 +17,34 @@ class MyApp extends StatelessWidget {
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<AppPageStack>(
             pageStack: AppPageStack.new,
-            tab1Translators: _getTranslatorOfTab(TabItem.red),
-            tab2Translators: _getTranslatorOfTab(TabItem.green),
+            tab1Translators: [
+              PathTranslator<RedListPageStack>(
+                path: '${tabName[TabItem.red]!}',
+                pageStack: RedListPageStack(),
+              ),
+              PathTranslator<RedDetailPageStack>.parse(
+                path: '${tabName[TabItem.red]!}/details_:materialIndex',
+                matchToPageStack: (match) => RedDetailPageStack(
+                  materialIndex: int.parse(match.pathParams['materialIndex']!),
+                ),
+                pageStackToWebEntry: (route) =>
+                    WebEntry(path: '${tabName[TabItem.red]!}/details_${route.materialIndex}'),
+              ),
+            ],
+            tab2Translators: [
+              PathTranslator<GreenListPageStack>(
+                path: '${tabName[TabItem.green]!}',
+                pageStack: GreenListPageStack(),
+              ),
+              PathTranslator<GreenDetailPageStack>.parse(
+                path: '${tabName[TabItem.green]!}/details_:materialIndex',
+                matchToPageStack: (match) => GreenDetailPageStack(
+                  materialIndex: int.parse(match.pathParams['materialIndex']!),
+                ),
+                pageStackToWebEntry: (route) => WebEntry(
+                    path: '${tabName[TabItem.green]!}/details_${route.materialIndex}'),
+              ),
+            ],
           ),
           PathTranslator<SettingsPageStack>.parse(
             path: '/:color/settings',
@@ -34,56 +60,6 @@ class MyApp extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<PageStackTranslator<PageStackBase>> _getTranslatorOfTab(TabItem tabItem) {
-    switch (tabItem) {
-      case TabItem.red:
-        return [
-          PathTranslator<RedListPageStack>(
-            path: '${tabName[tabItem]!}',
-            pageStack: RedListPageStack(),
-          ),
-          PathTranslator<RedDetailPageStack>.parse(
-            path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToPageStack: (match) => RedDetailPageStack(
-              materialIndex: int.parse(match.pathParams['materialIndex']!),
-            ),
-            pageStackToWebEntry: (route) =>
-                WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
-          ),
-        ];
-      case TabItem.green:
-        return [
-          PathTranslator<GreenListPageStack>(
-            path: '${tabName[tabItem]!}',
-            pageStack: GreenListPageStack(),
-          ),
-          PathTranslator<GreenDetailPageStack>.parse(
-            path: '${tabName[tabItem]!}/details_:materialIndex',
-            matchToPageStack: (match) => GreenDetailPageStack(
-              materialIndex: int.parse(match.pathParams['materialIndex']!),
-            ),
-            pageStackToWebEntry: (route) =>
-                WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
-          ),
-        ];
-      // case TabItem.blue:
-      //   return [
-      //     SPathTranslator<BlueListPageStack, NonSPushable>(
-      //       path: '${tabName[tabItem]!}',
-      //       route: BlueListPageStack(),
-      //     ),
-      //     SPathTranslator<BlueDetailPageStack, NonSPushable>.parse(
-      //       path: '${tabName[tabItem]!}/details_:materialIndex',
-      //       matchToRoute: (match) => BlueDetailPageStack(
-      //         materialIndex: int.parse(match.pathParams['materialIndex']!),
-      //       ),
-      //       routeToWebEntry: (route) =>
-      //           WebEntry(path: '${tabName[tabItem]!}/details_${route.materialIndex}'),
-      //     ),
-      //   ];
-    }
   }
 }
 

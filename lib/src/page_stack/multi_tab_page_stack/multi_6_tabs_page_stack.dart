@@ -2,6 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
+import 'tabXIn.dart';
 
 /// The state of [Multi6TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi6TabsPageStack] is pushed)
@@ -32,22 +33,52 @@ class Multi6TabsState extends MultiTabState {
   final int activeIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
-  final PageStackBase tab1PageStack;
+  ///
+  /// [tab1PageStack] must implement the [Tab1In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab1In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab1In<Multi6TabsPageStack> tab1PageStack;
 
   /// The [PageStackBase] corresponding to the second tab (index 1)
-  final PageStackBase tab2PageStack;
+  ///
+  /// [tab2PageStack] must implement the [Tab2In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab2In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab2In<Multi6TabsPageStack> tab2PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 2)
-  final PageStackBase tab3PageStack;
+  ///
+  /// [tab3PageStack] must implement the [Tab3In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab3In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab3In<Multi6TabsPageStack> tab3PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 3)
-  final PageStackBase tab4PageStack;
+  ///
+  /// [tab4PageStack] must implement the [Tab4In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab4In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab4In<Multi6TabsPageStack> tab4PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 4)
-  final PageStackBase tab5PageStack;
+  ///
+  /// [tab5PageStack] must implement the [Tab5In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab5In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab5In<Multi6TabsPageStack> tab5PageStack;
 
   /// The [PageStackBase] corresponding to the third tab (index 5)
-  final PageStackBase tab6PageStack;
+  ///
+  /// [tab6PageStack] must implement the [Tab6In] mixin as follows:
+  /// ```dart
+  /// class MyPageStack extends PageStack with Tab6In<MyMulti6TabsPageStack> {...}
+  /// ```
+  final Tab6In<Multi6TabsPageStack> tab6PageStack;
 
   /// A list of 6 widgets, one for each tab
   ///
@@ -62,12 +93,12 @@ class Multi6TabsState extends MultiTabState {
   /// Use this is [StateBuilder] to easily return the new state
   Multi6TabsState copyWith({
     int? activeIndex,
-    PageStackBase? tab1PageStack,
-    PageStackBase? tab2PageStack,
-    PageStackBase? tab3PageStack,
-    PageStackBase? tab4PageStack,
-    PageStackBase? tab5PageStack,
-    PageStackBase? tab6PageStack,
+    Tab1In<Multi6TabsPageStack>? tab1PageStack,
+    Tab2In<Multi6TabsPageStack>? tab2PageStack,
+    Tab3In<Multi6TabsPageStack>? tab3PageStack,
+    Tab4In<Multi6TabsPageStack>? tab4PageStack,
+    Tab5In<Multi6TabsPageStack>? tab5PageStack,
+    Tab6In<Multi6TabsPageStack>? tab6PageStack,
   }) {
     return Multi6TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
@@ -87,12 +118,12 @@ class Multi6TabsState extends MultiTabState {
   ) =>
       Multi6TabsState(
         activeIndex: activeIndex,
-        tab1PageStack: sRoutes[0],
-        tab2PageStack: sRoutes[1],
-        tab3PageStack: sRoutes[2],
-        tab4PageStack: sRoutes[3],
-        tab5PageStack: sRoutes[4],
-        tab6PageStack: sRoutes[5],
+        tab1PageStack: sRoutes[0] as Tab1In<Multi6TabsPageStack>,
+        tab2PageStack: sRoutes[1] as Tab2In<Multi6TabsPageStack>,
+        tab3PageStack: sRoutes[2] as Tab3In<Multi6TabsPageStack>,
+        tab4PageStack: sRoutes[3] as Tab4In<Multi6TabsPageStack>,
+        tab5PageStack: sRoutes[4] as Tab5In<Multi6TabsPageStack>,
+        tab6PageStack: sRoutes[5] as Tab6In<Multi6TabsPageStack>,
       );
 }
 

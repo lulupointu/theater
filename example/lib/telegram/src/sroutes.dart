@@ -20,7 +20,7 @@ import 'navigators_implementations.dart';
 /// because only the [STabbedRoute] can directly be pushed into [SRouter]
 
 // Left side
-class ChatsListPageStack extends PageStack {
+class ChatsListPageStack extends PageStack with Tab1In<TabsWrapperPageStack> {
   final ChatsListNavigator navigator;
   final List<Chat> chats;
 
@@ -38,7 +38,7 @@ class ChatsListPageStack extends PageStack {
   }
 }
 
-class SettingsPageStack extends PageStack {
+class SettingsPageStack extends PageStack with Tab1In<TabsWrapperPageStack> {
   final SettingsNavigator settingsNavigator;
   final ChatsListNavigator chatsListNavigator;
   final List<Chat> chats;
@@ -55,7 +55,7 @@ class SettingsPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  Tab1In<TabsWrapperPageStack>? get pageStackBellow {
     return ChatsListPageStack(
       navigator: chatsListNavigator,
       chats: chats,
@@ -64,7 +64,7 @@ class SettingsPageStack extends PageStack {
 }
 
 // Middle side
-class StackedChatsPageStack extends PageStack {
+class StackedChatsPageStack extends PageStack with Tab2In<TabsWrapperPageStack> {
   final ChatNavigator navigator;
   final List<Chat> chats;
 
@@ -114,7 +114,7 @@ class StackedChatsPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  Tab2In<TabsWrapperPageStack>? get pageStackBellow {
     return chats.length <= 1
         ? null
         : StackedChatsPageStack(chats: List.from(chats)..removeLast(), navigator: navigator);
@@ -122,12 +122,10 @@ class StackedChatsPageStack extends PageStack {
 }
 
 // Right side
-class MembersDetailsPageStack extends PageStack {
+class MembersDetailsPageStack extends PageStack with Tab3In<TabsWrapperPageStack> {
   final MembersDetailsNavigator navigator;
 
-  MembersDetailsPageStack({
-    required this.navigator,
-  });
+  MembersDetailsPageStack({required this.navigator});
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +156,7 @@ class TabsWrapperPageStack extends Multi3TabsPageStack {
     bool? showMemberDetails,
     bool? maybeShowLeftTab,
     List<Chat>? selectedChats,
-    PageStackBase? tabLeftRoute,
+    Tab1In<Multi3TabsPageStack>? tabLeftRoute,
   }) {
     final previousState = context.read<TabsWrapperScreenState?>();
 
@@ -179,7 +177,7 @@ class TabsWrapperPageStack extends Multi3TabsPageStack {
   Widget build(BuildContext context, Multi3TabsState state) {
     return TabsWrapperScreen(
       tabs: state.tabs,
-      chats: (state.tab2PageStack as ChatsListPageStack).chats,
+      chats: (state.tab2PageStack as StackedChatsPageStack).chats,
       showMemberDetails: showMemberDetails,
       maybeShowLeftTab: maybeShowLeftTab,
     );

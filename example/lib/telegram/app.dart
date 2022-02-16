@@ -52,10 +52,10 @@ class MyApp extends StatelessWidget {
             pageStack: TabsWrapperPageStack.new,
             tab1Translators: [],
             tab2Translators: [
-              PathTranslator<ChatsListPageStack>.parse(
+              PathTranslator<StackedChatsPageStack>.parse(
                 path: '*',
-                matchToPageStack: (match) => ChatsListPageStack(
-                  navigator: ChatsListNavigatorImplementation(),
+                matchToPageStack: (match) => StackedChatsPageStack(
+                  navigator: ChatNavigatorImplementation(),
                   chats: match.pathSegments
                       .map((id) => chats.firstWhere((chat) => chat.id == id))
                       .toList(),

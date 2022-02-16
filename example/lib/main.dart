@@ -47,7 +47,7 @@ class MainPageStack extends Multi2TabsPageStack {
       MainScreen(currentIndex: state.activeIndex, child: state.tabs[state.activeIndex]);
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) {
+  PageStackBase get pageStackBellow {
     return LogInPageStack();
   }
 
@@ -59,12 +59,12 @@ class MainPageStack extends Multi2TabsPageStack {
       );
 }
 
-class UserPageStack extends PageStack {
+class UserPageStack extends PageStack with Tab1In<MainPageStack> {
   @override
   Widget build(BuildContext context) => UserScreen();
 }
 
-class SettingsPageStack extends PageStack {
+class SettingsPageStack extends PageStack with Tab2In<MainPageStack> {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }

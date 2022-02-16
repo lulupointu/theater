@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_5_tabs_page_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -24,15 +25,15 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi5TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi5TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi5TabsPageStack>>>
     tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab4In<Multi5TabsPageStack>>>
     tab4Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab5In<Multi5TabsPageStack>>>
     tab5Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -62,15 +63,15 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi5TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi5TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi5TabsPageStack>>>
     tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab4In<Multi5TabsPageStack>>>
     tab4Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab5In<Multi5TabsPageStack>>>
     tab5Translators,
   })  : matcher = WebEntryMatcher(
     path: path,
@@ -124,11 +125,11 @@ class Multi5TabsTranslator<PS extends Multi5TabsPageStack>
       ) {
     return Multi5TabsState(
       activeIndex: activeIndex,
-      tab1PageStack: pageStacks[0],
-      tab2PageStack: pageStacks[1],
-      tab3PageStack: pageStacks[2],
-      tab4PageStack: pageStacks[3],
-      tab5PageStack: pageStacks[4],
+      tab1PageStack: pageStacks[0] as Tab1In<Multi5TabsPageStack>,
+      tab2PageStack: pageStacks[1] as Tab2In<Multi5TabsPageStack>,
+      tab3PageStack: pageStacks[2] as Tab3In<Multi5TabsPageStack>,
+      tab4PageStack: pageStacks[3] as Tab4In<Multi5TabsPageStack>,
+      tab5PageStack: pageStacks[4] as Tab5In<Multi5TabsPageStack>,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -184,7 +185,7 @@ abstract class StatelessSWidget extends SWidget {
 /// It creates a list of [Page]s by:
 ///   - Creating a [SWidget] in [createSWidget] which describes the top most
 ///   ^ [Page]
-///   - Creating a [PageStack] in [createPageStackBellow] which describes the [Page]s
+///   - Getting the [PageStack] in [pageStackBellow] which describes the [Page]s
 ///   ^ which are bellow the one created in [createSWidget]
 @immutable
 abstract class PageStackBase {
@@ -202,20 +203,16 @@ abstract class PageStackBase {
   /// Creates an [PageStackBase] which describes the [Page]s to display bellow the
   /// page created by the [SWidget] in [createSWidget]
   ///
-  /// If null, there is no [Page] bellow
-  ///
-  ///
-  /// Keep in mind that the given [context] is always very high (at the level
-  /// of [SRouter])
-  PageStackBase? createPageStackBellow(BuildContext context);
+  /// If null, there is no [PageStack] bellow
+  PageStackBase? get pageStackBellow;
 }
 
 /// An extension which allows us to easily build all the [SWidget]s generated
 /// by a [PageStack] (including the [PageStack] own [SWidget] and all those generated
-/// by the [PageStack] of [createPageStackBellow])
+/// by the [pageStackBellow])
 extension _PageStackBaseSWidgetsBuilder on PageStackBase {
   IList<SWidget> createSWidgets(BuildContext context) => <SWidget>[
-        ...(createPageStackBellow(context)?.createSWidgets(context) ?? []),
+        ...(pageStackBellow?.createSWidgets(context) ?? []),
         createSWidget(context),
       ].lock;
 }
@@ -291,7 +288,7 @@ class StatelessPageStackSWidget<PS extends StatelessPageStack> extends Stateless
 
 /// This [PageStackBase] serves 2 purpose:
 ///   1. Overrides [PageStackBase.createSWidget] by returning the [SWidget] from
-///   ^ the [PageStack] returned by [createPageStackBellow] AND a
+///   ^ the [PageStack] in [pageStackBellow] AND a
 ///   ^ [StatelessPageStackSWidget]
 ///   2. Is the configuration of the [StatelessPageStackSWidget]
 abstract class StatelessPageStack extends PageStackBase {
@@ -315,14 +312,6 @@ abstract class StatelessPageStack extends PageStackBase {
   /// [createSWidgets], if this [StatelessPageStack] is used directly in [SRouter],
   /// this will be the visible [Page]
   Page buildPage(BuildContext context);
-
-  /// The [PageStackBase] which describes the stack of [Page]s that should be put
-  /// bellow the [Page] built in [buildPage]
-  ///
-  ///
-  /// Keep in mind that the given [context] is always very high (at the level
-  /// of [SRouter])
-  PageStackBase? createPageStackBellow(BuildContext context);
 }
 
 mixin _DefaultBuildPage on PageStackBase {
@@ -366,7 +355,7 @@ mixin _DefaultBuildPage on PageStackBase {
 }
 
 /// A superclass of [StatelessPageStack] which provides an implementation of
-/// [buildPage], [createPageStackBellow] and [onPop]
+/// [buildPage], [pageStackBellow] and [onPop]
 ///
 ///
 /// This is the primary class used in [SRouter] to describe the [Page] stack of
@@ -374,8 +363,8 @@ mixin _DefaultBuildPage on PageStackBase {
 ///
 /// [build] will be the visible widget (the one at the top of the [Page] stack)
 ///
-/// [createPageStackBellow] builds an [PageStackBase] which describes the [Page] stack
-/// to put bellow the page containing the widget from [build]
+/// [pageStackBellow] provides an [PageStackBase] which describes the
+/// [Page] stack to put bellow the page containing the widget from [build]
 ///
 ///
 /// You can override [buildPage] if you want to build a custom [Page]. In which
@@ -405,7 +394,7 @@ abstract class PageStack extends StatelessPageStack with _DefaultBuildPage {
 
   /// By default, we don't build any [Page] bellow this one
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) => null;
+  PageStackBase? get pageStackBellow => null;
 }
 
 /// A function to build the state [S] based on a previous value of the state
@@ -422,7 +411,7 @@ typedef StateBuilder<S> = S Function(S state);
 /// [STabsSElement.update] is called
 /// Subclasses should implement a copyWith method to makes this easy
 @immutable
-class MultiTabState {
+class MultiTabState extends Equatable {
   /// {@template srouter.framework.STabsState.constructor}
   ///
   /// Creates a state where:
@@ -457,6 +446,47 @@ class MultiTabState {
   /// The widgets are created by [SRouter] and are [Builder]s so you don't use
   /// this to reason on the state of your tabs, use the tabs [PageStack] instead
   late final List<Widget> tabs;
+
+  @override
+  List<Object?> get props => [activeIndex, _pageStacks];
+}
+
+class MultiTabStateProvider extends InheritedWidget {
+  const MultiTabStateProvider({
+    Key? key,
+    required Widget child,
+    required this.multiTabState,
+    required this.multiTabPageStack,
+  }) : super(key: key, child: child);
+
+  final MultiTabState multiTabState;
+  final MultiTabPageStack multiTabPageStack;
+
+  static MultiTabState of(BuildContext context) {
+    final MultiTabStateProvider? result =
+        context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
+    assert(result != null, 'No MultiTabStateProvider found in context');
+    return result!.multiTabState;
+  }
+
+  static IList<PageStackBase> tabsPageStacksOf(BuildContext context) {
+    final MultiTabStateProvider? result =
+    context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
+    assert(result != null, 'No MultiTabStateProvider found in context');
+    return result!.multiTabState._pageStacks;
+  }
+
+  static MultiTabPageStack pageStackOf(BuildContext context) {
+    final MultiTabStateProvider? result =
+    context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
+    assert(result != null, 'No MultiTabStateProvider found in context');
+    return result!.multiTabPageStack;
+  }
+
+  @override
+  bool updateShouldNotify(MultiTabStateProvider old) {
+    return old.multiTabState != multiTabState;
+  }
 }
 
 /// The element created by [_STabsSWidget]
@@ -561,39 +591,42 @@ class STabsSElement<S extends MultiTabState> extends SElement {
 
     state.tabs = [
       for (var _tabIndex in _tabsSElements.keys)
-        Builder(
-          // Use this key so that AnimatedSwitcher can easily be used to animate
-          // a transition between tabs
-          key: ValueKey('sRouter_tabIndex_$_tabIndex'),
-          builder: (context) => Navigator(
-            key: _tabsNavigatorKeys[_tabIndex]!,
-            pages: _tabsSElements[_tabIndex]!.map((e) => e.buildPage(context)).toList(),
-            onPopPage: (route, data) {
-              final didPop = route.didPop(data);
+        MultiTabStateProvider(
+          multiTabState: state,multiTabPageStack: sWidget._multiTabPageStack,
+          child: Builder(
+            // Use this key so that AnimatedSwitcher can easily be used to animate
+            // a transition between tabs
+            key: ValueKey('sRouter_tabIndex_$_tabIndex'),
+            builder: (context) => Navigator(
+              key: _tabsNavigatorKeys[_tabIndex]!,
+              pages: _tabsSElements[_tabIndex]!.map((e) => e.buildPage(context)).toList(),
+              onPopPage: (route, data) {
+                final didPop = route.didPop(data);
 
-              if (didPop) {
-                final tabSElements = _tabsSElements[_tabIndex]!;
+                if (didPop) {
+                  final tabSElements = _tabsSElements[_tabIndex]!;
 
-                // Replace the current tab pageStack (which is the last one) by
-                // the one bellow
-                //
-                // It has to exist if didPop is true
-                final newTabPageStack =
-                    tabSElements[tabSElements.length - 2].sWidget.pageStack;
-                _updateState(
-                  context,
-                  newState: sWidget._multiTabPageStack._buildFromMultiTabState(
-                    state.activeIndex,
-                    state._pageStacks.replace(state.activeIndex, newTabPageStack),
-                  ),
-                );
+                  // Replace the current tab pageStack (which is the last one) by
+                  // the one bellow
+                  //
+                  // It has to exist if didPop is true
+                  final tabPageStackBellow =
+                      tabSElements[tabSElements.length - 2].sWidget.pageStack;
+                  _updateState(
+                    context,
+                    newState: sWidget._multiTabPageStack._buildFromMultiTabState(
+                      state.activeIndex,
+                      state._pageStacks.replace(state.activeIndex, tabPageStackBellow),
+                    ),
+                  );
 
-                // Update SRouter
-                (SRouter.of(context) as SRouterState).update();
-              }
+                  // Update SRouter
+                  (SRouter.of(context) as SRouterState).update();
+                }
 
-              return didPop;
-            },
+                return didPop;
+              },
+            ),
           ),
         ),
     ];
@@ -798,7 +831,7 @@ abstract class MultiTabPageStack<S extends MultiTabState> extends PageStackBase
       );
 
   /// By default, we don't build any [Page] bellow this one
-  PageStackBase? createPageStackBellow(BuildContext context) => null;
+  PageStackBase? get pageStackBellow => null;
 
   /// Returns a new state based on the previous value of the state
   ///

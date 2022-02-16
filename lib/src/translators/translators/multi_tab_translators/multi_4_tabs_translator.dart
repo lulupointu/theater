@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_4_tabs_page_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -24,13 +25,13 @@ class Multi4TabsTranslator<PS extends Multi4TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi4TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi4TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi4TabsPageStack>>>
     tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab4In<Multi4TabsPageStack>>>
     tab4Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -59,13 +60,13 @@ class Multi4TabsTranslator<PS extends Multi4TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi4TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi4TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab3In<Multi4TabsPageStack>>>
     tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab4In<Multi4TabsPageStack>>>
     tab4Translators,
   })  : matcher = WebEntryMatcher(
     path: path,
@@ -115,10 +116,10 @@ class Multi4TabsTranslator<PS extends Multi4TabsPageStack>
   Multi4TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
     return Multi4TabsState(
       activeIndex: activeIndex,
-      tab1PageStack: pageStacks[0],
-      tab2PageStack: pageStacks[1],
-      tab3PageStack: pageStacks[2],
-      tab4PageStack: pageStacks[3],
+      tab1PageStack: pageStacks[0] as Tab1In<Multi4TabsPageStack>,
+      tab2PageStack: pageStacks[1] as Tab2In<Multi4TabsPageStack>,
+      tab3PageStack: pageStacks[2] as Tab3In<Multi4TabsPageStack>,
+      tab4PageStack: pageStacks[3] as Tab4In<Multi4TabsPageStack>,
     );
   }
 }

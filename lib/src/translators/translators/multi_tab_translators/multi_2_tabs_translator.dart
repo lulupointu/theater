@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -61,9 +62,9 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
   })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -132,9 +133,9 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
+    required List<STranslator<SElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
@@ -182,8 +183,8 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
     return Multi2TabsState(
       activeIndex: activeIndex,
-      tab1PageStack: pageStacks[0],
-      tab2PageStack: pageStacks[1],
+      tab1PageStack: pageStacks[0] as Tab1In<Multi2TabsPageStack>,
+      tab2PageStack: pageStacks[1] as Tab2In<Multi2TabsPageStack>,
     );
   }
 }

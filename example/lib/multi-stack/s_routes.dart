@@ -20,7 +20,7 @@ class SettingsPageStack extends PageStack {
   _withCapitalLetter(String word) => word[0].toUpperCase() + word.substring(1);
 
   @override
-  PageStackBase createPageStackBellow(BuildContext context) {
+  PageStackBase get pageStackBellow {
     return AppPageStack(
       (state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem)),
     );
@@ -44,19 +44,13 @@ class AppPageStack extends Multi2TabsPageStack {
         tab1PageStack: RedListPageStack(),
         tab2PageStack: GreenListPageStack(),
       );
-
-  @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
-    // TODO: implement createPageStackBellow
-    return super.createPageStackBellow(context);
-  }
 }
 
-class RedListPageStack extends ColoredListPageStack {
+class RedListPageStack extends ColoredListPageStack with Tab1In<AppPageStack> {
   RedListPageStack() : super(TabItem.red);
 }
 
-class GreenListPageStack extends ColoredListPageStack {
+class GreenListPageStack extends ColoredListPageStack with Tab2In<AppPageStack> {
   GreenListPageStack() : super(TabItem.green);
 }
 
@@ -75,8 +69,9 @@ abstract class ColoredListPageStack extends PageStack {
         AppPageStack(
           (state) => state.copyWith(
             activeIndex: TabItem.values.indexOf(tabItem),
-            tab1PageStack:
-                tabItem == TabItem.red ? RedDetailPageStack(materialIndex: materialIndex) : null,
+            tab1PageStack: tabItem == TabItem.red
+                ? RedDetailPageStack(materialIndex: materialIndex)
+                : null,
             tab2PageStack: tabItem == TabItem.green
                 ? GreenDetailPageStack(materialIndex: materialIndex)
                 : null,
@@ -87,13 +82,13 @@ abstract class ColoredListPageStack extends PageStack {
   }
 }
 
-class RedDetailPageStack extends ColoredDetailPageStack {
+class RedDetailPageStack extends ColoredDetailPageStack with Tab1In<AppPageStack> {
   final int materialIndex;
 
   RedDetailPageStack({required this.materialIndex}) : super(TabItem.red);
 }
 
-class GreenDetailPageStack extends ColoredDetailPageStack {
+class GreenDetailPageStack extends ColoredDetailPageStack with Tab2In<AppPageStack> {
   final int materialIndex;
 
   GreenDetailPageStack({required this.materialIndex}) : super(TabItem.green);
@@ -117,7 +112,7 @@ abstract class ColoredDetailPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     switch (tabItem) {
       case TabItem.red:
         return RedListPageStack();

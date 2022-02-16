@@ -71,7 +71,7 @@ class ScaffoldPageStack extends Multi2TabsPageStack {
       );
 }
 
-class BooksViewPageStack extends Multi2TabsPageStack {
+class BooksViewPageStack extends Multi2TabsPageStack with Tab1In<BooksViewPageStack> {
   BooksViewPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
 
   @override
@@ -87,17 +87,17 @@ class BooksViewPageStack extends Multi2TabsPageStack {
       );
 }
 
-class NewBooksPageStack extends PageStack {
+class NewBooksPageStack extends PageStack with Tab1In<BooksViewPageStack> {
   @override
   Widget build(BuildContext context) => NewBooksScreen();
 }
 
-class AllBooksPageStack extends PageStack {
+class AllBooksPageStack extends PageStack with Tab2In<BooksViewPageStack> {
   @override
   Widget build(BuildContext context) => AllBooksScreen();
 }
 
-class SettingsPageStack extends PageStack {
+class SettingsPageStack extends PageStack with Tab2In<BooksViewPageStack> {
   @override
   Widget build(BuildContext context) => SettingsScreen();
 }
@@ -187,7 +187,8 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
           onTap: (index) => context.sRouter.to(
             ScaffoldPageStack(
               (state) => state.copyWith(
-                tab1PageStack: BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
+                tab1PageStack:
+                    BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
               ),
             ),
           ),

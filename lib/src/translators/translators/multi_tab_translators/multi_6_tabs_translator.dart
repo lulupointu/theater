@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_6_tabs_page_stack.dart';
+import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
 import '../../../s_router/s_router.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
@@ -24,18 +25,12 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
-        tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab4Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab5Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab6Translators,
+    required List<STranslator<SElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<STranslator<SElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<STranslator<SElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<STranslator<SElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<STranslator<SElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<STranslator<SElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
@@ -65,18 +60,12 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, PageStackBase>>
-        tab1Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab2Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab3Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab4Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab5Translators,
-    required List<STranslator<SElement, PageStackBase>>
-        tab6Translators,
+    required List<STranslator<SElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<STranslator<SElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<STranslator<SElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<STranslator<SElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<STranslator<SElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<STranslator<SElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
           validatePathParams: validatePathParams,
@@ -130,12 +119,12 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
   ) {
     return Multi6TabsState(
       activeIndex: activeIndex,
-      tab1PageStack: pageStacks[0],
-      tab2PageStack: pageStacks[1],
-      tab3PageStack: pageStacks[2],
-      tab4PageStack: pageStacks[3],
-      tab5PageStack: pageStacks[4],
-      tab6PageStack: pageStacks[5],
+      tab1PageStack: pageStacks[0] as Tab1In<Multi6TabsPageStack>,
+      tab2PageStack: pageStacks[1] as Tab2In<Multi6TabsPageStack>,
+      tab3PageStack: pageStacks[2] as Tab3In<Multi6TabsPageStack>,
+      tab4PageStack: pageStacks[3] as Tab4In<Multi6TabsPageStack>,
+      tab5PageStack: pageStacks[4] as Tab5In<Multi6TabsPageStack>,
+      tab6PageStack: pageStacks[5] as Tab6In<Multi6TabsPageStack>,
     );
   }
 }

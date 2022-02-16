@@ -37,7 +37,7 @@ class BooksPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     return HomePageStack();
   }
 }
@@ -55,7 +55,7 @@ class BookDetailsPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     return BooksPageStack(books: books);
   }
 }
@@ -73,7 +73,7 @@ class BookBuyPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     return BookDetailsPageStack(books: books, book: book);
   }
 }
@@ -92,7 +92,7 @@ class BookGenresPageStack extends PageStack {
   }
 
   @override
-  PageStackBase? createPageStackBellow(BuildContext context) {
+  PageStackBase? get pageStackBellow {
     return BookDetailsPageStack(books: books, book: book);
   }
 }
