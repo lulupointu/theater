@@ -83,7 +83,8 @@ abstract class SElement {
   /// Keep in mind that the given [context] is always very high (at the level
   /// of [SRouter])
   @mustCallSuper
-  void update(covariant SWidget newSWidget, BuildContext context) => _sWidget = newSWidget;
+  void update(covariant SWidget newSWidget, BuildContext context) =>
+      _sWidget = newSWidget;
 
   /// A function which is called by a parent [SElement] when the android back
   /// button is pressed
@@ -142,7 +143,8 @@ abstract class SWidget {
   /// This is used to know whether an [SElement] which contains [oldWidget] can
   /// be updated (by calling [SElement.update]) with [newWidget]
   static bool canUpdate(SWidget oldWidget, SWidget newWidget) {
-    return oldWidget.runtimeType == newWidget.runtimeType && oldWidget.key == newWidget.key;
+    return oldWidget.runtimeType == newWidget.runtimeType &&
+        oldWidget.key == newWidget.key;
   }
 }
 
@@ -169,7 +171,8 @@ class StatelessSElement extends SElement {
 /// [SElement.buildPage])
 abstract class StatelessSWidget extends SWidget {
   /// Gives the [pageStack] and [key] to its superclass
-  const StatelessSWidget(PageStackBase pageStack, {Key? key}) : super(pageStack, key: key);
+  const StatelessSWidget(PageStackBase pageStack, {Key? key})
+      : super(pageStack, key: key);
 
   @nonVirtual
   @override
@@ -235,8 +238,8 @@ IList<SElement> updatePageStackBaseSElements(
     // If we have a widget match (i.e. the runtimeType are the same), we
     // update the corresponding element with the new widget
     if (_oldSElements.any((e) => SWidget.canUpdate(e.sWidget, _sWidget))) {
-      final _sElement =
-          _oldSElements.firstWhere((e) => SWidget.canUpdate(e.sWidget, _sWidget));
+      final _sElement = _oldSElements
+          .firstWhere((e) => SWidget.canUpdate(e.sWidget, _sWidget));
 
       // Remove the element from the old list so that it's not matched
       // several times
@@ -271,7 +274,8 @@ IList<SElement> updatePageStackBaseSElements(
 /// describe a list of [SWidget]s and not a single one but it turns out that
 /// having both purpose it intuitive and effective. See [StatelessPageStack] to
 /// understand why.
-class StatelessPageStackSWidget<PS extends StatelessPageStack> extends StatelessSWidget {
+class StatelessPageStackSWidget<PS extends StatelessPageStack>
+    extends StatelessSWidget {
   /// The configuration of this [SWidget]
   final PS pageStack;
 
@@ -337,7 +341,8 @@ mixin _DefaultBuildPage on PageStackBase {
   /// `Widget build(BuildContext context) => Container();`
   ///
   /// {@endtemplate}
-  Page _defaultBuildPage(BuildContext context, Widget build(BuildContext context)) {
+  Page _defaultBuildPage(
+      BuildContext context, Widget build(BuildContext context)) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -471,14 +476,14 @@ class MultiTabStateProvider extends InheritedWidget {
 
   static IList<PageStackBase> tabsPageStacksOf(BuildContext context) {
     final MultiTabStateProvider? result =
-    context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
+        context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
     assert(result != null, 'No MultiTabStateProvider found in context');
     return result!.multiTabState._pageStacks;
   }
 
   static MultiTabPageStack pageStackOf(BuildContext context) {
     final MultiTabStateProvider? result =
-    context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
+        context.dependOnInheritedWidgetOfExactType<MultiTabStateProvider>();
     assert(result != null, 'No MultiTabStateProvider found in context');
     return result!.multiTabPageStack;
   }
@@ -550,6 +555,11 @@ class STabsSElement<S extends MultiTabState> extends SElement {
   /// The keys of this IMap are the same as the one of [_tabsSElements]
   IMap<int, GlobalKey<NavigatorState>> _tabsNavigatorKeys = IMap();
 
+  /// The [HeroController] of the navigator of each tab
+  ///
+  /// The keys of this IMap are the same as the one of [_tabsSElements]
+  IMap<int, HeroController> _tabsHeroControllers = IMap();
+
   /// Builds the page by calling [MultiTabPageStack.buildPage]
   ///
   /// This is also responsible for populating [state.tabs] which consist in:
@@ -586,46 +596,57 @@ class STabsSElement<S extends MultiTabState> extends SElement {
           pageStack: state._pageStacks[i],
         ),
       );
-      _tabsNavigatorKeys = _tabsNavigatorKeys.putIfAbsent(i, GlobalKey<NavigatorState>.new);
+      _tabsNavigatorKeys =
+          _tabsNavigatorKeys.putIfAbsent(i, GlobalKey<NavigatorState>.new);
+      _tabsHeroControllers =
+          _tabsHeroControllers.putIfAbsent(i, HeroController.new);
     }
 
     state.tabs = [
       for (var _tabIndex in _tabsSElements.keys)
         MultiTabStateProvider(
-          multiTabState: state,multiTabPageStack: sWidget._multiTabPageStack,
-          child: Builder(
-            // Use this key so that AnimatedSwitcher can easily be used to animate
-            // a transition between tabs
-            key: ValueKey('sRouter_tabIndex_$_tabIndex'),
-            builder: (context) => Navigator(
-              key: _tabsNavigatorKeys[_tabIndex]!,
-              pages: _tabsSElements[_tabIndex]!.map((e) => e.buildPage(context)).toList(),
-              onPopPage: (route, data) {
-                final didPop = route.didPop(data);
-
-                if (didPop) {
-                  final tabSElements = _tabsSElements[_tabIndex]!;
-
-                  // Replace the current tab pageStack (which is the last one) by
-                  // the one bellow
-                  //
-                  // It has to exist if didPop is true
-                  final tabPageStackBellow =
-                      tabSElements[tabSElements.length - 2].sWidget.pageStack;
-                  _updateState(
-                    context,
-                    newState: sWidget._multiTabPageStack._buildFromMultiTabState(
-                      state.activeIndex,
-                      state._pageStacks.replace(state.activeIndex, tabPageStackBellow),
-                    ),
-                  );
-
-                  // Update SRouter
-                  (SRouter.of(context) as SRouterState).update();
-                }
-
-                return didPop;
-              },
+          multiTabState: state,
+          multiTabPageStack: sWidget._multiTabPageStack,
+          child: HeroControllerScope(
+            controller: _tabsHeroControllers[_tabIndex]!,
+            child: Builder(
+              // Use this key so that AnimatedSwitcher can easily be used to animate
+              // a transition between tabs
+              key: ValueKey('sRouter_tabIndex_$_tabIndex'),
+              builder: (context) => Navigator(
+                key: _tabsNavigatorKeys[_tabIndex]!,
+                pages: _tabsSElements[_tabIndex]!
+                    .map((e) => e.buildPage(context))
+                    .toList(),
+                onPopPage: (route, data) {
+                  final didPop = route.didPop(data);
+          
+                  if (didPop) {
+                    final tabSElements = _tabsSElements[_tabIndex]!;
+          
+                    // Replace the current tab pageStack (which is the last one) by
+                    // the one bellow
+                    //
+                    // It has to exist if didPop is true
+                    final tabPageStackBellow =
+                        tabSElements[tabSElements.length - 2].sWidget.pageStack;
+                    _updateState(
+                      context,
+                      newState:
+                          sWidget._multiTabPageStack._buildFromMultiTabState(
+                        state.activeIndex,
+                        state._pageStacks
+                            .replace(state.activeIndex, tabPageStackBellow),
+                      ),
+                    );
+          
+                    // Update SRouter
+                    (SRouter.of(context) as SRouterState).update();
+                  }
+          
+                  return didPop;
+                },
+              ),
             ),
           ),
         ),
@@ -639,7 +660,8 @@ class STabsSElement<S extends MultiTabState> extends SElement {
     // We need to update the state even now because the initial
     // [_MultiTabPageStack] also has a state builder which must
     // be taken into account
-    _updateState(context, newState: sWidget._multiTabPageStack._stateBuilder(_initialState));
+    _updateState(context,
+        newState: sWidget._multiTabPageStack._stateBuilder(_initialState));
   }
 
   /// Updates:
@@ -653,7 +675,8 @@ class STabsSElement<S extends MultiTabState> extends SElement {
     // Since [MultiTabState] is immutable, we receive a new instance where
     // the tabs have not been populated. This is why we can set the tabs in
     // [buildPage] even if [MultiTabState.tabs] is final
-    _updateState(context, newState: newSWidget._multiTabPageStack._stateBuilder(state));
+    _updateState(context,
+        newState: newSWidget._multiTabPageStack._stateBuilder(state));
   }
 
   /// TODO: add comment
@@ -666,8 +689,10 @@ class STabsSElement<S extends MultiTabState> extends SElement {
     return result.when(
       parent: () {
         // We don't know if a tab bellow exists, so use getOrNull
-        final tabPageStackBellow =
-            activeTabSElements.getOrNull(activeTabSElements.length - 2)?.sWidget.pageStack;
+        final tabPageStackBellow = activeTabSElements
+            .getOrNull(activeTabSElements.length - 2)
+            ?.sWidget
+            .pageStack;
 
         if (tabPageStackBellow == null) {
           // If there is no [PageStack] bellow, delegate the system pop to the
@@ -884,8 +909,8 @@ abstract class MultiTabPageStack<S extends MultiTabState> extends PageStackBase
 ///
 /// DO use [Multi2TabsTranslator], [Multi2TabsTranslator], etc depending on
 /// which implementation of [MultiTabPageStack] you implemented
-abstract class MultiTabTranslator<PS extends MultiTabPageStack<S>, S extends MultiTabState>
-    extends STranslator<STabsSElement<S>, PS> {
+abstract class MultiTabTranslator<PS extends MultiTabPageStack<S>,
+    S extends MultiTabState> extends STranslator<STabsSElement<S>, PS> {
   /// Returns the [MultiTabPageStack] associated with the given [WebEntry]
   ///
   ///
@@ -949,7 +974,8 @@ abstract class MultiTabTranslator<PS extends MultiTabPageStack<S>, S extends Mul
   ) {
     // Get the web entry returned by the active tab
     final activeIndex = element.state.activeIndex;
-    final activeTabWebEntry = translatorsHandlers[activeIndex].getWebEntryFromSElement(
+    final activeTabWebEntry =
+        translatorsHandlers[activeIndex].getWebEntryFromSElement(
       context,
       element.tabsSElements[activeIndex]!.last,
     );
@@ -974,7 +1000,8 @@ abstract class MultiTabTranslator<PS extends MultiTabPageStack<S>, S extends Mul
     for (var i = 0; i < translatorsHandlers.length; i++) {
       final sTranslatorsHandler = translatorsHandlers[i];
 
-      final pageStack = sTranslatorsHandler.getPageStackFromWebEntry(context, webEntry);
+      final pageStack =
+          sTranslatorsHandler.getPageStackFromWebEntry(context, webEntry);
       if (pageStack != null) {
         maybeNewActiveTabPageStack = MapEntry(i, pageStack);
         break;
