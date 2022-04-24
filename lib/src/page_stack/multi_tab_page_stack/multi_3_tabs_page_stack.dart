@@ -46,13 +46,43 @@ class Multi3TabsState extends MultiTabState {
   /// ```
   final Tab3In<Multi3TabsPageStack> tab3PageStack;
 
-
   /// A list of 3 widgets, one for each tab
   ///
   /// Each widget correspond to a navigator which has the [Page] stack created
   /// by the [PageStackBase] of the given index
   @override
   late final List<Widget> tabs;
+
+  /// Builds a copy of this [Multi3TabsState] where
+  ///   - [pageStack] will replace the [PageStack] of its corresponding tab
+  ///   - The index corresponding to [pageStack] will be set as the active index
+  ///
+  /// [TabXOf3] is either a [Tab1In], [Tab2In] or [Tab3In] mixin
+  Multi3TabsState withActiveStack<PS extends Multi3TabsPageStack>(
+    TabXOf3<PS>? pageStack,
+  ) {
+    final index = pageStack is Tab1In<PS>
+        ? 0
+        : pageStack is Tab2In<PS>
+            ? 1
+            : pageStack is Tab3In<PS>
+                ? 2
+                : throw 'The index of the pageStack $pageStack could not be determined, does it implement [Tab1In], [Tab2In] or [Tab3In]?';
+    return copyWith(
+      activeIndex: index,
+      tab1PageStack: index == 0 ? pageStack as Tab1In<PS> : tab1PageStack,
+      tab2PageStack: index == 1 ? pageStack as Tab2In<PS> : tab2PageStack,
+      tab3PageStack: index == 2 ? pageStack as Tab3In<PS> : tab3PageStack,
+    );
+  }
+
+  /// Builds a copy of this [Multi3TabsState] where [index] will be set as the
+  /// active index
+  ///
+  /// 0 <= [index] <= 2
+  Multi3TabsState withActiveIndex<PS extends Multi3TabsPageStack>(int index) {
+    return copyWith(activeIndex: index);
+  }
 
   /// Builds a copy of this [Multi3TabsState] where the given attributes have been
   /// replaced
@@ -64,6 +94,11 @@ class Multi3TabsState extends MultiTabState {
     Tab2In<Multi3TabsPageStack>? tab2PageStack,
     Tab3In<Multi3TabsPageStack>? tab3PageStack,
   }) {
+    assert(
+      activeIndex == null || (0 <= activeIndex && activeIndex <= 2),
+      'The given activeIndex ($activeIndex) is not valid, it must be between 0 and 2',
+    );
+
     return Multi3TabsState(
       activeIndex: activeIndex ?? this.activeIndex,
       tab1PageStack: tab1PageStack ?? this.tab1PageStack,

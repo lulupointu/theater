@@ -428,7 +428,11 @@ class MultiTabState extends Equatable {
   MultiTabState({
     required this.activeIndex,
     required IList<PageStackBase> tabsPageStacks,
-  }) : _pageStacks = tabsPageStacks;
+  })  : assert(
+          0 <= activeIndex && activeIndex <= tabsPageStacks.length,
+          'The given activeIndex ($activeIndex) is not valid, it must be between 0 and ${tabsPageStacks.length}',
+        ),
+        _pageStacks = tabsPageStacks;
 
   /// An index indicating which tab is currently active
   ///
@@ -620,10 +624,10 @@ class STabsSElement<S extends MultiTabState> extends SElement {
                     .toList(),
                 onPopPage: (route, data) {
                   final didPop = route.didPop(data);
-          
+
                   if (didPop) {
                     final tabSElements = _tabsSElements[_tabIndex]!;
-          
+
                     // Replace the current tab pageStack (which is the last one) by
                     // the one bellow
                     //
@@ -639,11 +643,11 @@ class STabsSElement<S extends MultiTabState> extends SElement {
                             .replace(state.activeIndex, tabPageStackBellow),
                       ),
                     );
-          
+
                     // Update SRouter
                     (SRouter.of(context) as SRouterState).update();
                   }
-          
+
                   return didPop;
                 },
               ),
