@@ -11,6 +11,8 @@ export 'src/page_stack/multi_tab_page_stack/multi_5_tabs_page_stack.dart';
 export 'src/page_stack/multi_tab_page_stack/multi_6_tabs_page_stack.dart';
 export 'src/page_stack/multi_tab_page_stack/tabXIn.dart';
 export 'src/page_stack/system_pop_result/system_pop_result.dart';
+export 'src/page_transitions/custom_transition_page.dart';
+export 'src/page_transitions/no_transition_page.dart';
 export 'src/s_router/build_context_s_router_extension.dart';
 export 'src/s_router/s_router.dart';
 export 'src/translators/page_stack_translator.dart';
