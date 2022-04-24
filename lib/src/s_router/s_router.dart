@@ -565,7 +565,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     toWebEntry(webEntry, isReplacement: true);
   }
 
-  /// This function must end up removing the last page in the list of pages
+  /// This function must end up removing the last page in the list of page_transitions
   /// given to [RootSFlutterNavigatorBuilder]
   void _onPop() {
     // At this point, we already know that there is a page bellow because

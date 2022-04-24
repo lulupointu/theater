@@ -11,7 +11,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: SRouter.build(
         initialPageStack: UserPageStack(),
-        // [translatorsBuilder] is optional on non-web platforms
         translatorsBuilder: (_) => [
           PathTranslator<UserPageStack>(
             path: '/user',
@@ -21,7 +20,6 @@ class MyApp extends StatelessWidget {
             path: '/settings',
             pageStack: SettingsPageStack(),
           ),
-          RedirectorTranslator(path: '*', pageStack: UserPageStack()),
         ],
       ),
     );
@@ -63,6 +61,11 @@ class UserPageStack extends PageStack {
 }
 
 class SettingsPageStack extends PageStack {
+  @override
+  Page buildPage(BuildContext context) {
+    return MaterialPage(child: build(context));
+  }
+
   @override
   Widget build(BuildContext context) {
     return SettingsScreen();

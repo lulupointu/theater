@@ -6,7 +6,7 @@ import '../page_stack/framework.dart';
 import '../s_router/s_router.dart';
 
 /// The widget which creates the [Navigator] and map the current
-/// [PageStack] to a list of pages to display in [Navigator.pages]
+/// [PageStack] to a list of page_transitions to display in [Navigator.page_transitions]
 ///
 ///
 /// This also handles onPop and onBack
@@ -15,13 +15,13 @@ import '../s_router/s_router.dart';
 /// "Root" refers to the fact that this is the one created by [SRouter] directly,
 /// event if it might not be the "root navigator" per say.
 class RootSFlutterNavigatorBuilder extends StatefulWidget {
-  /// The pages to display in the [Navigator]
+  /// The page_transitions to display in the [Navigator]
   final List<Page> pages;
 
   /// Called when a pop event happened in the created [Navigator]
   ///
   ///
-  /// This callback should end up removing the last page of [pages]
+  /// This callback should end up removing the last page of [page_transitions]
   final VoidCallback onPop;
 
   /// Called when a system pop (android back button press) occured
@@ -61,7 +61,7 @@ class _RootSFlutterNavigatorBuilderState extends State<RootSFlutterNavigatorBuil
 
     if (didPop) {
       // If the page did pop, call [onPop] so that the last [Page] of
-      // [widget.pages] gets removed
+      // [widget.page_transitions] gets removed
       widget.onPop();
     }
 

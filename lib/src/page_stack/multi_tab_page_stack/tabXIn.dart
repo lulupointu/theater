@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
 
+typedef NestedPageStack<T extends MultiTabPageStack> = Tab1In<T>;
 mixin Tab1In<T extends MultiTabPageStack> on PageStackBase {
   @nonVirtual
   bool isActiveTab(BuildContext context) {

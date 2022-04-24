@@ -3,6 +3,7 @@ import 'package:srouter/srouter.dart';
 
 import 's_routes.dart';
 
+
 void main() {
   runApp(MyApp());
 }
@@ -27,13 +28,13 @@ class MyApp extends StatelessWidget {
               searchedGenre: match.queryParams['genre'],
               searchedName: match.queryParams['name'],
             ),
-            pageStackToWebEntry: (route) => WebEntry(
+            pageStackToWebEntry: (pagestack) => WebEntry(
               pathSegments: ['books'],
               queryParams: {
-                if (route.searchedGenre != null) 'genre': route.searchedGenre!,
-                if (route.searchedName != null) 'name': route.searchedName!,
+                if (pagestack.searchedGenre != null) 'genre': pagestack.searchedGenre!,
+                if (pagestack.searchedName != null) 'name': pagestack.searchedName!,
               },
-              title: route.title,
+              title: pagestack.title,
             ),
           ),
           PathTranslator<BookDetailsPageStack>.parse(
@@ -42,9 +43,9 @@ class MyApp extends StatelessWidget {
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            pageStackToWebEntry: (route) => WebEntry(
-              pathSegments: ['books', route.book.id],
-              title: route.title,
+            pageStackToWebEntry: (pagestack) => WebEntry(
+              pathSegments: ['books', pagestack.book.id],
+              title: pagestack.title,
             ),
           ),
           PathTranslator<BookBuyPageStack>.parse(
@@ -53,9 +54,9 @@ class MyApp extends StatelessWidget {
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            pageStackToWebEntry: (route) => WebEntry(
-              pathSegments: ['books', route.book.id, 'buy'],
-              title: route.title,
+            pageStackToWebEntry: (pagestack) => WebEntry(
+              pathSegments: ['books', pagestack.book.id, 'buy'],
+              title: pagestack.title,
             ),
           ),
           PathTranslator<BookGenresPageStack>.parse(
@@ -64,9 +65,9 @@ class MyApp extends StatelessWidget {
               books: books,
               book: books.firstWhere((element) => element.id == match.pathParams['bookId']),
             ),
-            pageStackToWebEntry: (route) => WebEntry(
-              pathSegments: ['books', route.book.id, 'genres'],
-              title: route.title,
+            pageStackToWebEntry: (pagestack) => WebEntry(
+              pathSegments: ['books', pagestack.book.id, 'genres'],
+              title: pagestack.title,
             ),
           ),
         ],

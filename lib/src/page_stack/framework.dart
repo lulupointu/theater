@@ -564,7 +564,7 @@ class STabsSElement<S extends MultiTabState> extends SElement {
   ///
   /// This is also responsible for populating [state.tabs] which consist in:
   ///   1. Updating the [SElement]s associated with each tab
-  ///   2. Using each tab [SElement]s to get the pages to put in the nested
+  ///   2. Using each tab [SElement]s to get the page_transitions to put in the nested
   ///   ^  [Navigator]
   @override
   Page buildPage(BuildContext context) {

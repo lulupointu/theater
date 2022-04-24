@@ -7,7 +7,7 @@ import 'data.dart';
 import 'navigators.dart';
 import 'navigators_implementations.dart';
 
-/// Contains the definitions of each stack of pages as [PageStack]s
+/// Contains the definitions of each stack of page_transitions as [PageStack]s
 ///
 ///
 /// Something interesting is how clear the dependencies are, if you are on
