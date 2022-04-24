@@ -10,15 +10,11 @@ import 'tabXIn.dart';
 class NestedState extends MultiTabState {
   /// {@macro srouter.framework.STabsState.constructor}
   NestedState({
-    required this.activeIndex,
     required this.nestedPageStack,
   }) : super(
-          activeIndex: activeIndex,
+          activeIndex: 0,
           tabsPageStacks: [nestedPageStack].lock,
         );
-
-  @override
-  final int activeIndex;
 
   /// The [PageStackBase] which is nested
   ///
@@ -39,13 +35,11 @@ class NestedState extends MultiTabState {
   /// replaced
   ///
   /// Use this is [StateBuilder] to easily return the new state
-  NestedState copyWith({
-    int? activeIndex,
-    NestedPageStack<NestingPageStack>? nestedPageStack,
-  }) {
+  NestedState copyWith(
+    NestedPageStack<NestingPageStack> nestedPageStack,
+  ) {
     return NestedState(
-      activeIndex: activeIndex ?? this.activeIndex,
-      nestedPageStack: nestedPageStack ?? this.nestedPageStack,
+      nestedPageStack: nestedPageStack,
     );
   }
 
@@ -55,7 +49,6 @@ class NestedState extends MultiTabState {
     IList<PageStackBase> sRoutes,
   ) =>
       NestedState(
-        activeIndex: activeIndex,
         nestedPageStack: sRoutes[0] as NestedPageStack<NestingPageStack>,
       );
 }
