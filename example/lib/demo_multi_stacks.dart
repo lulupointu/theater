@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: MyScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
           PathTranslator<FeaturePageStack>(
@@ -25,6 +25,10 @@ class MyApp extends StatelessWidget {
                 path: '/home',
                 pageStack: HomePageStack(),
               ),
+              PathTranslator<Home2PageStack>(
+                path: '/home2',
+                pageStack: Home2PageStack(),
+              ),
             ],
             tab2Translators: [
               PathTranslator<ProfilePageStack>(
@@ -35,6 +39,10 @@ class MyApp extends StatelessWidget {
                 path: '/settings',
                 pageStack: SettingsPageStack(),
               ),
+              PathTranslator<Settings2PageStack>(
+                path: '/settings2',
+                pageStack: Settings2PageStack(),
+              ),
             ],
           ),
         ],
@@ -43,19 +51,39 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void didChangeDependencies() {
+    print('ProfileScreen isCurrent: ${PageState.of(context).isCurrent}');
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Profile')),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () => SRouter.of(context).to(
-            MyScaffoldPageStack(
-              (state) => state.copyWith(tab2PageStack: SettingsPageStack()),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () => Theater.of(context).to(
+                MyScaffoldPageStack(
+                  (state) => state.withCurrentStack(SettingsPageStack()),
+                ),
+              ),
+              child: Text('Go to settings'),
             ),
-          ),
-          child: Text('Go to settings'),
+            ElevatedButton(
+              onPressed: () => Theater.of(context).to(FeaturePageStack()),
+              child: Text('Go to feature'),
+            ),
+          ],
         ),
       ),
     );
@@ -68,7 +96,26 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Settings')),
       body: Center(
-        child: Text('Here are your settings'),
+        child: ElevatedButton(
+          onPressed: () => Theater.of(context).to(
+            MyScaffoldPageStack(
+              (state) => state.withCurrentStack(Settings2PageStack()),
+            ),
+          ),
+          child: Text('Go to settings2'),
+        ),
+      ),
+    );
+  }
+}
+
+class Settings2Screen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Settings2')),
+      body: Center(
+        child: Text('Here are your settings2'),
       ),
     );
   }
@@ -82,7 +129,28 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: Center(
           child: ElevatedButton(
-            onPressed: () => SRouter.of(context).to(FeaturePageStack()),
+            onPressed: () => Theater.of(context).to(
+              MyScaffoldPageStack(
+                (state) => state.withCurrentStack(Home2PageStack()),
+              ),
+            ),
+            child: Text('Go to Home2'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Home2Screen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Home2')),
+      body: Center(
+        child: Center(
+          child: ElevatedButton(
+            onPressed: () => Theater.of(context).to(FeaturePageStack()),
             child: Text('Go to feature'),
           ),
         ),
@@ -97,7 +165,29 @@ class FeatureScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Feature')),
       body: Center(
-        child: Text('Here is your Feature'),
+        child: ElevatedButton(
+          onPressed: () => Theater.of(context).to(Feature2PageStack()),
+          child: Text('Go to feature2'),
+        ),
+      ),
+    );
+  }
+}
+
+class Feature2Screen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Feature2')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => Theater.of(context).to(
+            MyScaffoldPageStack(
+              (state) => state.withCurrentStack(ProfilePageStack()),
+            ),
+          ),
+          child: Text('Go to profile'),
+        ),
       ),
     );
   }
@@ -122,8 +212,8 @@ class MyScaffold extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (index) => SRouter.of(context).to(
-          MyScaffoldPageStack((state) => state.copyWith(activeIndex: index)),
+        onTap: (index) => Theater.of(context).to(
+          MyScaffoldPageStack((state) => state.withCurrentIndex(index)),
         ),
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -135,17 +225,17 @@ class MyScaffold extends StatelessWidget {
 }
 
 class MyScaffoldPageStack extends Multi2TabsPageStack {
-  MyScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder)
+  const MyScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder)
       : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, Multi2TabsState state) {
-    return MyScaffold(children: state.tabs, currentIndex: state.activeIndex);
+  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {
+    return MyScaffold(children: state.tabs, currentIndex: state.currentIndex);
   }
 
   @override
   Multi2TabsState get initialState => Multi2TabsState(
-        activeIndex: 0,
+        currentIndex: 0,
         tab1PageStack: HomePageStack(),
         tab2PageStack: ProfilePageStack(),
       );
@@ -158,6 +248,16 @@ class HomePageStack extends PageStack with Tab1In<MyScaffoldPageStack> {
   }
 }
 
+class Home2PageStack extends PageStack with Tab1In<MyScaffoldPageStack> {
+  @override
+  Widget build(BuildContext context) {
+    return Home2Screen();
+  }
+
+  @override
+  Tab1In<MyScaffoldPageStack>? get pageStackBellow => HomePageStack();
+}
+
 class ProfilePageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
   @override
   Widget build(BuildContext context) {
@@ -166,7 +266,6 @@ class ProfilePageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
 }
 
 class SettingsPageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
-
   @override
   Widget build(BuildContext context) {
     return SettingsScreen();
@@ -174,6 +273,16 @@ class SettingsPageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
 
   @override
   Tab2In<MyScaffoldPageStack>? get pageStackBellow => ProfilePageStack();
+}
+
+class Settings2PageStack extends PageStack with Tab2In<MyScaffoldPageStack> {
+  @override
+  Widget build(BuildContext context) {
+    return Settings2Screen();
+  }
+
+  @override
+  Tab2In<MyScaffoldPageStack>? get pageStackBellow => SettingsPageStack();
 }
 
 class FeaturePageStack extends PageStack {
@@ -184,4 +293,14 @@ class FeaturePageStack extends PageStack {
 
   @override
   PageStackBase? get pageStackBellow => MyScaffoldPageStack((state) => state);
+}
+
+class Feature2PageStack extends PageStack {
+  @override
+  Widget build(BuildContext context) {
+    return Feature2Screen();
+  }
+
+  @override
+  PageStackBase? get pageStackBellow => FeaturePageStack();
 }

@@ -10,7 +10,7 @@ import 'translator.dart';
 class TranslatorsHandler {
   /// The list of [STranslator]s which will be used to convert a web
   /// to a [PageStack] and vise versa
-  final List<STranslator<SElement, PageStackBase>> translators;
+  final List<STranslator<PageElement, PageStackBase>> translators;
 
   // ignore: public_member_api_docs
   const TranslatorsHandler({required this.translators});
@@ -38,9 +38,9 @@ class TranslatorsHandler {
   ///
   ///
   /// If no translator can translate the route to a web entry, return null
-  WebEntry? getWebEntryFromSElement<Element extends SElement, Route extends PageStackBase>(
+  WebEntry? getWebEntryFromPageElement<Element extends PageElement, Route extends PageStackBase>(
     BuildContext context,
-    Element sElement,
+    Element pageElement,
   ) {
     // We explicitly allow [dynamic] so that a route can implement matching
     // everything (on mobile with [UniversalWebEntryMatcherTranslator] for
@@ -49,7 +49,7 @@ class TranslatorsHandler {
     // If there is no match, return null
     if (!translators.any(
       (translator) =>
-          translator.pageStackType == sElement.sWidget.pageStack.runtimeType ||
+          translator.pageStackType == pageElement.pageWidget.pageStack.runtimeType ||
           translator.pageStackType == dynamic,
     )) {
       return null;
@@ -63,14 +63,14 @@ class TranslatorsHandler {
     // example)
     final translator = translators.firstWhere(
       (translator) =>
-          translator.pageStackType == sElement.sWidget.pageStack.runtimeType ||
+          translator.pageStackType == pageElement.pageWidget.pageStack.runtimeType ||
           translator.pageStackType == dynamic,
     );
 
-    return translator.sElementToWebEntry(
+    return translator.pageElementToWebEntry(
       context,
-      sElement,
-      sElement.sWidget.pageStack as Route,
+      pageElement,
+      pageElement.pageWidget.pageStack as Route,
     );
   }
 }

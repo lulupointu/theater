@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,11 +11,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: MyScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
-
-          
           Multi2TabsTranslator<MyScaffoldPageStack>(
             pageStack: MyScaffoldPageStack.new,
             tab1Translators: [
@@ -35,13 +33,10 @@ class MyApp extends StatelessWidget {
               ),
             ],
           ),
-
-
           PathTranslator<FeaturePageStack>(
-              path: '/feature',
-              pageStack: FeaturePageStack(),
+            path: '/feature',
+            pageStack: FeaturePageStack(),
           ),
-          
           RedirectorTranslator(
             path: '*',
             pageStack: MyScaffoldPageStack((state) => state),
@@ -59,11 +54,8 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: Text('Profile')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => SRouter.of(context).to(MyScaffoldPageStack(
-            (state) => state.copyWith(
-              activeIndex: 1,
-              tab2PageStack: SettingsPageStack(),
-            ),
+          onPressed: () => Theater.of(context).to(MyScaffoldPageStack(
+            (state) => state.withCurrentStack(SettingsPageStack()),
           )),
           child: Text('Go to settings'),
         ),
@@ -92,7 +84,7 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: Center(
           child: ElevatedButton(
-            onPressed: () => SRouter.of(context).to(FeaturePageStack()),
+            onPressed: () => Theater.of(context).to(FeaturePageStack()),
             child: Text('Go to feature'),
           ),
         ),
@@ -132,9 +124,9 @@ class MyScaffold extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (index) => SRouter.of(context).to(
+        onTap: (index) => Theater.of(context).to(
           MyScaffoldPageStack(
-            (state) => state.copyWith(activeIndex: index),
+            (state) => state.withCurrentIndex(index),
           ),
         ),
         items: [
@@ -171,13 +163,13 @@ class MyScaffoldPageStack extends Multi2TabsPageStack {
       : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, Multi2TabsState state) {
-    return MyScaffold(children: state.tabs, currentIndex: state.activeIndex);
+  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {
+    return MyScaffold(children: state.tabs, currentIndex: state.currentIndex);
   }
 
   @override
   Multi2TabsState get initialState => Multi2TabsState(
-        activeIndex: 0,
+        currentIndex: 0,
         tab1PageStack: HomePageStack(),
         tab2PageStack: ProfilePageStack(),
       );

@@ -7,38 +7,38 @@ import '../back_button_listener_scope/back_button_listener_scope.dart';
 import '../browser/s_browser.dart';
 import '../browser/s_url_strategy.dart';
 import '../browser/web_entry.dart';
-import '../flutter_navigator_builder/root_flutter_navigator_builder.dart';
+import '../navigator/theater_navigator.dart';
 import '../page_stack/framework.dart';
 import '../translators/translator.dart';
 import '../translators/translators/universal_web_entry_translator.dart';
 import '../translators/translators_handler.dart';
 import 'history_entry.dart';
-import 's_router_interface.dart';
+import 'theater_interface.dart';
 
 /// A widget which assembles the different part of the package to
 /// create the greatest routing experience of your life ;)
 ///
 /// This class is an interface between [Navigator] and [SBrowserInterface].
-/// [SBrowserInterface] must never be handled directly, always use [SRouter]
+/// [SBrowserInterface] must never be handled directly, always use [Theater]
 ///
 /// The responsibility of this class is to exposed the current [HistoryEntry]
 /// which should be displayed
 ///
 ///
 /// The state of this class (used to navigate) can be accessed using
-/// [SRouter.of] or [content.sRouter]
-class SRouter extends StatefulWidget {
-  /// {@template srouter.srouter.constructor}
+/// [Theater.of] or [content.theater]
+class Theater extends StatefulWidget {
+  /// {@template theater.theater.constructor}
   ///
   /// The [initialPageStack] describes the first [PageStack] to be shown before
   /// any navigation has taken place
   ///
   /// [translatorsBuilder] are optional but must be given to support the web
-  /// platform, otherwise [SRouter] can't turn the url into [PageStack]s
+  /// platform, otherwise [Theater] can't turn the url into [PageStack]s
   ///
   /// [key] can be useful if you need to use [to] and friends without
   /// a [BuildContext]. In which case you would create
-  /// [routerKey = GlobalKey<SRouterState>] and use it to access the [SRouter]
+  /// [routerKey = GlobalKey<TheaterState>] and use it to access the [Theater]
   /// methods using [routerKey.currentState.to]
   ///
   /// [navigatorKey] is often useful if you need the overlay associated with
@@ -48,8 +48,8 @@ class SRouter extends StatefulWidget {
   /// {@endtemplate}
   ///
   ///
-  /// PREFER using [SRouter.build]
-  const SRouter({
+  /// PREFER using [Theater.build]
+  const Theater({
     Key? key,
     required this.initialPageStack,
     this.translatorsBuilder,
@@ -60,19 +60,19 @@ class SRouter extends StatefulWidget {
     this.disableSendAppToBackground = false,
     this.disableUniversalTranslator = false,
   })  : assert(!kIsWeb || translatorsBuilder != null, '''
-You must define [translators] when you are on the web, otherwise SRouter can't know which [PageStack] correspond to which url
+You must define [translators] when you are on the web, otherwise Theater can't know which [PageStack] correspond to which url
 '''),
         super(key: key);
 
-  /// A useful builder of [SRouter] to use in [WidgetsApp.builder],
+  /// A useful builder of [Theater] to use in [WidgetsApp.builder],
   /// [MaterialApp.builder] or [CupertinoApp.builder]
   ///
-  /// {@macro srouter.srouter.constructor}
-  static SRouter Function(BuildContext context, Widget? child) build({
+  /// {@macro theater.theater.constructor}
+  static Theater Function(BuildContext context, Widget? child) build({
     Key? key,
     required PageStackBase initialPageStack,
-    List<STranslator<SElement, PageStackBase>>
-            Function(BuildContext context)?
+    List<STranslator<PageElement, PageStackBase>> Function(
+            BuildContext context)?
         translatorsBuilder,
     SUrlStrategy sUrlStrategy = SUrlStrategy.hash,
     Widget Function(BuildContext, Widget)? builder,
@@ -84,10 +84,10 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
       (context, child) {
         assert(
           child == null,
-          'You should not provide a "home" parameter to the WidgetsApp (or MaterialApp or CupertinoApp) in which [SRouter] is created',
+          'You should not provide a "home" parameter to the WidgetsApp (or MaterialApp or CupertinoApp) in which [Theater] is created',
         );
 
-        return SRouter(
+        return Theater(
           initialPageStack: initialPageStack,
           translatorsBuilder: translatorsBuilder,
           sUrlStrategy: sUrlStrategy,
@@ -109,12 +109,11 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// to a [PageStack] and vise versa
   ///
   ///
-  /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
+  /// WARNING: In the given context, [Theater.of(context).currentHistoryEntry]
   /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
-  final List<
-          STranslator<SElement, PageStackBase>>
-      Function(BuildContext context)? translatorsBuilder;
+  final List<STranslator<PageElement, PageStackBase>> Function(
+      BuildContext context)? translatorsBuilder;
 
   /// Only used in Flutter web to describe whether a hash (#) should be used
   /// at the beginning of your url path.
@@ -129,10 +128,10 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// widget
   ///
   ///
-  /// [SRouter] will be accessible in the given context
+  /// [Theater] will be accessible in the given context
   final Widget Function(BuildContext context, Widget child)? builder;
 
-  /// The key of the navigator created by [SRouter]
+  /// The key of the navigator created by [Theater]
   ///
   ///
   /// We force it to be global since using a regular key would not be of any
@@ -147,7 +146,7 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// You can set [disableUniversalTranslator] to true to disable this behavior
   ///
   ///
-  /// In a nested [SRouter], we never tries to put the app in the background so
+  /// In a nested [Theater], we never tries to put the app in the background so
   /// this attribute is useless
   ///
   ///
@@ -171,58 +170,58 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   final bool disableUniversalTranslator;
 
   @override
-  State<SRouter> createState() => SRouterState();
+  State<Theater> createState() => TheaterState();
 
-  /// A method to access the [SRouter] of the given [context]
+  /// A method to access the [Theater] of the given [context]
   ///
   ///
-  /// If [SRouter] is not present is the given [context], throw an
+  /// If [Theater] is not present is the given [context], throw an
   /// exception
   ///
   ///
-  /// If [listen] is true, any change to [SRouterState] will cause a
+  /// If [listen] is true, any change to [TheaterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf] is true, it won't return try to look at the
   /// [StatefulElement] associated with the [context] and only look at its
   /// parents
   ///
-  /// If [findRoot] is true, it will try to find the root [SRouterState]
+  /// If [findRoot] is true, it will try to find the root [TheaterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
-  static SRouterInterface of(
+  static TheaterInterface of(
     BuildContext context, {
     bool listen = false,
     bool ignoreSelf = false,
     bool findRoot = false,
   }) {
-    final result = SRouter.maybeOf(
+    final result = Theater.maybeOf(
       context,
       listen: listen,
       ignoreSelf: ignoreSelf,
       findRoot: findRoot,
     );
-    assert(result != null, 'No SRouter found in the given context');
+    assert(result != null, 'No Theater found in the given context');
     return result!;
   }
 
-  /// A method to access the [SRouter] of the given [context]
+  /// A method to access the [Theater] of the given [context]
   ///
   ///
-  /// If [SRouter] is not present is the given [context], null is
+  /// If [Theater] is not present is the given [context], null is
   /// returned
   ///
   ///
-  /// If [listen] is true, any change to [SRouterState] will cause a
+  /// If [listen] is true, any change to [TheaterState] will cause a
   /// rebuild of the context which used this method
   ///
   /// If [ignoreSelf], it won't return try to look at the [StatefulElement] associated
   /// with the [context] and only look at its parents
   ///
-  /// If [findRoot] is true, it will try to find the root [SRouterState]
+  /// If [findRoot] is true, it will try to find the root [TheaterState]
   /// (i.e. the one which is the highest in the widget tree, considering the
   /// current context)
-  static SRouterInterface? maybeOf(
+  static TheaterInterface? maybeOf(
     BuildContext context, {
     bool listen = false,
     bool ignoreSelf = false,
@@ -239,14 +238,18 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
       return _rootMaybeOf(context, listen: listen);
     }
 
-    late final SRouterState? result;
-    if (!ignoreSelf && context is StatefulElement && context.state is SRouterState) {
-      result = context.state as SRouterState;
+    late final TheaterState? result;
+    if (!ignoreSelf &&
+        context is StatefulElement &&
+        context.state is TheaterState) {
+      result = context.state as TheaterState;
     } else if (listen) {
-      result = context.dependOnInheritedWidgetOfExactType<_SRouterProvider>()?.state;
+      result =
+          context.dependOnInheritedWidgetOfExactType<_TheaterProvider>()?.state;
     } else {
-      result = (context.getElementForInheritedWidgetOfExactType<_SRouterProvider>()?.widget
-              as _SRouterProvider?)
+      result = (context
+              .getElementForInheritedWidgetOfExactType<_TheaterProvider>()
+              ?.widget as _TheaterProvider?)
           ?.state;
     }
     return result;
@@ -259,11 +262,12 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// external method.
   /// It is used internally to ignore the state of the context during recursive
   /// calls
-  static SRouterState? _rootMaybeOf(
+  static TheaterState? _rootMaybeOf(
     BuildContext context, {
     required bool listen,
   }) {
-    final maybeCurrentElement = maybeOf(context, listen: false) as SRouterState?;
+    final maybeCurrentElement =
+        maybeOf(context, listen: false) as TheaterState?;
 
     // If there are no element in the given context, return null
     if (maybeCurrentElement == null) {
@@ -275,7 +279,7 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
       currentElement.context,
       listen: false,
       ignoreSelf: true,
-    ) as SRouterState?;
+    ) as TheaterState?;
 
     // Continue to go up the tree until there is no element in the context
     while (aboveElement != null) {
@@ -284,15 +288,15 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
         currentElement.context,
         listen: false,
         ignoreSelf: true,
-      ) as SRouterState?;
+      ) as TheaterState?;
     }
 
     // At this point, the [currentElement] contains the root element
 
     // We need to listen manually since we did not listen before
     if (listen) {
-      final maybeInheritedElement =
-          currentElement.context.getElementForInheritedWidgetOfExactType<_SRouterProvider>();
+      final maybeInheritedElement = currentElement.context
+          .getElementForInheritedWidgetOfExactType<_TheaterProvider>();
 
       // This can happen if the context used is the one of the root element, in
       // which can listening is not needed anyway
@@ -309,7 +313,7 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   /// Only use this method for testing, usually in [setUp]
   /// ```dart
   /// setUp(() {
-  ///   SRouter.reset();
+  ///   Theater.reset();
   /// })
   /// ```
   @visibleForTesting
@@ -317,16 +321,16 @@ You must define [translators] when you are on the web, otherwise SRouter can't k
   static void reset() => SBrowser.reset();
 }
 
-/// The state for a [SRouter] widget.
+/// The state for a [Theater] widget.
 ///
-/// A reference to this class can be obtained by calling [SRouter.of] or
-/// [context.sRouter]
-class SRouterState extends State<SRouter> implements SRouterInterface {
-  /// The translator associated with the [SRouter] with is used to
+/// A reference to this class can be obtained by calling [Theater.of] or
+/// [context.theater]
+class TheaterState extends State<Theater> implements TheaterInterface {
+  /// The translator associated with the [Theater] with is used to
   /// convert a [WebEntry] to a [PageStack] and vise versa
   ///
   ///
-  /// WARNING: In the given context, [SRouter.of(context).currentHistoryEntry]
+  /// WARNING: In the given context, [Theater.of(context).currentHistoryEntry]
   /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
   TranslatorsHandler get _translatorsHandler => TranslatorsHandler(
@@ -349,7 +353,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// The interface representing the browser in which this application run
   late final SBrowserInterface _sBrowser = SBrowser.instance;
 
-  /// Whether this [SRouter] is nested in another one
+  /// Whether this [Theater] is nested in another one
   ///
   ///
   /// If this is the case, we will NOT listen to browser updates and instead
@@ -357,17 +361,17 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// [build]
   ///
   ///
-  /// This is needed because a nested [SRouter] might not be placed in
+  /// This is needed because a nested [Theater] might not be placed in
   /// the widget tree during the next build call. In which case it should NOT
   /// try to find the [PageStack] corresponding to the current [WebEntry]
-  /// (which likely does NOT exists for this [SRouter])
+  /// (which likely does NOT exists for this [Theater])
   ///
-  /// However this is only possible in nested [SRouter] because
+  /// However this is only possible in nested [Theater] because
   /// [SBrowser] updates do NOT cause widget rebuild by itself, therefore if
-  /// no parent [SRouter] exist, this [SRouter] will NOT be
+  /// no parent [Theater] exist, this [Theater] will NOT be
   /// rebuilt upon [SBrowser] updates
   late final bool _isNested =
-      SRouter.maybeOf(context, listen: false, ignoreSelf: true) != null;
+      Theater.maybeOf(context, listen: false, ignoreSelf: true) != null;
 
   /// The history is a map between an history index and a
   /// [HistoryEntry]
@@ -385,7 +389,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   ///
   /// Watch out for edge cases:
-  ///   - It can be null when [SRouter] is first instantiated until the first
+  ///   - It can be null when [Theater] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
   ///   ^ a value (i.e. NOT be null) during all [build] phases
   ///   - It will have an outdated value when a new [WebEntry] or a new page
@@ -393,7 +397,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   ///
   /// This is particularly important to keep in mind when implementing
   /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
-  /// [STranslator.sElementToWebEntry] to get this SRouter will be in the
+  /// [STranslator.pageElementToWebEntry] to get this Theater will be in the
   /// in-between state described above
   HistoryEntry? _currentHistoryEntry;
 
@@ -407,11 +411,16 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// to use the [widget.initialPageStack] (if we are not deep-linking)
   bool _initialUrlHandled = false;
 
-  /// The [SElement]s used to create the [Page]s
+  /// The [PageElement]s used to create the [Page]s
   ///
   ///
   /// It will be updated each time [to] is called
-  IList<SElement> _sElements = IList();
+  IList<PageElement> _pageElements = IList();
+
+  /// The [Page]s created from [_pageElements]
+  ///
+  /// This is updated during [build]
+  IList<Page> pages = IList();
 
   /// Pushes a new entry with the given page stack
   ///
@@ -419,33 +428,46 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
   void to(PageStackBase pageStack, {bool isReplacement = false}) {
-    _sElements = updatePageStackBaseSElements(
+    _pageElements = updatePageStackBasePageElements(
       context,
-      oldSElements: _sElements,
+      oldPageElements: _pageElements,
       pageStack: pageStack,
+      // Always true since this will be placed in the root [TheaterNavigator]
+      isLastPageElementCurrent: true,
     );
 
-    return _toSElements(_sElements, isReplacement: isReplacement);
+    return _toPageElements(_pageElements, isReplacement: isReplacement);
   }
 
-  /// Updates the [WebEntry] based on the current [_sElements]
+  /// Calls [to] on the current [PageStackBase]
   ///
-  /// This should be called when [_sElements] is updated by another widget
-  void update() => _toSElements(_sElements);
+  /// This should be called when a [PageElement] updates its state internally
+  void update() {
+    final _currentPageStack = currentHistoryEntry?.pageStack;
+    assert(_currentPageStack != null, 'Tried to update while no PageStack was ever created');
 
-  /// Pushes a new entry with the given [sElements]
+    to(_currentPageStack!);
+  }
+
+  /// Pushes a new entry with the given [pageElements]
   ///
   ///
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
-  void _toSElements(IList<SElement> sElements, {bool isReplacement = false}) {
-    final _toCallback = isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
+  void _toPageElements(
+    IList<PageElement> pageElements, {
+    bool isReplacement = false,
+  }) {
+    final _toCallback =
+        isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
 
     return _toCallback(
       HistoryEntry(
-        webEntry: _translatorsHandler.getWebEntryFromSElement(context, sElements.last) ??
-            (throw UnknownPageStackError(pageStack: sElements.last.sWidget.pageStack)),
-        pageStack: sElements.last.sWidget.pageStack,
+        webEntry: _translatorsHandler.getWebEntryFromPageElement(
+                context, pageElements.last) ??
+            (throw UnknownPageStackError(
+                pageStack: pageElements.last.pageWidget.pageStack)),
+        pageStack: pageElements.last.pageWidget.pageStack,
       ),
     );
   }
@@ -566,28 +588,32 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   }
 
   /// This function must end up removing the last page in the list of page_transitions
-  /// given to [RootSFlutterNavigatorBuilder]
+  /// given to [TheaterNavigator]
   void _onPop() {
     // At this point, we already know that there is a page bellow because
-    // [RootSFlutterNavigatorBuilder] checked route.didPop
-    final newPageStack = _sElements[_sElements.length - 2].sWidget.pageStack;
+    // [TheaterNavigator] checked route.didPop
+    final newPageStack =
+        _pageElements[_pageElements.length - 2].pageWidget.pageStack;
 
     to(newPageStack);
   }
 
   /// This function handles a system pop by first passing the event to the top
-  /// [SElement]
+  /// [PageElement]
   ///
-  /// If the top [SElement] did NOT handle the event, we handle it by:
+  /// If the top [PageElement] did NOT handle the event, we handle it by:
   ///   - Either popping on the [PageStack] bellow if any
   ///   - Or putting the app in the background
   void _onSystemPop() {
-    final result = _sElements.last.onSystemPop(context);
+    final result = _pageElements.last.onSystemPop(context);
 
     result.when(
       parent: () {
         // We don't know if a tab bellow exists, so use getOrNull
-        final pageStackBellow = _sElements.getOrNull(_sElements.length - 2)?.sWidget.pageStack;
+        final pageStackBellow = _pageElements
+            .getOrNull(_pageElements.length - 2)
+            ?.pageWidget
+            .pageStack;
 
         if (pageStackBellow == null) {
           // If there is no [PageStack] bellow, move the app to the background
@@ -603,8 +629,10 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
         // We navigate to the current [PageStack] since the changes where internal
         _pushSHistoryEntry(
           HistoryEntry(
-            webEntry: _translatorsHandler.getWebEntryFromSElement(context, _sElements.last) ??
-                (throw UnknownPageStackError(pageStack: currentHistoryEntry!.pageStack)),
+            webEntry: _translatorsHandler.getWebEntryFromPageElement(
+                    context, _pageElements.last) ??
+                (throw UnknownPageStackError(
+                    pageStack: currentHistoryEntry!.pageStack)),
             pageStack: currentHistoryEntry!.pageStack,
           ),
         );
@@ -635,7 +663,7 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   }
 
   @override
-  void didUpdateWidget(covariant SRouter oldWidget) {
+  void didUpdateWidget(covariant Theater oldWidget) {
     // If we are nested, the update should only happen during the [build] phase
     if (!_isNested) {
       _sBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
@@ -658,22 +686,23 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
     // update anyway
     if (_isNested) _updateHistoryWithCurrentWebEntry();
 
-    return _SRouterProvider(
+    return _TheaterProvider(
       state: this,
       currentHistoryEntry: currentHistoryEntry!,
       isNested: _isNested,
       child: BackButtonListenerScope(
         child: Builder(
           builder: (context) {
-            final navigatorBuilder = RootSFlutterNavigatorBuilder(
-              pages: _sElements.map((element) => element.buildPage(context)).toList(),
+            final navigatorBuilder = TheaterNavigator.root(
+              pageElements: _pageElements,
               navigatorKey: widget.navigatorKey,
               navigatorObservers: widget.navigatorObservers,
               onPop: _onPop,
               onSystemPop: _onSystemPop,
             );
 
-            return widget.builder?.call(context, navigatorBuilder) ?? navigatorBuilder;
+            return widget.builder?.call(context, navigatorBuilder) ??
+                navigatorBuilder;
           },
         ),
       ),
@@ -681,26 +710,26 @@ class SRouterState extends State<SRouter> implements SRouterInterface {
   }
 }
 
-/// A provider which given efficient access to the nearest [SRouter]
+/// A provider which given efficient access to the nearest [Theater]
 ///
 ///
 /// This will also cause the subscribed [BuildContext] to rebuild if [isNested]
 /// of [currentHistoryEntry] are updated
-class _SRouterProvider extends InheritedWidget {
+class _TheaterProvider extends InheritedWidget {
   /// The current [HistoryEntry]
   final HistoryEntry currentHistoryEntry;
 
-  /// Whether the associated [SRouter] is nested in another one
+  /// Whether the associated [Theater] is nested in another one
   final bool isNested;
 
-  /// The [SRouterState] that this [InheritedWidget] provides
+  /// The [TheaterState] that this [InheritedWidget] provides
   ///
   ///
   /// Do NOT use this in [updateShouldNotify] since this object will mutate
   /// (therefore its reference will be the same)
-  final SRouterState state;
+  final TheaterState state;
 
-  const _SRouterProvider({
+  const _TheaterProvider({
     Key? key,
     required Widget child,
     required this.state,
@@ -709,15 +738,16 @@ class _SRouterProvider extends InheritedWidget {
   }) : super(key: key, child: child);
 
   @override
-  bool updateShouldNotify(_SRouterProvider old) {
-    return old.currentHistoryEntry != currentHistoryEntry || old.isNested != isNested;
+  bool updateShouldNotify(_TheaterProvider old) {
+    return old.currentHistoryEntry != currentHistoryEntry ||
+        old.isNested != isNested;
   }
 }
 
 /// An exception thrown when the given web entry in
 /// [TranslatorsHandler.getPageStackFromWebEntry] could not be matched by any
 /// translator
-class UnknownWebEntryError implements Exception {
+class UnknownWebEntryError extends Error {
   /// The web entry which could not be converted to a [PageStack]
   final WebEntry webEntry;
 
@@ -737,7 +767,7 @@ If you are NOT on the web, this should never happen, please fill an issue.
 /// An exception thrown when the given [PageStackBase] in
 /// [TranslatorsHandler.getPageStackFromWebEntry] could not be matched by any
 /// translator
-class UnknownPageStackError implements Exception {
+class UnknownPageStackError extends Error {
   /// The [PageStackBase] which could not be converted to an [WebEntry]
   final PageStackBase pageStack;
 

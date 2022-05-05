@@ -8,16 +8,16 @@ import '../page_stack/framework.dart';
 /// This class has three goals:
 ///   1. Define which type of url can access this translator
 ///   2. Convert the url to a [PageStackBase]
-///   3. Convert the [SElement] to a url
+///   3. Convert the [PageElement] to a url
 ///
 /// It uses the [Element] type to determine if it is its role to convert a given
-/// [SElement] to a [WebEntry]
+/// [PageElement] to a [WebEntry]
 ///
 ///
 /// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class STranslator<Element extends SElement, PS extends PageStackBase> {
+abstract class STranslator<Element extends PageElement, PS extends PageStackBase> {
   /// This constructor checks that the [PS] generic (stored in [pageStackType])
   /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)
@@ -55,10 +55,10 @@ $translatorType(...)
     }());
   }
 
-  /// This attributes describe which [SElement] is associated with this
+  /// This attributes describe which [PageElement] is associated with this
   /// [STranslator] :
-  ///   - When this [PageStackBase] associated with this [SElement] is pushed in
-  ///   ^ [SRouter], the translator with which is is associated will be used to
+  ///   - When this [PageStackBase] associated with this [PageElement] is pushed in
+  ///   ^ [Theater], the translator with which is is associated will be used to
   ///   ^ convert it to a [WebEntry]
   ///   - When a [WebEntry] matches this translator, it is this translator job
   ///   ^ to convert it to an [PageStack] instance
@@ -78,9 +78,9 @@ $translatorType(...)
   /// This is checked by the assert in this class' constructor
   final Type pageStackType = PS;
 
-  /// Converts the associated [SElement] and [PageStack] into a string representing
+  /// Converts the associated [PageElement] and [PageStack] into a string representing
   /// the url
-  WebEntry sElementToWebEntry(BuildContext context, Element element, PS sRoute);
+  WebEntry pageElementToWebEntry(BuildContext context, Element element, PS sRoute);
 
   /// Converts the given url into the associated [PageStack]
   ///

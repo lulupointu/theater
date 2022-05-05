@@ -2,20 +2,20 @@ import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
 import '../translators/translator.dart';
 import 'history_entry.dart';
-import 's_router.dart';
+import 'theater.dart';
 
-/// The object returned by [SRouter.of]
+/// The object returned by [Theater.of]
 ///
 ///
-/// We use this object instead of returning [SRouterState] so that internal
+/// We use this object instead of returning [TheaterState] so that internal
 /// non private methods do not appear in the IDE
-abstract class SRouterInterface {
+abstract class TheaterInterface {
   /// An helper to get the current web entry using [history] and the history
   /// index from [SBrowserInterface]
   ///
   ///
   /// Watch out for edge cases:
-  ///   - It can be null when [SRouter] is first instantiated until the first
+  ///   - It can be null when [Theater] is first instantiated until the first
   ///   ^ call to. the translators happens. However this is guaranteed to have
   ///   ^ a value (i.e. NOT be null) during all [buildTabs] phases
   ///   - It will have an outdated value when a new [WebEntry] or a new page
@@ -23,7 +23,7 @@ abstract class SRouterInterface {
   ///
   /// This is particularly important to keep in mind when implementing
   /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
-  /// [STranslator.sElementToWebEntry] to get this SRouter will be in the
+  /// [STranslator.pageElementToWebEntry] to get this Theater will be in the
   /// in-between state described above
   HistoryEntry? get currentHistoryEntry;
 

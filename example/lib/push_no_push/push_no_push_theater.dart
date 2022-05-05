@@ -1,6 +1,6 @@
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(PushNoPush());
@@ -12,7 +12,7 @@ class PushNoPush extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: ProfilesPageStack(profiles: [Faker().person.name()]),
         translatorsBuilder: (_) => [
           PathTranslator<ProfilesPageStack>.parse(
@@ -83,7 +83,7 @@ class _RandomProfileLinkState extends State<RandomProfileLink> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextButton(
-        onPressed: () => SRouter.of(context).to(
+        onPressed: () => Theater.of(context).to(
           ProfilesPageStack(profiles: widget.profiles + [randomName]),
         ),
         child: Text('See $randomName profile'),

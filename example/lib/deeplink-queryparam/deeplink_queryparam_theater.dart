@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(BooksApp());
@@ -26,7 +26,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: BooksListPageStack(
           books: books,
           onFilterChanged: onFilterChanged,
@@ -51,7 +51,7 @@ class BooksApp extends StatelessWidget {
   }
 
   void onFilterChanged(BuildContext context, String filter) {
-    context.sRouter.to(BooksListPageStack(
+    context.theater.to(BooksListPageStack(
       books: books,
       onFilterChanged: onFilterChanged,
       filter: filter.isEmpty ? null : filter,

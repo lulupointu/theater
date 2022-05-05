@@ -8,11 +8,11 @@ import 'tabXIn.dart';
 /// is called (i.e. each time a new [NestingPageStack] is pushed)
 @immutable
 class NestedState extends MultiTabState {
-  /// {@macro srouter.framework.STabsState.constructor}
+  /// {@macro theater.framework.MultiTabState.constructor}
   NestedState({
     required this.nestedPageStack,
   }) : super(
-          activeIndex: 0,
+          currentIndex: 0,
           tabsPageStacks: [nestedPageStack].lock,
         );
 
@@ -24,18 +24,11 @@ class NestedState extends MultiTabState {
   /// ```
   final NestedPageStack nestedPageStack;
 
-  /// A list of 2 widgets, one for each tab
-  ///
-  /// Each widget correspond to a navigator which has the [Page] stack created
-  /// by the [PageStackBase] of the given index
-  @override
-  late final List<Widget> tabs;
-
   /// Builds a copy of this [NestedState] where the given attributes have been
   /// replaced
   ///
   /// Use this is [StateBuilder] to easily return the new state
-  NestedState copyWith(
+  NestedState withNestedStack(
     NestedPageStack<NestingPageStack> nestedPageStack,
   ) {
     return NestedState(
@@ -43,9 +36,9 @@ class NestedState extends MultiTabState {
     );
   }
 
-  /// Creates a [NestedState] from a [_STabsState], internal use only
-  factory NestedState._fromSTabsState(
-    int activeIndex,
+  /// Creates a [NestedState] from a [_MultiTabState], internal use only
+  factory NestedState._fromMultiTabState(
+    int currentIndex,
     IList<PageStackBase> sRoutes,
   ) =>
       NestedState(
@@ -53,13 +46,13 @@ class NestedState extends MultiTabState {
       );
 }
 
-/// An implementation of [MultiTabPageStack] which makes it easy nest a
+/// An implementation of [MultiTabsPageStack] which makes it easy nest a
 /// [PageStackBase] inside another
 ///
 /// TODO: more doc
-abstract class NestingPageStack extends MultiTabPageStack<NestedState> {
+abstract class NestingPageStack extends MultiTabsPageStack<NestedState> {
   /// TODO: more doc
   @mustCallSuper
-  NestingPageStack(StateBuilder<NestedState> stateBuilder)
-      : super(stateBuilder, NestedState._fromSTabsState);
+  const NestingPageStack(StateBuilder<NestedState> stateBuilder)
+      : super(stateBuilder, NestedState._fromMultiTabState);
 }

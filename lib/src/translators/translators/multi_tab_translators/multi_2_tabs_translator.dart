@@ -5,12 +5,11 @@ import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';
 import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
-import '../../../s_router/s_router.dart';
+import '../../../theater/theater.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
 import '../web_entry_matcher/web_entry_match.dart';
 import '../web_entry_matcher/web_entry_matcher.dart';
-
 
 /// PageStackBase
 /// PageStack
@@ -28,9 +27,9 @@ import '../web_entry_matcher/web_entry_matcher.dart';
 /// A translator which should be used with a [STabbedRoute]
 class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     extends MultiTabTranslator<PS, Multi2TabsState> {
-  /// {@template srouter.multi_tab_translators.constructor}
+  /// {@template theater.multi_tab_translators.constructor}
   ///
-  /// [pageStack] builds the associated [MultiTabPageStack] from a [StateBuilder],
+  /// [pageStack] builds the associated [MultiTabsPageStack] from a [StateBuilder],
   /// Use MySTabsRoute.new
   ///
   /// There are also one list of [STranslator] per tab, which you should use to
@@ -47,8 +46,8 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   /// ```
   ///
   ///
-  /// If a [MultiTabPageStack] of the associated type [PS] is given to [SRouter]
-  /// but the active tab could not be converted to a [WebEntry], an
+  /// If a [MultiTabsPageStack] of the associated type [PS] is given to [Theater]
+  /// but the current tab could not be converted to a [WebEntry], an
   /// [UnknownPageStackError] will be thrown
   ///
   /// {@endtemplate}
@@ -62,12 +61,12 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi2TabsPageStack>>>
+    required List<STranslator<PageElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi2TabsPageStack>>>
+    required List<STranslator<PageElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
-  })  : matchToPageStack =
-            ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
+  })  : matchToPageStack = ((_, stateBuilder) =>
+            stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
         translatorsHandlers = [
           TranslatorsHandler(translators: tab1Translators),
@@ -75,7 +74,7 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
         ],
         pageStackToWebEntry = _defaultRouteToWebEntry;
 
-  /// {@template srouter.multi_tab_translators.parse}
+  /// {@template theater.multi_tab_translators.parse}
   ///
   /// Allows you to parse the incoming [WebEntry]
   ///
@@ -84,21 +83,21 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   /// parameters are accepted
   ///
   /// [matchToPageStack] is called when the current path matches [path], and must
-  /// return a [MultiTabPageStack] of the associated [PS] type.
+  /// return a [MultiTabsPageStack] of the associated [PS] type.
   /// Use the given match object to access the different parameters of the
   /// matched path.
   /// The given stateBuilder value depends on whether a [tabXTranslators]
   /// converted the [WebEntry] to a [PageStackBase]:
   ///   - If a [tabXTranslators] converted the [WebEntry] to tabPageStack then the
   ///     stateBuilder is:
-  ///     `((state) => state.copyWith(activeIndex: x, tabXRoute: tabPageStack)`
+  ///     `((state) => state.copyWith(currentIndex: x, tabXRoute: tabPageStack)`
   ///   - If no [tabXTranslators] matched, stateBuilder is null
   ///
   /// [pageStackToWebEntry] converts the [PageStack] of the associated [PS] type to
   /// a [WebEntry] (i.e. a representation of the url)
-  /// The [state] tab is the [MultiTabPageStack] state
-  /// The [activeTabWebEntry] variable gives you access to the [WebEntry]
-  /// returned by the active tab is also given. If the active  tab could not be
+  /// The [state] tab is the [MultiTabsPageStack] state
+  /// The [currentTabWebEntry] variable gives you access to the [WebEntry]
+  /// returned by the current tab is also given. If the current  tab could not be
   /// converted to a [WebEntry], this variable is null
   ///
   /// [validatePathParams], [validateQueryParams], [validateFragment] and
@@ -133,9 +132,9 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi2TabsPageStack>>>
+    required List<STranslator<PageElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi2TabsPageStack>>>
+    required List<STranslator<PageElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
@@ -150,7 +149,8 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
         ];
 
   @override
-  final PS? Function(WebEntryMatch match, StateBuilder<Multi2TabsState>? stateBuilder)
+  final PS? Function(
+          WebEntryMatch match, StateBuilder<Multi2TabsState>? stateBuilder)
       matchToPageStack;
 
   @override
@@ -159,8 +159,8 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   @override
   final WebEntry Function(
     PS pageStack,
-    Multi2TabsState state,
-    WebEntry? activeTabWebEntry,
+    MultiTabPageState<Multi2TabsState> state,
+    WebEntry? currentTabWebEntry,
   ) pageStackToWebEntry;
 
   @override
@@ -168,21 +168,24 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
 
   static WebEntry _defaultRouteToWebEntry(
     Multi2TabsPageStack pageStack,
-    Multi2TabsState state,
-    WebEntry? activeTabWebEntry,
+    MultiTabPageState<Multi2TabsState> state,
+    WebEntry? currentTabWebEntry,
   ) {
-    if (activeTabWebEntry == null) {
+    if (currentTabWebEntry == null) {
       throw UnknownPageStackError(pageStack: pageStack);
     }
 
-    return activeTabWebEntry;
+    return currentTabWebEntry;
   }
 
   @override
   @nonVirtual
-  Multi2TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
+  Multi2TabsState buildFromMultiTabState(
+    int currentIndex,
+    IList<PageStackBase> pageStacks,
+  ) {
     return Multi2TabsState(
-      activeIndex: activeIndex,
+      currentIndex: currentIndex,
       tab1PageStack: pageStacks[0] as Tab1In<Multi2TabsPageStack>,
       tab2PageStack: pageStacks[1] as Tab2In<Multi2TabsPageStack>,
     );

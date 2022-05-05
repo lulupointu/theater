@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
-import 'multi_stack_srouter.dart';
+import 'multi_stack_theater.dart';
 
 class SettingsPageStack extends PageStack {
   final TabItem tabItem;
@@ -12,7 +12,7 @@ class SettingsPageStack extends PageStack {
   Widget build(BuildContext context) {
     return SettingsScreen(
       tabItem: tabItem,
-      color: activeTabColor[tabItem]!,
+      color: currentTabColor[tabItem]!,
       title: '${_withCapitalLetter(tabName[tabItem]!)} settings',
     );
   }
@@ -22,35 +22,39 @@ class SettingsPageStack extends PageStack {
   @override
   PageStackBase get pageStackBellow {
     return AppPageStack(
-      (state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem)),
+      (state) => state.withCurrentIndex(TabItem.values.indexOf(tabItem)),
     );
   }
 }
 
 class AppPageStack extends Multi2TabsPageStack {
-  AppPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
+  AppPageStack(StateBuilder<Multi2TabsState> stateBuilder)
+      : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, Multi2TabsState state) {
+  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {
     return App(
-      activeTab: TabItem.values[state.activeIndex],
+      currentTab: TabItem.values[state.currentIndex],
       tabs: {TabItem.red: state.tabs[0], TabItem.green: state.tabs[1]},
     );
   }
 
   @override
-  Multi2TabsState get initialState => Multi2TabsState(
-        activeIndex: 0,
-        tab1PageStack: RedListPageStack(),
-        tab2PageStack: GreenListPageStack(),
-      );
+  Multi2TabsState get initialState => initState;
+
+  static Multi2TabsState initState = Multi2TabsState(
+    currentIndex: 0,
+    tab1PageStack: RedListPageStack(),
+    tab2PageStack: GreenListPageStack(),
+  );
 }
 
 class RedListPageStack extends ColoredListPageStack with Tab1In<AppPageStack> {
   RedListPageStack() : super(TabItem.red);
 }
 
-class GreenListPageStack extends ColoredListPageStack with Tab2In<AppPageStack> {
+class GreenListPageStack extends ColoredListPageStack
+    with Tab2In<AppPageStack> {
   GreenListPageStack() : super(TabItem.green);
 }
 
@@ -63,12 +67,12 @@ abstract class ColoredListPageStack extends PageStack {
   Widget build(BuildContext context) {
     return ColorsListScreen(
       tabItem: tabItem,
-      color: activeTabColor[tabItem]!,
+      color: currentTabColor[tabItem]!,
       title: tabName[tabItem]!,
-      onPush: (materialIndex) => context.sRouter.to(
+      onPush: (materialIndex) => context.theater.to(
         AppPageStack(
           (state) => state.copyWith(
-            activeIndex: TabItem.values.indexOf(tabItem),
+            currentIndex: TabItem.values.indexOf(tabItem),
             tab1PageStack: tabItem == TabItem.red
                 ? RedDetailPageStack(materialIndex: materialIndex)
                 : null,
@@ -82,13 +86,15 @@ abstract class ColoredListPageStack extends PageStack {
   }
 }
 
-class RedDetailPageStack extends ColoredDetailPageStack with Tab1In<AppPageStack> {
+class RedDetailPageStack extends ColoredDetailPageStack
+    with Tab1In<AppPageStack> {
   final int materialIndex;
 
   RedDetailPageStack({required this.materialIndex}) : super(TabItem.red);
 }
 
-class GreenDetailPageStack extends ColoredDetailPageStack with Tab2In<AppPageStack> {
+class GreenDetailPageStack extends ColoredDetailPageStack
+    with Tab2In<AppPageStack> {
   final int materialIndex;
 
   GreenDetailPageStack({required this.materialIndex}) : super(TabItem.green);
@@ -105,7 +111,7 @@ abstract class ColoredDetailPageStack extends PageStack {
   Widget build(BuildContext context) {
     return ColorDetailScreen(
       tabItem: tabItem,
-      color: activeTabColor[tabItem]!,
+      color: currentTabColor[tabItem]!,
       title: tabName[tabItem]!,
       materialIndex: materialIndex,
     );

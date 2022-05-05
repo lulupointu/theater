@@ -8,18 +8,19 @@ import 'tabXIn.dart';
 /// is called (i.e. each time a new [Multi2TabsPageStack] is pushed)
 @immutable
 class Multi2TabsState extends MultiTabState {
-  /// {@macro srouter.framework.STabsState.constructor}
+  /// {@macro theater.framework.MultiTabState.constructor}
   Multi2TabsState({
-    required this.activeIndex,
+    required this.currentIndex,
     required this.tab1PageStack,
     required this.tab2PageStack,
-  }) : super(
-          activeIndex: activeIndex,
+  })  : tabsPageStacks = IList([tab1PageStack, tab2PageStack]),
+        super(
+          currentIndex: currentIndex,
           tabsPageStacks: [tab1PageStack, tab2PageStack].lock,
         );
 
   @override
-  final int activeIndex;
+  final int currentIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
   ///
@@ -37,48 +38,78 @@ class Multi2TabsState extends MultiTabState {
   /// ```
   final Tab2In<Multi2TabsPageStack> tab2PageStack;
 
-  /// A list of 2 widgets, one for each tab
-  ///
-  /// Each widget correspond to a navigator which has the [Page] stack created
-  /// by the [PageStackBase] of the given index
+  /// A list of 2 [PageStack], one for each tab
   @override
-  late final List<Widget> tabs;
+  final IList<TabXOf2<Multi2TabsPageStack>> tabsPageStacks;
+
+  /// Builds a copy of this [Multi2TabsState] where
+  ///   - [pageStack] will replace the [PageStack] of its corresponding tab
+  ///   - The index corresponding to [pageStack] will be set as the current index
+  ///
+  /// [TabXOf2] is either a [Tab1In], [Tab2In] mixin
+  Multi2TabsState withCurrentStack<PS extends Multi2TabsPageStack>(
+    TabXOf2<PS> pageStack,
+  ) {
+    final index = pageStack is Tab1In<PS>
+        ? 0
+        : pageStack is Tab2In<PS>
+            ? 1
+            : throw 'The index of the pageStack $pageStack could not be determined, does it implement [Tab1In], [Tab2In]?';
+    return copyWith(
+      currentIndex: index,
+      tab1PageStack: index == 0 ? pageStack as Tab1In<PS> : tab1PageStack,
+      tab2PageStack: index == 1 ? pageStack as Tab2In<PS> : tab2PageStack,
+    );
+  }
+
+  /// Builds a copy of this [Multi3TabsState] where [index] will be set as the
+  /// current index
+  ///
+  /// 0 <= [index] <= 1
+  Multi2TabsState withCurrentIndex<PS extends Multi2TabsState>(int index) {
+    return copyWith(currentIndex: index);
+  }
 
   /// Builds a copy of this [Multi2TabsState] where the given attributes have been
   /// replaced
   ///
   /// Use this is [StateBuilder] to easily return the new state
   Multi2TabsState copyWith({
-    int? activeIndex,
+    int? currentIndex,
     Tab1In<Multi2TabsPageStack>? tab1PageStack,
     Tab2In<Multi2TabsPageStack>? tab2PageStack,
   }) {
+    assert(
+      currentIndex == null || (0 <= currentIndex && currentIndex <= 1),
+      'The given currentIndex ($currentIndex) is not valid, it must be between 0 and 1',
+    );
+
     return Multi2TabsState(
-      activeIndex: activeIndex ?? this.activeIndex,
+      currentIndex: currentIndex ?? this.currentIndex,
       tab1PageStack: tab1PageStack ?? this.tab1PageStack,
       tab2PageStack: tab2PageStack ?? this.tab2PageStack,
     );
   }
 
-  /// Creates a [Multi2TabsState] from a [_STabsState], internal use only
-  factory Multi2TabsState._fromSTabsState(
-    int activeIndex,
+  /// Creates a [Multi2TabsState] from a [_MultiTabState], internal use only
+  factory Multi2TabsState._fromMultiTabState(
+    int currentIndex,
     IList<PageStackBase> sRoutes,
   ) =>
       Multi2TabsState(
-        activeIndex: activeIndex,
+        currentIndex: currentIndex,
         tab1PageStack: sRoutes[0] as Tab1In<Multi2TabsPageStack>,
         tab2PageStack: sRoutes[1] as Tab2In<Multi2TabsPageStack>,
       );
 }
 
-/// An implementation of [MultiTabPageStack] which makes it easy to build screens
+/// An implementation of [MultiTabsPageStack] which makes it easy to build screens
 /// with 2 tabs.
 ///
-/// {@macro srouter.framework.STabsRoute}
-abstract class Multi2TabsPageStack extends MultiTabPageStack<Multi2TabsState> {
-  /// {@macro srouter.framework.STabsRoute.constructor}
+/// {@macro theater.framework.STabsRoute}
+abstract class Multi2TabsPageStack extends MultiTabsPageStack<Multi2TabsState> {
+  /// {@macro theater.framework.STabsRoute.constructor}
   @mustCallSuper
-  Multi2TabsPageStack(StateBuilder<Multi2TabsState> stateBuilder)
-      : super(stateBuilder, Multi2TabsState._fromSTabsState);
+  const Multi2TabsPageStack(StateBuilder<Multi2TabsState> stateBuilder)
+      : super(stateBuilder, Multi2TabsState._fromMultiTabState);
 }

@@ -1,9 +1,9 @@
 import 'package:example/telegram/src/navigators_implementations.dart';
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 import 'src/data.dart';
-import 'src/sroutes.dart';
+import 'src/page_stacks.dart';
 
 /// This is a partial fake implementation of the telegram app
 ///
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(subtitle1: TextStyle(color: Colors.white.withOpacity(0.9))),
         scaffoldBackgroundColor: Colors.black87,
       ),
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: TabsWrapperPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi3TabsTranslator<TabsWrapperPageStack>(

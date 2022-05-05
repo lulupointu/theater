@@ -39,7 +39,7 @@ class CustomTransitionPage<T> extends Page<T> {
   /// Defaults to 300ms.
   final Duration transitionDuration;
 
-  /// Whether the route should remain in memory when it is inactive.
+  /// Whether the route should remain in memory when it is incurrent.
   ///
   /// If this is true, then the route is maintained, so that any futures it is
   /// holding from the next route will properly resolve when the next route
@@ -85,7 +85,7 @@ class CustomTransitionPage<T> extends Page<T> {
   ///
   /// The transitionsBuilder method, is called each time the Route's state
   /// changes while it is visible (e.g. if the value of canPop changes on the
-  /// active route).
+  /// current route).
   ///
   /// The transitionsBuilder method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the

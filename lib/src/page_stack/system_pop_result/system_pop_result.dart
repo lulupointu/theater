@@ -1,7 +1,7 @@
 import '../framework.dart';
 
 /// A class which static methods should be used to give the result of
-/// [SElement.onSystemPop]
+/// [PageElement.onSystemPop]
 ///
 ///
 /// Use [SystemPopResult.done] or [SystemPopResult.parent] to describe result of the callback

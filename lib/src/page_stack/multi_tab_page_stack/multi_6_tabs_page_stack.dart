@@ -8,17 +8,25 @@ import 'tabXIn.dart';
 /// is called (i.e. each time a new [Multi6TabsPageStack] is pushed)
 @immutable
 class Multi6TabsState extends MultiTabState {
-  /// {@macro srouter.framework.STabsState.constructor}
+  /// {@macro theater.framework.MultiTabState.constructor}
   Multi6TabsState({
-    required this.activeIndex,
+    required this.currentIndex,
     required this.tab1PageStack,
     required this.tab2PageStack,
     required this.tab3PageStack,
     required this.tab4PageStack,
     required this.tab5PageStack,
     required this.tab6PageStack,
-  }) : super(
-          activeIndex: activeIndex,
+  })  : tabsPageStacks = IList([
+          tab1PageStack,
+          tab2PageStack,
+          tab3PageStack,
+          tab4PageStack,
+          tab5PageStack,
+          tab6PageStack,
+        ]),
+        super(
+          currentIndex: currentIndex,
           tabsPageStacks: [
             tab1PageStack,
             tab2PageStack,
@@ -30,7 +38,7 @@ class Multi6TabsState extends MultiTabState {
         );
 
   @override
-  final int activeIndex;
+  final int currentIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
   ///
@@ -80,19 +88,57 @@ class Multi6TabsState extends MultiTabState {
   /// ```
   final Tab6In<Multi6TabsPageStack> tab6PageStack;
 
-  /// A list of 6 widgets, one for each tab
-  ///
-  /// Each widget correspond to a navigator which has the [Page] stack created
-  /// by the [PageStackBase] of the given index
+  /// A list of 6 [PageStack], one for each tab
   @override
-  late final List<Widget> tabs;
+  final IList<TabXOf6<Multi6TabsPageStack>> tabsPageStacks;
+
+  /// Builds a copy of this [Multi6TabsState] where
+  ///   - [pageStack] will replace the [PageStack] of its corresponding tab
+  ///   - The index corresponding to [pageStack] will be set as the current index
+  ///
+  /// [TabXOf6] is either a [Tab1In], [Tab2In], [Tab3In], [Tab4In], [Tab5In], or
+  /// [Tab6In] mixin.
+  Multi6TabsState withCurrentStack<PS extends Multi6TabsPageStack>(
+    TabXOf3<PS> pageStack,
+  ) {
+    final index = pageStack is Tab1In<PS>
+        ? 0
+        : pageStack is Tab2In<PS>
+            ? 1
+            : pageStack is Tab3In<PS>
+                ? 2
+                : pageStack is Tab4In<PS>
+                    ? 3
+                    : pageStack is Tab5In<PS>
+                        ? 4
+                        : pageStack is Tab6In<PS>
+                            ? 5
+                            : throw 'The index of the pageStack $pageStack could not be determined, does it implement [Tab1In], [Tab2In], [Tab3In], [Tab4In], [Tab5In] or [Tab6In]?';
+    return copyWith(
+      currentIndex: index,
+      tab1PageStack: index == 0 ? pageStack as Tab1In<PS> : tab1PageStack,
+      tab2PageStack: index == 1 ? pageStack as Tab2In<PS> : tab2PageStack,
+      tab3PageStack: index == 2 ? pageStack as Tab3In<PS> : tab3PageStack,
+      tab4PageStack: index == 3 ? pageStack as Tab4In<PS> : tab4PageStack,
+      tab5PageStack: index == 4 ? pageStack as Tab5In<PS> : tab5PageStack,
+      tab6PageStack: index == 5 ? pageStack as Tab6In<PS> : tab6PageStack,
+    );
+  }
+
+  /// Builds a copy of this [Multi6TabsState] where [index] will be set as the
+  /// current index
+  ///
+  /// 0 <= [index] <= 5
+  Multi6TabsState withCurrentIndex<PS extends Multi6TabsPageStack>(int index) {
+    return copyWith(currentIndex: index);
+  }
 
   /// Builds a copy of this [Multi6TabsState] where the given attributes have been
   /// replaced
   ///
   /// Use this is [StateBuilder] to easily return the new state
   Multi6TabsState copyWith({
-    int? activeIndex,
+    int? currentIndex,
     Tab1In<Multi6TabsPageStack>? tab1PageStack,
     Tab2In<Multi6TabsPageStack>? tab2PageStack,
     Tab3In<Multi6TabsPageStack>? tab3PageStack,
@@ -100,8 +146,13 @@ class Multi6TabsState extends MultiTabState {
     Tab5In<Multi6TabsPageStack>? tab5PageStack,
     Tab6In<Multi6TabsPageStack>? tab6PageStack,
   }) {
+    assert(
+      currentIndex == null || (0 <= currentIndex && currentIndex <= 5),
+      'The given currentIndex ($currentIndex) is not valid, it must be between 0 and 5',
+    );
+
     return Multi6TabsState(
-      activeIndex: activeIndex ?? this.activeIndex,
+      currentIndex: currentIndex ?? this.currentIndex,
       tab1PageStack: tab1PageStack ?? this.tab1PageStack,
       tab2PageStack: tab2PageStack ?? this.tab2PageStack,
       tab3PageStack: tab3PageStack ?? this.tab3PageStack,
@@ -111,13 +162,13 @@ class Multi6TabsState extends MultiTabState {
     );
   }
 
-  /// Creates a [Multi6TabsState] from a [_STabsState], internal use only
-  factory Multi6TabsState._fromSTabsState(
-    int activeIndex,
+  /// Creates a [Multi6TabsState] from a [_MultiTabState], internal use only
+  factory Multi6TabsState._fromMultiTabState(
+    int currentIndex,
     IList<PageStackBase> sRoutes,
   ) =>
       Multi6TabsState(
-        activeIndex: activeIndex,
+        currentIndex: currentIndex,
         tab1PageStack: sRoutes[0] as Tab1In<Multi6TabsPageStack>,
         tab2PageStack: sRoutes[1] as Tab2In<Multi6TabsPageStack>,
         tab3PageStack: sRoutes[2] as Tab3In<Multi6TabsPageStack>,
@@ -127,13 +178,13 @@ class Multi6TabsState extends MultiTabState {
       );
 }
 
-/// An implementation of [MultiTabPageStack] which makes it easy to build screens
+/// An implementation of [MultiTabsPageStack] which makes it easy to build screens
 /// with 6 tabs.
 ///
-/// {@macro srouter.framework.STabsRoute}
-abstract class Multi6TabsPageStack extends MultiTabPageStack<Multi6TabsState> {
-  /// {@macro srouter.framework.STabsRoute.constructor}
+/// {@macro theater.framework.STabsRoute}
+abstract class Multi6TabsPageStack extends MultiTabsPageStack<Multi6TabsState> {
+  /// {@macro theater.framework.STabsRoute.constructor}
   @mustCallSuper
-  Multi6TabsPageStack(StateBuilder<Multi6TabsState> stateBuilder)
-      : super(stateBuilder, Multi6TabsState._fromSTabsState);
+  const Multi6TabsPageStack(StateBuilder<Multi6TabsState> stateBuilder)
+      : super(stateBuilder, Multi6TabsState._fromMultiTabState);
 }

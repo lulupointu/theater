@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
-import '../../s_router/s_router.dart';
+import '../../theater/theater.dart';
 import '../page_stack_translator.dart';
 import 'web_entry_matcher/web_entry_match.dart';
 import 'web_entry_matcher/web_entry_matcher.dart';
@@ -16,7 +16,7 @@ class RedirectorTranslator extends PageStackTranslator<PageStackBase> {
   /// parameters are accepted but cannot be used to create the [route].
   ///
   /// [route] is the [PageStack] of the associated [PageStack] type that will be used
-  /// in [SRouter] if the path patches the given one
+  /// in [Theater] if the path patches the given one
   ///
   ///
   /// # Example

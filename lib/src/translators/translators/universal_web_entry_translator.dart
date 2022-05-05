@@ -4,8 +4,8 @@ import 'package:flutter/widgets.dart';
 import '../../browser/s_browser.dart';
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
-import '../../s_router/history_entry.dart';
-import '../../s_router/s_router.dart';
+import '../../theater/history_entry.dart';
+import '../../theater/theater.dart';
 import '../page_stack_translator.dart';
 import '../translator.dart';
 
@@ -17,7 +17,7 @@ import '../translator.dart';
 ///
 ///
 /// This should be used on mobile at the bottom of the [translator] so that if
-/// a [SRouter] navigates somewhere, the response of other [SRouter]s will be
+/// a [Theater] navigates somewhere, the response of other [Theater]s will be
 /// to re-render the same route
 class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
   /// This is a trick to please our assert which checks that the generic type
@@ -27,10 +27,10 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
   @override
   Type get pageStackType => dynamic;
 
-  /// The initial [PageStack] to display when the [SRouter] is initialized
+  /// The initial [PageStack] to display when the [Theater] is initialized
   final PageStackBase initialPageStack;
 
-  /// The history of the [SRouterState] associating history indexes to
+  /// The history of the [TheaterState] associating history indexes to
   /// [HistoryEntry]
   final IMap<int, HistoryEntry> history;
 
@@ -53,14 +53,14 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
     if (currentRoute != null) return currentRoute;
 
     // If the current route is null, try to return the previous route
-    // This is needed because if nested SRouter push a route, this
+    // This is needed because if nested Theater push a route, this
     // will be triggered but won't have had the chance to populate
     // its route as it would it it had itself been called
     final previousRoute = history[currentHistoryIndex - 1]?.pageStack;
     if (previousRoute != null) return previousRoute;
 
     // Else return the initial route since if both previous value
-    // are null, this means that this SRouter has just been inserted
+    // are null, this means that this Theater has just been inserted
     // in the widget tree
     return initialPageStack;
   }

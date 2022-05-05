@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(BooksApp());
@@ -32,23 +32,23 @@ class BooksApp extends StatelessWidget {
   List<Author> get authors => books.map<Author>((e) => e.author).toList();
 
   void toBooks(BuildContext context) {
-    context.sRouter.to(BooksListPageStack(books: books, toBook: toBook));
+    context.theater.to(BooksListPageStack(books: books, toBook: toBook));
   }
 
   void toBook(BuildContext context, Book book) {
-    context.sRouter.to(
+    context.theater.to(
       BookDetailsPageStack(books: books, book: book, toBook: toBook, toAuthor: toAuthor),
     );
   }
 
   void toAuthors(BuildContext context) {
-    context.sRouter.to(
+    context.theater.to(
       AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
     );
   }
 
   void toAuthor(BuildContext context, Author author) {
-    context.sRouter.to(
+    context.theater.to(
       AuthorDetailsPageStack(
           authors: authors, author: author, toBooks: toBooks, toAuthor: toAuthor),
     );
@@ -57,7 +57,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: BooksListPageStack(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
           PathTranslator<BooksListPageStack>(

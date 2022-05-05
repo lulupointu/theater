@@ -1,7 +1,7 @@
 import 'package:example/telegram/src/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 import 'data.dart';
 import 'navigators.dart';
@@ -17,7 +17,7 @@ import 'navigators_implementations.dart';
 ///
 ///
 /// Note how no [PageStack] is [Pushable] except the [STabbedRoute], this is
-/// because only the [STabbedRoute] can directly be pushed into [SRouter]
+/// because only the [STabbedRoute] can directly be pushed into [Theater]
 
 // Left side
 class ChatsListPageStack extends PageStack with Tab1In<TabsWrapperPageStack> {
@@ -64,22 +64,23 @@ class SettingsPageStack extends PageStack with Tab1In<TabsWrapperPageStack> {
 }
 
 // Middle side
-class StackedChatsPageStack extends PageStack with Tab2In<TabsWrapperPageStack> {
+class StackedChatsPageStack extends PageStack
+    with Tab2In<TabsWrapperPageStack> {
   final ChatNavigator navigator;
   final List<Chat> chats;
 
   StackedChatsPageStack({required this.navigator, required this.chats});
 
   @override
-  Page buildPage(BuildContext context) {
+  Page buildPage(BuildContext context, PageState state, Widget child) {
     return MaterialPage(
       key: ValueKey(chats.length),
-      child: build(context),
+      child: child,
     );
   }
 
   void _onPop(BuildContext context) {
-    context.sRouter.to(
+    context.theater.to(
       TabsWrapperPageStack.from(
         context,
         selectedChats: List.from(chats)..removeLast(),
@@ -117,12 +118,14 @@ class StackedChatsPageStack extends PageStack with Tab2In<TabsWrapperPageStack> 
   Tab2In<TabsWrapperPageStack>? get pageStackBellow {
     return chats.length <= 1
         ? null
-        : StackedChatsPageStack(chats: List.from(chats)..removeLast(), navigator: navigator);
+        : StackedChatsPageStack(
+            chats: List.from(chats)..removeLast(), navigator: navigator);
   }
 }
 
 // Right side
-class MembersDetailsPageStack extends PageStack with Tab3In<TabsWrapperPageStack> {
+class MembersDetailsPageStack extends PageStack
+    with Tab3In<TabsWrapperPageStack> {
   final MembersDetailsNavigator navigator;
 
   MembersDetailsPageStack({required this.navigator});
@@ -136,10 +139,10 @@ class MembersDetailsPageStack extends PageStack with Tab3In<TabsWrapperPageStack
 // Tabs wrapper
 //
 // Using the navigator src directly is ok since this is part of
-// the SRouter package anyway, but a DI approach could be used
+// the Theater package anyway, but a DI approach could be used
 //
 // The [chats] global variable is used directly but since it's a global
-// dependency something like a [Provider] should be put on top on [SRouter] and
+// dependency something like a [Provider] should be put on top on [Theater] and
 // be accessed here (or even in the screens directly)
 class TabsWrapperPageStack extends Multi3TabsPageStack {
   final bool showMemberDetails;
@@ -168,16 +171,18 @@ class TabsWrapperPageStack extends Multi3TabsPageStack {
           chats: selectedChats ?? previousState?.widget.chats ?? [chats.first],
         ),
       ),
-      showMemberDetails: showMemberDetails ?? previousState?.widget.showMemberDetails ?? false,
-      maybeShowLeftTab: maybeShowLeftTab ?? previousState?.widget.maybeShowLeftTab ?? false,
+      showMemberDetails:
+          showMemberDetails ?? previousState?.widget.showMemberDetails ?? false,
+      maybeShowLeftTab:
+          maybeShowLeftTab ?? previousState?.widget.maybeShowLeftTab ?? false,
     );
   }
 
   @override
-  Widget build(BuildContext context, Multi3TabsState state) {
+  Widget build(BuildContext context, MultiTabPageState<Multi3TabsState> state) {
     return TabsWrapperScreen(
       tabs: state.tabs,
-      chats: (state.tab2PageStack as StackedChatsPageStack).chats,
+      chats: (state.tabsState.tab2PageStack as StackedChatsPageStack).chats,
       showMemberDetails: showMemberDetails,
       maybeShowLeftTab: maybeShowLeftTab,
     );
@@ -185,7 +190,7 @@ class TabsWrapperPageStack extends Multi3TabsPageStack {
 
   @override
   Multi3TabsState get initialState => Multi3TabsState(
-        activeIndex: 1,
+        currentIndex: 1,
         tab1PageStack: ChatsListPageStack(
           navigator: ChatsListNavigatorImplementation(),
           chats: chats,

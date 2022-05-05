@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../s_router/s_router.dart';
+import '../theater/theater.dart';
 
 /// A widget to place at the top of the widget tree
 ///
@@ -66,8 +66,8 @@ class _BackButtonListenerScopeRouterDelegate extends RouterDelegate with ChangeN
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild each time SRouter updates
-    SRouter.of(context,listen: true);
+    // Rebuild each time Theater updates
+    Theater.of(context,listen: true);
 
     return builder();
   }

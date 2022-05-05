@@ -17,7 +17,7 @@ class PathTranslator<PS extends PageStackBase> extends PageStackTranslator<PS> {
   /// parameters are accepted but cannot be used to create the [pageStack].
   ///
   /// [pageStack] is the [PageStack] of the associated [PS] type that will be used
-  /// in [SRouter] if the path patches the given one
+  /// in [Theater] if the path patches the given one
   ///
   ///
   /// ### Example

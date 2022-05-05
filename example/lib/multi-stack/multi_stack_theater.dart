@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
-import 's_routes.dart';
+import 'page_stacks.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue),
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: AppPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<AppPageStack>(
@@ -27,8 +27,9 @@ class MyApp extends StatelessWidget {
                 matchToPageStack: (match) => RedDetailPageStack(
                   materialIndex: int.parse(match.pathParams['materialIndex']!),
                 ),
-                pageStackToWebEntry: (route) =>
-                    WebEntry(path: '${tabName[TabItem.red]!}/details_${route.materialIndex}'),
+                pageStackToWebEntry: (route) => WebEntry(
+                    path:
+                        '${tabName[TabItem.red]!}/details_${route.materialIndex}'),
               ),
             ],
             tab2Translators: [
@@ -42,7 +43,8 @@ class MyApp extends StatelessWidget {
                   materialIndex: int.parse(match.pathParams['materialIndex']!),
                 ),
                 pageStackToWebEntry: (route) => WebEntry(
-                    path: '${tabName[TabItem.green]!}/details_${route.materialIndex}'),
+                    path:
+                        '${tabName[TabItem.green]!}/details_${route.materialIndex}'),
               ),
             ],
           ),
@@ -50,7 +52,8 @@ class MyApp extends StatelessWidget {
             path: '/:color/settings',
             matchToPageStack: (match) => SettingsPageStack(
               tabItem: tabName.entries
-                  .firstWhere((element) => element.value == match.pathParams['color'])
+                  .firstWhere(
+                      (element) => element.value == match.pathParams['color'])
                   .key,
             ),
             pageStackToWebEntry: (route) => WebEntry(
@@ -64,27 +67,28 @@ class MyApp extends StatelessWidget {
 }
 
 class App extends StatelessWidget {
-  final TabItem activeTab;
+  final TabItem currentTab;
 
   final Map<TabItem, Widget> tabs;
 
-  App({Key? key, required this.activeTab, required this.tabs}) : super(key: key);
+  App({Key? key, required this.currentTab, required this.tabs})
+      : super(key: key);
 
   void _selectTab(BuildContext context, TabItem tabItem) {
-    if (tabItem == activeTab) {
+    if (tabItem == currentTab) {
       // pop to first route
-      context.sRouter.to(
+      context.theater.to(
         AppPageStack(
-          (state) => state.copyWith(
-            activeIndex: TabItem.values.indexOf(tabItem),
-            tab1PageStack: tabItem == TabItem.red ? RedListPageStack() : null,
-            tab2PageStack: tabItem == TabItem.green ? GreenListPageStack() : null,
+          (state) => state.withCurrentStack(
+            AppPageStack.initState.tabsPageStacks[state.currentIndex],
           ),
         ),
       );
     } else {
-      context.sRouter.to(
-        AppPageStack((state) => state.copyWith(activeIndex: TabItem.values.indexOf(tabItem))),
+      context.theater.to(
+        AppPageStack(
+          (state) => state.withCurrentIndex(TabItem.values.indexOf(tabItem)),
+        ),
       );
     }
   }
@@ -93,11 +97,11 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: TabItem.values.indexOf(activeTab),
+        index: TabItem.values.indexOf(currentTab),
         children: tabs.values.toList(),
       ),
       bottomNavigationBar: BottomNavigation(
-        currentTab: activeTab,
+        currentTab: currentTab,
         onSelectTab: _selectTab,
       ),
     );
@@ -117,11 +121,10 @@ class BottomNavigation extends StatelessWidget {
       items: [
         _buildItem(TabItem.red),
         _buildItem(TabItem.green),
-        // _buildItem(TabItem.blue),
       ],
       onTap: (index) => onSelectTab(context, TabItem.values[index]),
       currentIndex: currentTab.index,
-      selectedItemColor: activeTabColor[currentTab]!,
+      selectedItemColor: currentTabColor[currentTab]!,
     );
   }
 
@@ -136,7 +139,7 @@ class BottomNavigation extends StatelessWidget {
   }
 
   Color _colorTabMatching(TabItem item) {
-    return currentTab == item ? activeTabColor[item]! : Colors.grey;
+    return currentTab == item ? currentTabColor[item]! : Colors.grey;
   }
 }
 
@@ -178,9 +181,11 @@ class ColorDetailScreen extends StatelessWidget {
               (e) => Padding(
                 padding: const EdgeInsets.all(50.0),
                 child: ElevatedButton(
-                  onPressed: () => context.sRouter.to(
+                  onPressed: () => context.theater.to(
                     AppPageStack(
-                      (state) => state.copyWith(activeIndex: TabItem.values.indexOf(e)),
+                      (state) => state.withCurrentIndex(
+                        TabItem.values.indexOf(e),
+                      ),
                     ),
                   ),
                   child: Text('Go to ${tabName[e]}'),
@@ -221,7 +226,18 @@ class ColorsListScreen extends StatelessWidget {
     );
   }
 
-  final List<int> materialIndices = [900, 800, 700, 600, 500, 400, 300, 200, 100, 50];
+  final List<int> materialIndices = [
+    900,
+    800,
+    700,
+    600,
+    500,
+    400,
+    300,
+    200,
+    100,
+    50
+  ];
 
   Widget _buildList() {
     return ListView.builder(
@@ -247,7 +263,8 @@ class ColorsListScreen extends StatelessWidget {
 }
 
 class SettingsScreen extends StatelessWidget {
-  SettingsScreen({required this.tabItem, required this.color, required this.title});
+  SettingsScreen(
+      {required this.tabItem, required this.color, required this.title});
 
   final TabItem tabItem;
   final MaterialColor color;
@@ -271,7 +288,8 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-List<Widget> _buildSettingsButtons(BuildContext context, {required TabItem tabItem}) {
+List<Widget> _buildSettingsButtons(BuildContext context,
+    {required TabItem tabItem}) {
   return TabItem.values
       .map(
         (e) => Padding(
@@ -279,11 +297,12 @@ List<Widget> _buildSettingsButtons(BuildContext context, {required TabItem tabIt
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: activeTabColor[tabItem]!.shade100,
+              color: currentTabColor[tabItem]!.shade100,
             ),
             child: IconButton(
-              onPressed: () => context.sRouter.to(SettingsPageStack(tabItem: e)),
-              icon: Icon(Icons.settings, color: activeTabColor[e]),
+              onPressed: () =>
+                  context.theater.to(SettingsPageStack(tabItem: e)),
+              icon: Icon(Icons.settings, color: currentTabColor[e]),
             ),
           ),
         ),
@@ -303,7 +322,7 @@ const Map<TabItem, String> tabName = {
   // TabItem.blue: 'blue',
 };
 
-const Map<TabItem, MaterialColor> activeTabColor = {
+const Map<TabItem, MaterialColor> currentTabColor = {
   TabItem.red: Colors.red,
   TabItem.green: Colors.green,
   // TabItem.blue: Colors.blue,

@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(BooksApp());
@@ -13,7 +13,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: ScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<ScaffoldPageStack>(
@@ -53,35 +53,38 @@ class BooksApp extends StatelessWidget {
 }
 
 class ScaffoldPageStack extends Multi2TabsPageStack {
-  ScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
+  ScaffoldPageStack(StateBuilder<Multi2TabsState> stateBuilder)
+      : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, Multi2TabsState state) {
+  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {
     return ScaffoldScreen(
-      child: state.tabs[state.activeIndex],
-      currentIndex: state.activeIndex,
+      child: state.tabs[state.currentIndex],
+      currentIndex: state.currentIndex,
     );
   }
 
   @override
   Multi2TabsState get initialState => Multi2TabsState(
-        activeIndex: 0,
+        currentIndex: 0,
         tab1PageStack: BooksViewPageStack((state) => state),
         tab2PageStack: SettingsPageStack(),
       );
 }
 
-class BooksViewPageStack extends Multi2TabsPageStack with Tab1In<BooksViewPageStack> {
-  BooksViewPageStack(StateBuilder<Multi2TabsState> stateBuilder) : super(stateBuilder);
+class BooksViewPageStack extends Multi2TabsPageStack
+    with Tab1In<BooksViewPageStack> {
+  BooksViewPageStack(StateBuilder<Multi2TabsState> stateBuilder)
+      : super(stateBuilder);
 
   @override
-  Widget build(BuildContext context, Multi2TabsState state) {
-    return BooksScreen(selectedTab: state.activeIndex, tabs: state.tabs);
+  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {
+    return BooksScreen(selectedTab: state.currentIndex, tabs: state.tabs);
   }
 
   @override
   Multi2TabsState get initialState => Multi2TabsState(
-        activeIndex: 0,
+        currentIndex: 0,
         tab1PageStack: NewBooksPageStack(),
         tab2PageStack: AllBooksPageStack(),
       );
@@ -121,8 +124,8 @@ class ScaffoldScreen extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (idx) => context.sRouter.to(
-          ScaffoldPageStack((state) => state.copyWith(activeIndex: idx)),
+        onTap: (idx) => context.theater.to(
+          ScaffoldPageStack((state) => state.withCurrentIndex(idx)),
         ),
         items: [
           BottomNavigationBarItem(
@@ -153,7 +156,8 @@ class BooksScreen extends StatefulWidget {
   _BooksScreenState createState() => _BooksScreenState();
 }
 
-class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStateMixin {
+class _BooksScreenState extends State<BooksScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -184,11 +188,10 @@ class _BooksScreenState extends State<BooksScreen> with SingleTickerProviderStat
       children: [
         TabBar(
           controller: _tabController,
-          onTap: (index) => context.sRouter.to(
+          onTap: (index) => context.theater.to(
             ScaffoldPageStack(
-              (state) => state.copyWith(
-                tab1PageStack:
-                    BooksViewPageStack((state) => state.copyWith(activeIndex: index)),
+              (state) => state.withCurrentStack(
+                BooksViewPageStack((state) => state.withCurrentIndex(index)),
               ),
             ),
           ),

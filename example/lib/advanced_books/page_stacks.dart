@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
-import 'advanced_books_srouter.dart';
+import 'advanced_books_theater.dart';
 
 class HomePageStack extends PageStack {
   @override

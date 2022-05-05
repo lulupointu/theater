@@ -8,20 +8,31 @@ import 'tabXIn.dart';
 /// is called (i.e. each time a new [Multi4TabsPageStack] is pushed)
 @immutable
 class Multi4TabsState extends MultiTabState {
-  /// {@macro srouter.framework.STabsState.constructor}
+  /// {@macro theater.framework.MultiTabState.constructor}
   Multi4TabsState({
-    required this.activeIndex,
+    required this.currentIndex,
     required this.tab1PageStack,
     required this.tab2PageStack,
     required this.tab3PageStack,
     required this.tab4PageStack,
-  }) : super(
-          activeIndex: activeIndex,
-          tabsPageStacks: [tab1PageStack, tab2PageStack, tab3PageStack, tab4PageStack].lock,
+  })  : tabsPageStacks = IList([
+          tab1PageStack,
+          tab2PageStack,
+          tab3PageStack,
+          tab4PageStack,
+        ]),
+        super(
+          currentIndex: currentIndex,
+          tabsPageStacks: [
+            tab1PageStack,
+            tab2PageStack,
+            tab3PageStack,
+            tab4PageStack,
+          ].lock,
         );
 
   @override
-  final int activeIndex;
+  final int currentIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
   ///
@@ -55,26 +66,62 @@ class Multi4TabsState extends MultiTabState {
   /// ```
   final Tab4In<Multi4TabsPageStack> tab4PageStack;
 
-  /// A list of 4 widgets, one for each tab
-  ///
-  /// Each widget correspond to a navigator which has the [Page] stack created
-  /// by the [PageStackBase] of the given index
+  /// A list of 4 [PageStack], one for each tab
   @override
-  late final List<Widget> tabs;
+  final IList<TabXOf4<Multi4TabsPageStack>> tabsPageStacks;
+
+  /// Builds a copy of this [Multi4TabsState] where
+  ///   - [pageStack] will replace the [PageStack] of its corresponding tab
+  ///   - The index corresponding to [pageStack] will be set as the current index
+  ///
+  /// [TabXOf4] is either a [Tab1In], [Tab2In], [Tab3In] or [Tab4In] mixin.
+  Multi4TabsState withCurrentStack<PS extends Multi4TabsPageStack>(
+    TabXOf3<PS> pageStack,
+  ) {
+    final index = pageStack is Tab1In<PS>
+        ? 0
+        : pageStack is Tab2In<PS>
+            ? 1
+            : pageStack is Tab3In<PS>
+                ? 2
+                : pageStack is Tab4In<PS>
+                    ? 3
+                    : throw 'The index of the pageStack $pageStack could not be determined, does it implement [Tab1In], [Tab2In], [Tab3In] or [Tab4In]?';
+    return copyWith(
+      currentIndex: index,
+      tab1PageStack: index == 0 ? pageStack as Tab1In<PS> : tab1PageStack,
+      tab2PageStack: index == 1 ? pageStack as Tab2In<PS> : tab2PageStack,
+      tab3PageStack: index == 2 ? pageStack as Tab3In<PS> : tab3PageStack,
+      tab4PageStack: index == 3 ? pageStack as Tab4In<PS> : tab4PageStack,
+    );
+  }
+
+  /// Builds a copy of this [Multi4TabsState] where [index] will be set as the
+  /// current index
+  ///
+  /// 0 <= [index] <= 3
+  Multi4TabsState withCurrentIndex<PS extends Multi4TabsState>(int index) {
+    return copyWith(currentIndex: index);
+  }
 
   /// Builds a copy of this [Multi4TabsState] where the given attributes have been
   /// replaced
   ///
   /// Use this is [StateBuilder] to easily return the new state
   Multi4TabsState copyWith({
-    int? activeIndex,
+    int? currentIndex,
     Tab1In<Multi4TabsPageStack>? tab1PageStack,
     Tab2In<Multi4TabsPageStack>? tab2PageStack,
     Tab3In<Multi4TabsPageStack>? tab3PageStack,
     Tab4In<Multi4TabsPageStack>? tab4PageStack,
   }) {
+    assert(
+      currentIndex == null || (0 <= currentIndex && currentIndex <= 3),
+      'The given currentIndex ($currentIndex) is not valid, it must be between 0 and 3',
+    );
+
     return Multi4TabsState(
-      activeIndex: activeIndex ?? this.activeIndex,
+      currentIndex: currentIndex ?? this.currentIndex,
       tab1PageStack: tab1PageStack ?? this.tab1PageStack,
       tab2PageStack: tab2PageStack ?? this.tab2PageStack,
       tab3PageStack: tab3PageStack ?? this.tab3PageStack,
@@ -82,13 +129,13 @@ class Multi4TabsState extends MultiTabState {
     );
   }
 
-  /// Creates a [Multi4TabsState] from a [_STabsState], internal use only
-  factory Multi4TabsState._fromSTabsState(
-    int activeIndex,
+  /// Creates a [Multi4TabsState] from a [_MultiTabState], internal use only
+  factory Multi4TabsState._fromMultiTabState(
+    int currentIndex,
     IList<PageStackBase> sRoutes,
   ) =>
       Multi4TabsState(
-        activeIndex: activeIndex,
+        currentIndex: currentIndex,
         tab1PageStack: sRoutes[0] as Tab1In<Multi4TabsPageStack>,
         tab2PageStack: sRoutes[1] as Tab2In<Multi4TabsPageStack>,
         tab3PageStack: sRoutes[2] as Tab3In<Multi4TabsPageStack>,
@@ -96,13 +143,13 @@ class Multi4TabsState extends MultiTabState {
       );
 }
 
-/// An implementation of [MultiTabPageStack] which makes it easy to build screens
+/// An implementation of [MultiTabsPageStack] which makes it easy to build screens
 /// with 4 tabs.
 ///
-/// {@macro srouter.framework.STabsRoute}
-abstract class Multi4TabsPageStack extends MultiTabPageStack<Multi4TabsState> {
-  /// {@macro srouter.framework.STabsRoute.constructor}
+/// {@macro theater.framework.STabsRoute}
+abstract class Multi4TabsPageStack extends MultiTabsPageStack<Multi4TabsState> {
+  /// {@macro theater.framework.STabsRoute.constructor}
   @mustCallSuper
-  Multi4TabsPageStack(StateBuilder<Multi4TabsState> stateBuilder)
-      : super(stateBuilder, Multi4TabsState._fromSTabsState);
+  const Multi4TabsPageStack(StateBuilder<Multi4TabsState> stateBuilder)
+      : super(stateBuilder, Multi4TabsState._fromMultiTabState);
 }

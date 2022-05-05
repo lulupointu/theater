@@ -5,7 +5,7 @@ import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_3_tabs_page_stack.dart';
 import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
-import '../../../s_router/s_router.dart';
+import '../../../theater/theater.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
 import '../web_entry_matcher/web_entry_match.dart';
@@ -14,7 +14,7 @@ import '../web_entry_matcher/web_entry_matcher.dart';
 /// A translator which should be used with a [STabbedRoute]
 class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     extends MultiTabTranslator<PS, Multi3TabsState> {
-  /// {@macro srouter.multi_tab_translators.constructor}
+  /// {@macro theater.multi_tab_translators.constructor}
   ///
   /// See also:
   ///   - [Multi3TabsTranslator.parse] for a way to match the path dynamically
@@ -25,11 +25,11 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, Tab3In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -41,7 +41,7 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
         ],
         pageStackToWebEntry = _defaultRouteToWebEntry;
 
-  /// {@macro srouter.multi_tab_translators.parse}
+  /// {@macro theater.multi_tab_translators.parse}
   Multi3TabsTranslator.parse({
     required String path,
     required this.matchToPageStack,
@@ -57,11 +57,11 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<SElement, Tab3In<Multi3TabsPageStack>>>
+    required List<STranslator<PageElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matcher = WebEntryMatcher(
     path: path,
@@ -86,8 +86,8 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
   @override
   final WebEntry Function(
       PS pageStack,
-      Multi3TabsState state,
-      WebEntry? activeTabWebEntry,
+      MultiTabPageState<Multi3TabsState> state,
+      WebEntry? currentTabWebEntry,
       ) pageStackToWebEntry;
 
   @override
@@ -95,21 +95,21 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
 
   static WebEntry _defaultRouteToWebEntry(
       Multi3TabsPageStack pageStack,
-      Multi3TabsState state,
-      WebEntry? activeTabWebEntry,
+      MultiTabPageState<Multi3TabsState> state,
+      WebEntry? currentTabWebEntry,
       ) {
-    if (activeTabWebEntry == null) {
+    if (currentTabWebEntry == null) {
       throw UnknownPageStackError(pageStack: pageStack);
     }
 
-    return activeTabWebEntry;
+    return currentTabWebEntry;
   }
 
   @override
   @nonVirtual
-  Multi3TabsState buildFromMultiTabState(int activeIndex, IList<PageStackBase> pageStacks) {
+  Multi3TabsState buildFromMultiTabState(int currentIndex, IList<PageStackBase> pageStacks) {
     return Multi3TabsState(
-      activeIndex: activeIndex,
+      currentIndex: currentIndex,
       tab1PageStack: pageStacks[0] as Tab1In<Multi3TabsPageStack>,
       tab2PageStack: pageStacks[1] as Tab2In<Multi3TabsPageStack>,
       tab3PageStack: pageStacks[2] as Tab3In<Multi3TabsPageStack>,

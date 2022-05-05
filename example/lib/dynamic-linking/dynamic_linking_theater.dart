@@ -5,7 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(WishlistApp());
@@ -27,7 +27,7 @@ class _WishlistAppState extends State<WishlistApp> {
 
   void toWishlist(BuildContext context, Wishlist wishlist) {
     _addWishlistIfNotPresent(wishlist);
-    context.sRouter.to(
+    context.theater.to(
       WishlistPageStack(wishlists: wishlists, wishlist: wishlist, toWishlist: toWishlist),
     );
   }
@@ -39,7 +39,7 @@ class _WishlistAppState extends State<WishlistApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: WishlistListPageStack(wishlists: [], toWishlist: toWishlist),
         translatorsBuilder: (_) => [
           PathTranslator<WishlistListPageStack>(

@@ -8,19 +8,20 @@ import 'tabXIn.dart';
 /// is called (i.e. each time a new [Multi3TabsPageStack] is pushed)
 @immutable
 class Multi3TabsState extends MultiTabState {
-  /// {@macro srouter.framework.STabsState.constructor}
+  /// {@macro theater.framework.MultiTabState.constructor}
   Multi3TabsState({
-    required this.activeIndex,
+    required this.currentIndex,
     required this.tab1PageStack,
     required this.tab2PageStack,
     required this.tab3PageStack,
-  }) : super(
-          activeIndex: activeIndex,
+  })  : tabsPageStacks = IList([tab1PageStack, tab2PageStack, tab3PageStack]),
+        super(
+          currentIndex: currentIndex,
           tabsPageStacks: [tab1PageStack, tab2PageStack, tab3PageStack].lock,
         );
 
   @override
-  final int activeIndex;
+  final int currentIndex;
 
   /// The [PageStackBase] corresponding to the first tab (index 0)
   ///
@@ -46,20 +47,17 @@ class Multi3TabsState extends MultiTabState {
   /// ```
   final Tab3In<Multi3TabsPageStack> tab3PageStack;
 
-  /// A list of 3 widgets, one for each tab
-  ///
-  /// Each widget correspond to a navigator which has the [Page] stack created
-  /// by the [PageStackBase] of the given index
+  /// A list of 3 [PageStack], one for each tab
   @override
-  late final List<Widget> tabs;
+  final IList<TabXOf3<Multi3TabsPageStack>> tabsPageStacks;
 
   /// Builds a copy of this [Multi3TabsState] where
   ///   - [pageStack] will replace the [PageStack] of its corresponding tab
-  ///   - The index corresponding to [pageStack] will be set as the active index
+  ///   - The index corresponding to [pageStack] will be set as the current index
   ///
   /// [TabXOf3] is either a [Tab1In], [Tab2In] or [Tab3In] mixin
-  Multi3TabsState withActiveStack<PS extends Multi3TabsPageStack>(
-    TabXOf3<PS>? pageStack,
+  Multi3TabsState withCurrentStack<PS extends Multi3TabsPageStack>(
+    TabXOf3<PS> pageStack,
   ) {
     final index = pageStack is Tab1In<PS>
         ? 0
@@ -69,7 +67,7 @@ class Multi3TabsState extends MultiTabState {
                 ? 2
                 : throw 'The index of the pageStack $pageStack could not be determined, does it implement [Tab1In], [Tab2In] or [Tab3In]?';
     return copyWith(
-      activeIndex: index,
+      currentIndex: index,
       tab1PageStack: index == 0 ? pageStack as Tab1In<PS> : tab1PageStack,
       tab2PageStack: index == 1 ? pageStack as Tab2In<PS> : tab2PageStack,
       tab3PageStack: index == 2 ? pageStack as Tab3In<PS> : tab3PageStack,
@@ -77,11 +75,11 @@ class Multi3TabsState extends MultiTabState {
   }
 
   /// Builds a copy of this [Multi3TabsState] where [index] will be set as the
-  /// active index
+  /// current index
   ///
   /// 0 <= [index] <= 2
-  Multi3TabsState withActiveIndex<PS extends Multi3TabsPageStack>(int index) {
-    return copyWith(activeIndex: index);
+  Multi3TabsState withCurrentIndex<PS extends Multi3TabsPageStack>(int index) {
+    return copyWith(currentIndex: index);
   }
 
   /// Builds a copy of this [Multi3TabsState] where the given attributes have been
@@ -89,44 +87,44 @@ class Multi3TabsState extends MultiTabState {
   ///
   /// Use this is [StateBuilder] to easily return the new state
   Multi3TabsState copyWith({
-    int? activeIndex,
+    int? currentIndex,
     Tab1In<Multi3TabsPageStack>? tab1PageStack,
     Tab2In<Multi3TabsPageStack>? tab2PageStack,
     Tab3In<Multi3TabsPageStack>? tab3PageStack,
   }) {
     assert(
-      activeIndex == null || (0 <= activeIndex && activeIndex <= 2),
-      'The given activeIndex ($activeIndex) is not valid, it must be between 0 and 2',
+      currentIndex == null || (0 <= currentIndex && currentIndex <= 2),
+      'The given currentIndex ($currentIndex) is not valid, it must be between 0 and 2',
     );
 
     return Multi3TabsState(
-      activeIndex: activeIndex ?? this.activeIndex,
+      currentIndex: currentIndex ?? this.currentIndex,
       tab1PageStack: tab1PageStack ?? this.tab1PageStack,
       tab2PageStack: tab2PageStack ?? this.tab2PageStack,
       tab3PageStack: tab3PageStack ?? this.tab3PageStack,
     );
   }
 
-  /// Creates a [Multi3TabsState] from a [_STabsState], internal use only
-  factory Multi3TabsState._fromSTabsState(
-    int activeIndex,
+  /// Creates a [Multi3TabsState] from a [_MultiTabState], internal use only
+  factory Multi3TabsState._fromMultiTabState(
+    int currentIndex,
     IList<PageStackBase> sRoutes,
   ) =>
       Multi3TabsState(
-        activeIndex: activeIndex,
+        currentIndex: currentIndex,
         tab1PageStack: sRoutes[0] as Tab1In<Multi3TabsPageStack>,
         tab2PageStack: sRoutes[1] as Tab2In<Multi3TabsPageStack>,
         tab3PageStack: sRoutes[2] as Tab3In<Multi3TabsPageStack>,
       );
 }
 
-/// An implementation of [MultiTabPageStack] which makes it easy to build screens
+/// An implementation of [MultiTabsPageStack] which makes it easy to build screens
 /// with 3 tabs.
 ///
-/// {@macro srouter.framework.STabsRoute}
-abstract class Multi3TabsPageStack extends MultiTabPageStack<Multi3TabsState> {
-  /// {@macro srouter.framework.STabsRoute.constructor}
+/// {@macro theater.framework.STabsRoute}
+abstract class Multi3TabsPageStack extends MultiTabsPageStack<Multi3TabsState> {
+  /// {@macro theater.framework.STabsRoute.constructor}
   @mustCallSuper
-  Multi3TabsPageStack(StateBuilder<Multi3TabsState> stateBuilder)
-      : super(stateBuilder, Multi3TabsState._fromSTabsState);
+  const Multi3TabsPageStack(StateBuilder<Multi3TabsState> stateBuilder)
+      : super(stateBuilder, Multi3TabsState._fromMultiTabState);
 }

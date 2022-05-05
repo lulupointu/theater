@@ -5,7 +5,7 @@ import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_6_tabs_page_stack.dart';
 import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
-import '../../../s_router/s_router.dart';
+import '../../../theater/theater.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';
 import '../web_entry_matcher/web_entry_match.dart';
@@ -14,7 +14,7 @@ import '../web_entry_matcher/web_entry_matcher.dart';
 /// A translator which should be used with a [STabbedRoute]
 class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     extends MultiTabTranslator<PS, Multi6TabsState> {
-  /// {@macro srouter.multi_tab_translators.constructor}
+  /// {@macro theater.multi_tab_translators.constructor}
   ///
   /// See also:
   ///   - [Multi6TabsTranslator.parse] for a way to match the path dynamically
@@ -25,12 +25,12 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
-    required List<STranslator<SElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
-    required List<STranslator<SElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
-    required List<STranslator<SElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
-    required List<STranslator<SElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
+    required List<STranslator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<STranslator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<STranslator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<STranslator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<STranslator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<STranslator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
@@ -44,7 +44,7 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
         ],
         pageStackToWebEntry = _defaultRouteToWebEntry;
 
-  /// {@macro srouter.multi_tab_translators.parse}
+  /// {@macro theater.multi_tab_translators.parse}
   Multi6TabsTranslator.parse({
     required String path,
     required this.matchToPageStack,
@@ -60,12 +60,12 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     // The type seem quite complex but what it means is that the [STranslator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<SElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
-    required List<STranslator<SElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
-    required List<STranslator<SElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
-    required List<STranslator<SElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
-    required List<STranslator<SElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
-    required List<STranslator<SElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
+    required List<STranslator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<STranslator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<STranslator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<STranslator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<STranslator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<STranslator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
           validatePathParams: validatePathParams,
@@ -92,8 +92,8 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
   @override
   final WebEntry Function(
     PS pageStack,
-    Multi6TabsState state,
-    WebEntry? activeTabWebEntry,
+      MultiTabPageState<Multi6TabsState> state,
+    WebEntry? currentTabWebEntry,
   ) pageStackToWebEntry;
 
   @override
@@ -101,24 +101,24 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
 
   static WebEntry _defaultRouteToWebEntry(
     Multi6TabsPageStack pageStack,
-    Multi6TabsState state,
-    WebEntry? activeTabWebEntry,
+      MultiTabPageState<Multi6TabsState> state,
+    WebEntry? currentTabWebEntry,
   ) {
-    if (activeTabWebEntry == null) {
+    if (currentTabWebEntry == null) {
       throw UnknownPageStackError(pageStack: pageStack);
     }
 
-    return activeTabWebEntry;
+    return currentTabWebEntry;
   }
 
   @override
   @nonVirtual
   Multi6TabsState buildFromMultiTabState(
-    int activeIndex,
+    int currentIndex,
     IList<PageStackBase> pageStacks,
   ) {
     return Multi6TabsState(
-      activeIndex: activeIndex,
+      currentIndex: currentIndex,
       tab1PageStack: pageStacks[0] as Tab1In<Multi6TabsPageStack>,
       tab2PageStack: pageStacks[1] as Tab2In<Multi6TabsPageStack>,
       tab3PageStack: pageStacks[2] as Tab3In<Multi6TabsPageStack>,

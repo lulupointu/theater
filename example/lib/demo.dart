@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:srouter/srouter.dart';
+import 'package:theater/theater.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: SRouter.build(
+      builder: Theater.build(
         initialPageStack: UserPageStack(),
         translatorsBuilder: (_) => [
           PathTranslator<UserPageStack>(
@@ -33,7 +33,7 @@ class UserScreen extends StatelessWidget {
       appBar: AppBar(title: Text('User')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => SRouter.of(context).to(SettingsPageStack()),
+          onPressed: () => Theater.of(context).to(SettingsPageStack()),
           child: Text('Go to settings'),
         ),
       ),
@@ -62,8 +62,8 @@ class UserPageStack extends PageStack {
 
 class SettingsPageStack extends PageStack {
   @override
-  Page buildPage(BuildContext context) {
-    return MaterialPage(child: build(context));
+  Page buildPage(BuildContext context, PageState state, child) {
+    return MaterialPage(child: child);
   }
 
   @override
