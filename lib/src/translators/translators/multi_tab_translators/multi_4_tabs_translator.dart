@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../browser/web_entry.dart';
 import '../../../page_stack/framework.dart';
 import '../../../page_stack/multi_tab_page_stack/multi_4_tabs_page_stack.dart';
-import '../../../page_stack/multi_tab_page_stack/tabXIn.dart';
+import '../../../page_stack/multi_tab_page_stack/tab_x_in.dart';
 import '../../../theater/theater.dart';
 import '../../translator.dart';
 import '../../translators_handler.dart';

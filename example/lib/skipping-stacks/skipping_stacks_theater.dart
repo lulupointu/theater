@@ -169,7 +169,7 @@ class AuthorDetailsPageStack extends PageStack {
   Widget build(BuildContext context) => AuthorDetailsScreen(author: author);
 
   @override
-  PageStackBase createPageStackBellow(BuildContext _) {
+  PageStackBase get pageStackBellow {
     return AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks);
   }
 }

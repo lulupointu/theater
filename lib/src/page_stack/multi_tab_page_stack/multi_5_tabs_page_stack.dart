@@ -2,7 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
 import '../framework.dart';
-import 'tabXIn.dart';
+import 'tab_x_in.dart';
 
 /// The state of [Multi5TabsPageStack], which will be updated each time [StateBuilder]
 /// is called (i.e. each time a new [Multi5TabsPageStack] is pushed)
