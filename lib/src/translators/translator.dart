@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
 
-/// A class used to interact with the web url
+/// A class used to interact with the docs url
 ///
 /// This class has three goals:
 ///   1. Define which type of url can access this translator

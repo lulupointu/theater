@@ -8,10 +8,10 @@ import '../../theater_browser.dart';
 import '../../theater_url_strategy.dart';
 import '../../web_entry.dart';
 
-/// A web implementation of [TheaterBrowserInterface]
+/// A docs implementation of [TheaterBrowserInterface]
 ///
 ///
-/// It report new web entries to the browser and update itself if the browser
+/// It report new docs entries to the browser and update itself if the browser
 /// reports a new route
 class TheaterBrowser extends TheaterBrowserInterface {
   /// Prevent direct instantiation;
@@ -35,7 +35,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
     }
   }
 
-  /// This information is impossible to have on the web platform due for
+  /// This information is impossible to have on the docs platform due for
   /// security reasons
   @override
   bool? canGo(int delta) => null;
@@ -131,7 +131,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
     };
   }
 
-  /// Get the current web entry by takings the url and the history state from
+  /// Get the current docs entry by takings the url and the history state from
   /// the browser
   static WebEntry _getCurrentWebEntry(
       {required TheaterUrlStrategy theaterUrlStrategy}) {

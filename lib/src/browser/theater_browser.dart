@@ -3,7 +3,7 @@ import 'theater_url_strategy.dart';
 
 import 'web_entry.dart';
 
-export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/web/theater_browser.dart' show TheaterBrowser;
+export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/docs/theater_browser.dart' show TheaterBrowser;
 
 /// A class which interacts with the browser i.e.:
 ///   - Passes information to update the browser
@@ -11,9 +11,9 @@ export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/web/theate
 ///   - Notify its listeners when the browser causes a change to its state
 ///
 ///
-/// The implementation is different on the web than on other platform, see:
-///   - [WebTheaterBrowser] for the web implementation
-///   - [NonWebTheaterBrowser] for the non web implementation
+/// The implementation is different on the docs than on other platform, see:
+///   - [WebTheaterBrowser] for the docs implementation
+///   - [NonWebTheaterBrowser] for the non docs implementation
 abstract class TheaterBrowserInterface extends ChangeNotifier {
   /// Instantiate [TheaterBrowserInterface] with the given [theaterUrlStrategy]
   TheaterBrowserInterface(this.theaterUrlStrategy);
@@ -21,10 +21,10 @@ abstract class TheaterBrowserInterface extends ChangeNotifier {
   /// The current index on which we are in the browser history
   int get historyIndex;
 
-  /// The web entry corresponding to the current [historyIndex]
+  /// The docs entry corresponding to the current [historyIndex]
   WebEntry get webEntry;
 
-  /// The first web entry which will be reported by the browser if the
+  /// The first docs entry which will be reported by the browser if the
   /// application is NOT deep-linking
   WebEntry get initialWebEntry;
 
@@ -51,7 +51,7 @@ abstract class TheaterBrowserInterface extends ChangeNotifier {
   /// of [delta]
   ///
   ///
-  /// Always returns null on web
-  /// Always returns true or false on non web platforms
+  /// Always returns null on docs
+  /// Always returns true or false on non docs platforms
   bool? canGo(int delta);
 }

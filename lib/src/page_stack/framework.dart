@@ -1016,7 +1016,7 @@ abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
     StateBuilder<S>? stateBuilder,
   ) get matchToPageStack;
 
-  /// Returns the web entry to return web the associated [MultiTabsPageStack]
+  /// Returns the docs entry to return docs the associated [MultiTabsPageStack]
   /// is pushed into [Theater]
   ///
   ///
@@ -1024,7 +1024,7 @@ abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
   ///
   /// [state] is the current state of [pageStack]
   ///
-  /// [currentTabWebEntry] is the web entry returned by the tab at the current
+  /// [currentTabWebEntry] is the docs entry returned by the tab at the current
   /// index. If the current tab could not be converted to a [WebEntry] this
   /// value is null
   WebEntry Function(
@@ -1060,7 +1060,7 @@ abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
     MultiTabsPageElement<S> element,
     PS pageStack,
   ) {
-    // Get the web entry returned by the current tab
+    // Get the docs entry returned by the current tab
     final currentIndex = element.state.currentIndex;
     final currentTabWebEntry =
         translatorsHandlers[currentIndex].getWebEntryFromPageElement(

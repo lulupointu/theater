@@ -7,7 +7,7 @@ import '../../theater_browser.dart';
 import '../../theater_url_strategy.dart';
 import '../../web_entry.dart';
 
-/// A non web implementation of [TheaterBrowserInterface]
+/// A non docs implementation of [TheaterBrowserInterface]
 ///
 ///
 /// It basically does nothing apart from keeping track of the history
@@ -35,7 +35,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
   /// The first index is 0
   int _historyIndex = 0;
 
-  /// The list of all the web entries
+  /// The list of all the docs entries
   IList<WebEntry> _webEntries;
 
   @override
@@ -43,7 +43,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
     // Increment the [_historyIndex]
     ++_historyIndex;
 
-    // Add the web entry to the web entry and remove any web entry that came
+    // Add the docs entry to the docs entry and remove any docs entry that came
     // after it
     _webEntries = _webEntries.sublist(0, _historyIndex).add(webEntry);
   }
@@ -56,7 +56,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
   @override
   void go(int delta) {
     assert(
-      canGo(delta)!, // Can't be null on non-web browser
+      canGo(delta)!, // Can't be null on non-docs browser
       '''
 [go] was called with delta=$delta but this is not possible considering the current browser state.
 

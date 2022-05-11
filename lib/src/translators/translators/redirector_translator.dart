@@ -99,7 +99,7 @@ class RedirectorTranslator extends PageStackTranslator<PageStackBase> {
   PageStackBase? webEntryToPageStack(BuildContext context, WebEntry webEntry) {
     final match = _matcher.match(webEntry);
 
-    // If the web entry does not match, return null
+    // If the docs entry does not match, return null
     if (match == null) {
       return null;
     }

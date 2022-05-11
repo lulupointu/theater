@@ -35,7 +35,7 @@ class Theater extends StatelessWidget {
   /// The [initialPageStack] describes the first [PageStack] to be shown before
   /// any navigation has taken place
   ///
-  /// [translatorsBuilder] are optional but must be given to support the web
+  /// [translatorsBuilder] are optional but must be given to support the docs
   /// platform, otherwise [Theater] can't turn the url into [PageStack]s
   ///
   /// [key] can be useful if you need to use [to] and friends without
@@ -62,7 +62,7 @@ class Theater extends StatelessWidget {
     this.disableSendAppToBackground = false,
     this.disableUniversalTranslator = false,
   })  : assert(!kIsWeb || translatorsBuilder != null, '''
-You must define [translators] when you are on the web, otherwise Theater can't know which [PageStack] correspond to which url
+You must define [translators] when you are on the docs, otherwise Theater can't know which [PageStack] correspond to which url
 '''),
         super(key: key);
 
@@ -72,12 +72,12 @@ You must define [translators] when you are on the web, otherwise Theater can't k
   /// This will be ignored if we are deep-linking
   final PageStackBase initialPageStack;
 
-  /// The list of [Translator]s which will be used to convert a web
+  /// The list of [Translator]s which will be used to convert a docs
   /// to a [PageStack] and vise versa
   ///
   ///
   /// WARNING: In the given context, [Theater.of(context).currentHistoryEntry]
-  /// might be null since the conversion from page stack to web entry or vise
+  /// might be null since the conversion from page stack to docs entry or vise
   /// versa is not done
   final List<Translator<PageElement, PageStackBase>> Function(
       BuildContext context)? translatorsBuilder;
@@ -145,14 +145,14 @@ You must define [translators] when you are on the web, otherwise Theater can't k
   final bool disableSendAppToBackground;
 
   /// Whether [UniversalNonWebTranslator] should be used as a translator when
-  /// the app is run on a different platform than the web
+  /// the app is run on a different platform than the docs
   ///
   /// You may only want to turn this to [false] if your application supports
-  /// both web and non web platform. This is not compulsory but makes it easier
+  /// both docs and non docs platform. This is not compulsory but makes it easier
   /// to debug missing [translatorsBuilder].
   ///
   ///
-  /// On the web, this has no effect
+  /// On the docs, this has no effect
   ///
   /// Defaults to false
   final bool disableUniversalTranslator;
@@ -293,7 +293,7 @@ You must define [translators] when you are on the web, otherwise Theater can't k
     return currentElement;
   }
 
-  /// Resets the singleton used to internally represent the web browser
+  /// Resets the singleton used to internally represent the docs browser
   ///
   /// Only use this method for testing, usually in [setUp]
   /// ```dart
@@ -307,11 +307,11 @@ You must define [translators] when you are on the web, otherwise Theater can't k
 
   /// Initializes Theater
   ///
-  /// IMPORTANT: On Flutter web, this must be called before the url strategy is
+  /// IMPORTANT: On Flutter docs, this must be called before the url strategy is
   /// set by Flutter. Which means that you either need to put Theater in
   /// MaterialApp.build or use [Theater.ensureInitialized] in [runApp]
   ///
-  /// [theaterUrlStrategy] is only used in Flutter web to describe whether a
+  /// [theaterUrlStrategy] is only used in Flutter docs to describe whether a
   /// hash (#) should be used at the beginning of your url path.
   /// Read the [TheaterUrlStrategy] class documentation for more details.
   static void ensureInitialized({
@@ -432,7 +432,7 @@ class TheaterState extends State<_Theater> implements TheaterInterface {
   ///
   ///
   /// WARNING: In the given context, [Theater.of(context).currentHistoryEntry]
-  /// might be null since the conversion from page stack to web entry or vise
+  /// might be null since the conversion from page stack to docs entry or vise
   /// versa is not done
   TranslatorsHandler get _translatorsHandler => TranslatorsHandler(
         translators: [
@@ -485,7 +485,7 @@ class TheaterState extends State<_Theater> implements TheaterInterface {
   /// A getter of the [_history]
   IMap<int, HistoryEntry> get history => _history;
 
-  /// An helper to get the current web entry using [history] and the history
+  /// An helper to get the current docs entry using [history] and the history
   /// index from [TheaterBrowserInterface]
   ///
   ///
@@ -659,8 +659,8 @@ class TheaterState extends State<_Theater> implements TheaterInterface {
   /// method anyway
   ///
   ///
-  /// Always returns null on web
-  /// Always returns true or false on non web platforms
+  /// Always returns null on docs
+  /// Always returns true or false on non docs platforms
   bool? canGo(int delta) => _theaterBrowser.canGo(delta);
 
   /// Converts the current [WebEntry] from [_theaterBrowser] to a [PageStack]
@@ -756,7 +756,7 @@ class TheaterState extends State<_Theater> implements TheaterInterface {
         // ignore: avoid_catching_errors
       } on AssertionError {
         throw '''
-On Flutter web, you must either:
+On Flutter docs, you must either:
   - Use [Theater.ensureInitialized] in [runApp] 
   - Or put Theater in MaterialApp.build (or WidgetsApp.build)
 ''';
@@ -858,11 +858,11 @@ class _TheaterProvider extends InheritedWidget {
   }
 }
 
-/// An exception thrown when the given web entry in
+/// An exception thrown when the given docs entry in
 /// [TranslatorsHandler.getPageStackFromWebEntry] could not be matched by any
 /// translator
 class UnknownWebEntryError extends Error {
-  /// The web entry which could not be converted to a [PageStack]
+  /// The docs entry which could not be converted to a [PageStack]
   final WebEntry webEntry;
 
   // ignore: public_member_api_docs
@@ -870,11 +870,11 @@ class UnknownWebEntryError extends Error {
 
   @override
   String toString() => '''
-The web entry $webEntry could not be translated to a page stack.
+The docs entry $webEntry could not be translated to a page stack.
 
-If you are on the web, did you forget to add the translator corresponding to the web entry $webEntry ?
+If you are on the docs, did you forget to add the translator corresponding to the docs entry $webEntry ?
 
-If you are NOT on the web, this should never happen, please fill an issue.
+If you are NOT on the docs, this should never happen, please fill an issue.
 ''';
 }
 
@@ -890,8 +890,8 @@ class UnknownPageStackError extends Error {
 
   @override
   String toString() => '''
-The [PageStack] of type "${pageStack.runtimeType}" could not be translated to a web entry:
-  - If you are on the web, did you forget to add the translator corresponding to the [PageStack] of type "${pageStack.runtimeType}" ?
-  - If you are NOT on the web, this should never happen, please fill an issue.
+The [PageStack] of type "${pageStack.runtimeType}" could not be translated to a docs entry:
+  - If you are on the docs, did you forget to add the translator corresponding to the [PageStack] of type "${pageStack.runtimeType}" ?
+  - If you are NOT on the docs, this should never happen, please fill an issue.
 ''';
 }

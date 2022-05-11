@@ -10,7 +10,7 @@ import 'theater.dart';
 /// We use this object instead of returning [TheaterState] so that internal
 /// non private methods do not appear in the IDE
 abstract class TheaterInterface {
-  /// An helper to get the current web entry using [history] and the history
+  /// An helper to get the current docs entry using [history] and the history
   /// index from [TheaterBrowserInterface]
   ///
   ///
@@ -69,7 +69,7 @@ abstract class TheaterInterface {
   /// method anyway
   ///
   ///
-  /// Always returns null on web
-  /// Always returns true or false on non web platforms
+  /// Always returns null on docs
+  /// Always returns true or false on non docs platforms
   bool? canGo(int delta);
 }
