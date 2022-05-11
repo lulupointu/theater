@@ -19,7 +19,7 @@ import 'translator.dart';
 /// its default value ([Element])
 @immutable
 abstract class PageStackTranslator<Route extends PageStackBase>
-    extends STranslator<PageElement, Route> {
+    extends Translator<PageElement, Route> {
 
   @override
   WebEntry pageElementToWebEntry(BuildContext context, PageElement element, Route sRoute) {

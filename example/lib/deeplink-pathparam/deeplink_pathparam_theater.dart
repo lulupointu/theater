@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+
   runApp(BooksApp());
 }
 
@@ -26,7 +28,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: BooksListScreenPageStack(books: _books),
         translatorsBuilder: (_) => [
           PathTranslator<BooksListScreenPageStack>(
@@ -39,9 +41,11 @@ class BooksApp extends StatelessWidget {
               books: _books,
               selectedBook: int.parse(match.pathParams['id']!),
             ),
-            pageStackToWebEntry: (route) => WebEntry(path: '/book/${route.selectedBook}'),
+            pageStackToWebEntry: (route) =>
+                WebEntry(path: '/book/${route.selectedBook}'),
           ),
-          RedirectorTranslator(path: '*', pageStack: BooksListScreenPageStack(books: _books)),
+          RedirectorTranslator(
+              path: '*', pageStack: BooksListScreenPageStack(books: _books)),
         ],
       ),
     );
@@ -64,14 +68,17 @@ class BookDetailsPageStack extends PageStack {
   BookDetailsPageStack({
     required this.books,
     required this.selectedBook,
-  }) : super(key: ValueKey(selectedBook));
+  });
 
   @override
-  Widget build(BuildContext context) => BookDetailsScreen(book: books[selectedBook]);
+  LocalKey? get key => ValueKey(selectedBook);
 
   @override
-  PageStackBase get pageStackBellow =>
-      BooksListScreenPageStack(books: books);
+  Widget build(BuildContext context) =>
+      BookDetailsScreen(book: books[selectedBook]);
+
+  @override
+  PageStackBase get pageStackBellow => BooksListScreenPageStack(books: books);
 }
 
 class BooksListScreen extends StatelessWidget {
@@ -89,8 +96,9 @@ class BooksListScreen extends StatelessWidget {
             ListTile(
               title: Text(book.title),
               subtitle: Text(book.author),
-              onTap: () => context.theater.to(
-                BookDetailsPageStack(books: books, selectedBook: books.indexOf(book)),
+              onTap: () => context.to(
+                BookDetailsPageStack(
+                    books: books, selectedBook: books.indexOf(book)),
               ),
             ),
         ],

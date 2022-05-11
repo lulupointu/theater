@@ -4,6 +4,8 @@ import 'package:theater/theater.dart';
 import 'page_stacks.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(MyApp());
 }
 
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue),
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: AppPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<AppPageStack>(
@@ -77,7 +79,7 @@ class App extends StatelessWidget {
   void _selectTab(BuildContext context, TabItem tabItem) {
     if (tabItem == currentTab) {
       // pop to first route
-      context.theater.to(
+      context.to(
         AppPageStack(
           (state) => state.withCurrentStack(
             AppPageStack.initState.tabsPageStacks[state.currentIndex],
@@ -85,7 +87,7 @@ class App extends StatelessWidget {
         ),
       );
     } else {
-      context.theater.to(
+      context.to(
         AppPageStack(
           (state) => state.withCurrentIndex(TabItem.values.indexOf(tabItem)),
         ),
@@ -181,7 +183,7 @@ class ColorDetailScreen extends StatelessWidget {
               (e) => Padding(
                 padding: const EdgeInsets.all(50.0),
                 child: ElevatedButton(
-                  onPressed: () => context.theater.to(
+                  onPressed: () => context.to(
                     AppPageStack(
                       (state) => state.withCurrentIndex(
                         TabItem.values.indexOf(e),
@@ -301,7 +303,7 @@ List<Widget> _buildSettingsButtons(BuildContext context,
             ),
             child: IconButton(
               onPressed: () =>
-                  context.theater.to(SettingsPageStack(tabItem: e)),
+                  context.to(SettingsPageStack(tabItem: e)),
               icon: Icon(Icons.settings, color: currentTabColor[e]),
             ),
           ),

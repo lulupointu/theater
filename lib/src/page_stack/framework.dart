@@ -424,79 +424,61 @@ class PageStackWidget<PS extends PageStack> extends StatelessPageWidget {
       pageStack.buildPage(context, state, pageStack.build(context));
 }
 
-/// Builds the default page for a page stack
-mixin PageStackBuilder<State extends PageState> on PageStackBase {
-  /// A key used (if non-null) in the [Page] built in [buildPage]
-  Key? get key;
+/// Provides the default page to be used
+class DefaultPageBuilder extends InheritedWidget {
+  // ignore: public_member_api_docs
+  const DefaultPageBuilder({
+    Key? key,
+    required Widget child,
+    required this.builder,
+  }) : super(key: key, child: child);
 
-  /// {@template theater.framework.defaultBuildPage}
+  /// The default builder which will be used if [PageStack] does not implement
+  /// buildPage
+  final Page Function(
+    BuildContext context,
+    PageStackWithPage pageStack,
+    Widget child,
+  ) builder;
+
+  /// Returns the [DefaultPageBuilder] of the given [context]
+  static DefaultPageBuilder of(BuildContext context) {
+    final element =
+        context.getElementForInheritedWidgetOfExactType<DefaultPageBuilder>();
+    assert(element != null, 'No DefaultPageBuilder found in context');
+    return element!.widget as DefaultPageBuilder;
+  }
+
+  @override
+  bool updateShouldNotify(DefaultPageBuilder old) => false;
+}
+
+/// Builds the default page for a page stack
+mixin PageStackWithPage<State extends PageState> on PageStackBase {
+  /// A key used (if non-null) in the [Page] built in [buildPage]
+  LocalKey? get key => ValueKey(runtimeType);
+
+  /// Builds the page used for the top page of the page stack
   ///
-  /// A default implementation of [buildPage] which returns a [Page]
-  /// corresponding to the current platform:
-  ///   - On iOS or macOS [CupertinoPage]
-  ///   - Else [MaterialPage]
-  ///
-  /// If a non-null [key] has been given to the constructor, it will be used as
-  /// the [Page]'s key
-  /// If no [key] where given, the [runtimeType] will be used as the [Page]
-  /// identifier instead
-  ///
-  ///
-  /// You can override this implementation if you want to build a custom [Page].
-  /// In which case [build] will not be used and a dummy implementation will
-  /// suffice:
-  /// `Widget build(BuildContext context) => Container();`
-  ///
-  /// {@endtemplate}
+  /// By default, uses the page builder stored in [DefaultPageBuilder]
   Page buildPage(BuildContext context, State state, Widget child) {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return CupertinoPage(
-          key: ValueKey(key ?? runtimeType),
-          child: child,
-        );
-      default:
-        return MaterialPage(
-          key: ValueKey(key ?? runtimeType),
-          child: child,
-        );
-    }
+    return DefaultPageBuilder.of(context).builder(context, this, child);
   }
 }
 
-/// A superclass of [StatelessPageStack] which provides an implementation of
-/// [buildPage], [pageStackBellow] and [onPop]
+/// The primary class used in [Theater] to describe the [Page]s of the [Navigator].
+///
+/// [build] will be the visible widget (the one at the top of the [Navigator]
+/// [Page] stack)
+///
+/// [pageStackBellow] provides a [PageStackBase] which describes the [Page] stack
+/// to put bellow the page from [build]
 ///
 ///
-/// This is the primary class used in [Theater] to describe the [Page] stack of
-/// the [Navigator].
-///
-/// [build] will be the visible widget (the one at the top of the [Page] stack)
-///
-/// [pageStackBellow] provides an [PageStackBase] which describes the
-/// [Page] stack to put bellow the page containing the widget from [build]
-///
-///
-/// You can override [buildPage] if you want to build a custom [Page]. In which
-/// case [build] will not be used and a dummy implementation will suffice:
-/// `Widget build(BuildContext context) => Container();`
-///
-///
-/// You an also override [onPop] to change the behavior of when pop is called
-/// on this [PageStack]
-abstract class PageStack extends PageStackBase with PageStackBuilder {
-  /// Passes the given key to the super constructor.
-  ///
-  /// If non-null, this key will also be used in [buildPage] to identify the
-  /// [Page] that this [PageStack] builds.
-  const PageStack({this.key});
-
-  /// This key will be attached to the [PageWidget] that this [StatelessPageStack]
-  /// describes
-  ///
-  /// See [PageWidget.key] for more info
-  final Key? key;
+/// You can override [buildPage] if you want to build a custom [Page].
+abstract class PageStack extends PageStackBase with PageStackWithPage {
+  /// Allow subclasses to be const
+  const PageStack();
 
   /// The widget which will be displayed on the screen when this [PageStack] is
   /// used directly
@@ -569,7 +551,7 @@ abstract class MultiTabState extends Equatable {
   const MultiTabState({
     required this.currentIndex,
     required this.tabsPageStacks,
-  })  : assert(
+  }) : assert(
           0 <= currentIndex && currentIndex <= tabsPageStacks.length,
           'The given currentIndex ($currentIndex) is not valid, it must be between 0 and ${tabsPageStacks.length}',
         );
@@ -908,7 +890,7 @@ class _MultiTabsPageWidget<TabsState extends MultiTabState> extends PageWidget {
 ///
 /// {@endtemplate}
 abstract class MultiTabsPageStack<S extends MultiTabState> extends PageStackBase
-    with PageStackBuilder {
+    with PageStackWithPage {
   /// A const constructor initializing different attributes with the given
   /// values
   ///
@@ -931,16 +913,8 @@ abstract class MultiTabsPageStack<S extends MultiTabState> extends PageStackBase
   /// {@endtemplate}
   const MultiTabsPageStack(
     this._stateBuilder,
-    this._buildFromMultiTabState, {
-    this.key,
-  });
-
-  /// The key of the [Page] created in [buildPage] (if non-null)
-  ///
-  ///
-  /// This key will also be attached to the [_MultiTabsPageWidget] that this
-  /// [StatelessPageStack] describes, see [PageWidget.key] for more info
-  final Key? key;
+    this._buildFromMultiTabState,
+  );
 
   /// The initial state, it will be used the first time [StateBuilder] is
   /// called
@@ -1024,7 +998,7 @@ abstract class MultiTabsPageStack<S extends MultiTabState> extends PageStackBase
 /// DO use [Multi2TabsTranslator], [Multi2TabsTranslator], etc depending on
 /// which implementation of [MultiTabsPageStack] you implemented
 abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
-    S extends MultiTabState> extends STranslator<MultiTabsPageElement<S>, PS> {
+    S extends MultiTabState> extends Translator<MultiTabsPageElement<S>, PS> {
   /// Returns the [MultiTabsPageStack] associated with the given [WebEntry]
   ///
   ///
@@ -1062,7 +1036,7 @@ abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
   /// A class which determined whether a given [WebEntry] is valid
   WebEntryMatcher get matcher;
 
-  /// A [STranslatorHandler] for each tab of the state
+  /// A [TranslatorHandler] for each tab of the state
   List<TranslatorsHandler> get translatorsHandlers;
 
   /// A function which build the state [S] based on the base state class
@@ -1112,10 +1086,10 @@ abstract class MultiTabTranslator<PS extends MultiTabsPageStack<S>,
     // Get the pageStack and its associated index returned from the [webEntry]
     MapEntry<int, PageStackBase>? maybeNewCurrentTabPageStack;
     for (var i = 0; i < translatorsHandlers.length; i++) {
-      final sTranslatorsHandler = translatorsHandlers[i];
+      final translatorsHandler = translatorsHandlers[i];
 
       final pageStack =
-          sTranslatorsHandler.getPageStackFromWebEntry(context, webEntry);
+          translatorsHandler.getPageStackFromWebEntry(context, webEntry);
       if (pageStack != null) {
         maybeNewCurrentTabPageStack = MapEntry(i, pageStack);
         break;

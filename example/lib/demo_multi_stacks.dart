@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+
   runApp(MyApp());
 }
 
@@ -11,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: MyScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
           PathTranslator<FeaturePageStack>(

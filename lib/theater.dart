@@ -1,7 +1,7 @@
 library theater;
 
-export 'src/browser/s_browser.dart';
-export 'src/browser/s_url_strategy.dart';
+export 'src/browser/theater_browser.dart';
+export 'src/browser/theater_url_strategy.dart';
 export 'src/browser/web_entry.dart';
 export 'src/page_stack/framework.dart' hide updatePageStackBasePageElements;
 export 'src/page_stack/multi_tab_page_stack/multi_2_tabs_page_stack.dart';

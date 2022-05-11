@@ -22,15 +22,15 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     required PS Function(StateBuilder<Multi6TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
-    required List<STranslator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
-    required List<STranslator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
-    required List<STranslator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
+    required List<Translator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<Translator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<Translator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<Translator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<Translator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<Translator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matchToPageStack =
             ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
         matcher = WebEntryMatcher(path: '*'),
@@ -57,15 +57,15 @@ class Multi6TabsTranslator<PS extends Multi6TabsPageStack>
     final bool Function(Map<String, String> historyState)? validateHistoryState,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
-    required List<STranslator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
-    required List<STranslator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
-    required List<STranslator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
+    required List<Translator<PageElement, Tab1In<Multi6TabsPageStack>>> tab1Translators,
+    required List<Translator<PageElement, Tab2In<Multi6TabsPageStack>>> tab2Translators,
+    required List<Translator<PageElement, Tab3In<Multi6TabsPageStack>>> tab3Translators,
+    required List<Translator<PageElement, Tab4In<Multi6TabsPageStack>>> tab4Translators,
+    required List<Translator<PageElement, Tab5In<Multi6TabsPageStack>>> tab5Translators,
+    required List<Translator<PageElement, Tab6In<Multi6TabsPageStack>>> tab6Translators,
   })  : matcher = WebEntryMatcher(
           path: path,
           validatePathParams: validatePathParams,

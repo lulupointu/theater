@@ -1,7 +1,7 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../browser/s_browser.dart';
+import '../../browser/theater_browser.dart';
 import '../../browser/web_entry.dart';
 import '../../page_stack/framework.dart';
 import '../../theater/history_entry.dart';
@@ -9,7 +9,7 @@ import '../../theater/theater.dart';
 import '../page_stack_translator.dart';
 import '../translator.dart';
 
-/// This [STranslator] will
+/// This [Translator] will
 ///   - match any [WebEntry] and make it correspond to the current
 ///   ^ [PageStack]
 ///   - match any [PageStack] and make it correspond to the current
@@ -21,7 +21,7 @@ import '../translator.dart';
 /// to re-render the same route
 class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
   /// This is a trick to please our assert which checks that the generic type
-  /// of [STranslator] is available at runtime
+  /// of [Translator] is available at runtime
   ///
   /// You should never have to do this
   @override
@@ -39,14 +39,14 @@ class UniversalNonWebTranslator extends PageStackTranslator<PageStackBase> {
 
   @override
   WebEntry sRouteToWebEntry(BuildContext context, PageStackBase route) {
-    // Use SBrowser directly because the currentWebEntry may not be
+    // Use TheaterBrowser directly because the currentWebEntry may not be
     // set at this point
-    return SBrowser.instance.webEntry;
+    return TheaterBrowser.instance.webEntry;
   }
 
   @override
   PageStackBase webEntryToPageStack(BuildContext context, WebEntry webEntry) {
-    final currentHistoryIndex = SBrowser.instance.historyIndex;
+    final currentHistoryIndex = TheaterBrowser.instance.historyIndex;
 
     // Try to return the current route
     final currentRoute = history[currentHistoryIndex]?.pageStack;

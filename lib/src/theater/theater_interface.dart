@@ -11,7 +11,7 @@ import 'theater.dart';
 /// non private methods do not appear in the IDE
 abstract class TheaterInterface {
   /// An helper to get the current web entry using [history] and the history
-  /// index from [SBrowserInterface]
+  /// index from [TheaterBrowserInterface]
   ///
   ///
   /// Watch out for edge cases:
@@ -22,8 +22,8 @@ abstract class TheaterInterface {
   ///   ^ stack it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
-  /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
-  /// [STranslator.pageElementToWebEntry] to get this Theater will be in the
+  /// [Translator]s as using the context in [Translator.webEntryToPageStack] and
+  /// [Translator.pageElementToWebEntry] to get this Theater will be in the
   /// in-between state described above
   HistoryEntry? get currentHistoryEntry;
 
@@ -51,13 +51,13 @@ abstract class TheaterInterface {
   /// Throws an exception if this is not possible
   ///
   ///
-  /// This will only delegate the work to the [SBrowserInterface] since
+  /// This will only delegate the work to the [TheaterBrowserInterface] since
   /// this only changes the history index which is handled by the
-  /// [SBrowserInterface]
+  /// [TheaterBrowserInterface]
   ///
   ///
   /// NOT calling [setState] is NOT an error, it will be called during
-  /// [_updateHistoryWithCurrentWebEntry] when [SBrowserInterface] will have processed this
+  /// [_updateHistoryWithCurrentWebEntry] when [TheaterBrowserInterface] will have processed this
   /// method and updated its current history index
   void go(int delta);
 
@@ -65,7 +65,7 @@ abstract class TheaterInterface {
   /// of [delta]
   ///
   ///
-  /// We delegate the work to the [SBrowserInterface] since it implements this
+  /// We delegate the work to the [TheaterBrowserInterface] since it implements this
   /// method anyway
   ///
   ///

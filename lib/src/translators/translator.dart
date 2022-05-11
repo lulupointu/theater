@@ -17,7 +17,7 @@ import '../page_stack/framework.dart';
 /// Prefer extending this class since the [pageStackType] type should usually keep
 /// its default value ([Element])
 @immutable
-abstract class STranslator<Element extends PageElement, PS extends PageStackBase> {
+abstract class Translator<Element extends PageElement, PS extends PageStackBase> {
   /// This constructor checks that the [PS] generic (stored in [pageStackType])
   /// is resolved at runtime (i.e. that it is NOT [PageStackBase] but the
   /// name of a route class you created)
@@ -31,7 +31,7 @@ abstract class STranslator<Element extends PageElement, PS extends PageStackBase
   /// // BAD
   /// PathTranslator(...)
   /// ```
-  STranslator() {
+  Translator() {
     assert(() {
       if (pageStackType == PageStackBase) {
         final translatorType =
@@ -56,7 +56,7 @@ $translatorType(...)
   }
 
   /// This attributes describe which [PageElement] is associated with this
-  /// [STranslator] :
+  /// [Translator] :
   ///   - When this [PageStackBase] associated with this [PageElement] is pushed in
   ///   ^ [Theater], the translator with which is is associated will be used to
   ///   ^ convert it to a [WebEntry]
@@ -74,7 +74,7 @@ $translatorType(...)
   /// It must be resolved at runtime, this means that if its value is
   /// [SRouteBase<MaybeSNested>], an assertion error will be raised.
   /// We impose this constraint so that developers don't forget to specify the
-  /// generic type (i.e. use STranslator<MySRoute, ...>(), NOT STranslator())
+  /// generic type (i.e. use Translator<MySRoute, ...>(), NOT Translator())
   /// This is checked by the assert in this class' constructor
   final Type pageStackType = PS;
 

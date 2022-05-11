@@ -1,14 +1,16 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:move_to_background/move_to_background.dart';
 
 import '../back_button_listener_scope/back_button_listener_scope.dart';
-import '../browser/s_browser.dart';
-import '../browser/s_url_strategy.dart';
+import '../browser/theater_browser.dart';
+import '../browser/theater_url_strategy.dart';
 import '../browser/web_entry.dart';
 import '../navigator/theater_navigator.dart';
 import '../page_stack/framework.dart';
+import '../page_transitions/no_transition_page.dart';
 import '../translators/translator.dart';
 import '../translators/translators/universal_web_entry_translator.dart';
 import '../translators/translators_handler.dart';
@@ -18,8 +20,8 @@ import 'theater_interface.dart';
 /// A widget which assembles the different part of the package to
 /// create the greatest routing experience of your life ;)
 ///
-/// This class is an interface between [Navigator] and [SBrowserInterface].
-/// [SBrowserInterface] must never be handled directly, always use [Theater]
+/// This class is an interface between [Navigator] and [TheaterBrowserInterface].
+/// [TheaterBrowserInterface] must never be handled directly, always use [Theater]
 ///
 /// The responsibility of this class is to exposed the current [HistoryEntry]
 /// which should be displayed
@@ -27,7 +29,7 @@ import 'theater_interface.dart';
 ///
 /// The state of this class (used to navigate) can be accessed using
 /// [Theater.of] or [content.theater]
-class Theater extends StatefulWidget {
+class Theater extends StatelessWidget {
   /// {@template theater.theater.constructor}
   ///
   /// The [initialPageStack] describes the first [PageStack] to be shown before
@@ -53,7 +55,7 @@ class Theater extends StatefulWidget {
     Key? key,
     required this.initialPageStack,
     this.translatorsBuilder,
-    this.sUrlStrategy = SUrlStrategy.hash,
+    this.defaultPageBuilder = _defaultPageBuilder,
     this.builder,
     this.navigatorKey,
     this.navigatorObservers = const [],
@@ -64,65 +66,51 @@ You must define [translators] when you are on the web, otherwise Theater can't k
 '''),
         super(key: key);
 
-  /// A useful builder of [Theater] to use in [WidgetsApp.builder],
-  /// [MaterialApp.builder] or [CupertinoApp.builder]
-  ///
-  /// {@macro theater.theater.constructor}
-  static Theater Function(BuildContext context, Widget? child) build({
-    Key? key,
-    required PageStackBase initialPageStack,
-    List<STranslator<PageElement, PageStackBase>> Function(
-            BuildContext context)?
-        translatorsBuilder,
-    SUrlStrategy sUrlStrategy = SUrlStrategy.hash,
-    Widget Function(BuildContext, Widget)? builder,
-    GlobalKey<NavigatorState>? navigatorKey,
-    List<NavigatorObserver> navigatorObservers = const [],
-    bool disableSendAppToBackground = false,
-    bool disableUniversalTranslator = false,
-  }) =>
-      (context, child) {
-        assert(
-          child == null,
-          'You should not provide a "home" parameter to the WidgetsApp (or MaterialApp or CupertinoApp) in which [Theater] is created',
-        );
-
-        return Theater(
-          initialPageStack: initialPageStack,
-          translatorsBuilder: translatorsBuilder,
-          sUrlStrategy: sUrlStrategy,
-          builder: builder,
-          navigatorKey: navigatorKey,
-          navigatorObservers: navigatorObservers,
-          disableSendAppToBackground: disableSendAppToBackground,
-          disableUniversalTranslator: disableUniversalTranslator,
-        );
-      };
-
   /// The initial [PageStack] to display
   ///
   ///
   /// This will be ignored if we are deep-linking
   final PageStackBase initialPageStack;
 
-  /// The list of [STranslator]s which will be used to convert a web
+  /// The list of [Translator]s which will be used to convert a web
   /// to a [PageStack] and vise versa
   ///
   ///
   /// WARNING: In the given context, [Theater.of(context).currentHistoryEntry]
   /// might be null since the conversion from page stack to web entry or vise
   /// versa is not done
-  final List<STranslator<PageElement, PageStackBase>> Function(
+  final List<Translator<PageElement, PageStackBase>> Function(
       BuildContext context)? translatorsBuilder;
 
-  /// Only used in Flutter web to describe whether a hash (#) should be used
-  /// at the beginning of your url path.
+
+  /// The default builder which will be used if [PageStack] does not implement
+  /// buildPage. Use it to create default page transition for every page at
+  /// the same time.
   ///
-  /// Defaults to [SUrlStrategy.hash]
+  /// You should use [pageStack.key] as your page key instead you have a good
+  /// reason not to
+  ///
+  /// Example:
+  /// ```dart
+  /// MaterialApp(
+  ///   home: Theater(
+  ///     initialPageStack: LogInPageStack(),
+  ///     defaultPageBuilder: (context, pageStack, child) {
+  ///       return PageBuilder(
+  ///         child: child,
+  ///         transitionsBuilder: (context, animation, _, child) {
+  ///           // Create a fade transition when switching between pages
+  ///           return FadeTransition(opacity: animation, child: child),
+  ///         },
+  ///       );
+  ///     },
+  ///   ),
+  /// );
+  /// ```
   ///
   ///
-  /// Read the [SUrlStrategy] class documentation for more details.
-  final SUrlStrategy sUrlStrategy;
+  /// Defaults to [_defaultPageBuilder]
+  final Page Function(BuildContext context, PageStackWithPage pageStack, Widget child,) defaultPageBuilder;
 
   /// A callback to build a widget around the [Navigator] created by this
   /// widget
@@ -168,9 +156,6 @@ You must define [translators] when you are on the web, otherwise Theater can't k
   ///
   /// Defaults to false
   final bool disableUniversalTranslator;
-
-  @override
-  State<Theater> createState() => TheaterState();
 
   /// A method to access the [Theater] of the given [context]
   ///
@@ -318,14 +303,130 @@ You must define [translators] when you are on the web, otherwise Theater can't k
   /// ```
   @visibleForTesting
   // ignore: invalid_use_of_visible_for_testing_member
-  static void reset() => SBrowser.reset();
+  static void reset() => TheaterBrowser.reset();
+
+  /// Initializes Theater
+  ///
+  /// IMPORTANT: On Flutter web, this must be called before the url strategy is
+  /// set by Flutter. Which means that you either need to put Theater in
+  /// MaterialApp.build or use [Theater.ensureInitialized] in [runApp]
+  ///
+  /// [theaterUrlStrategy] is only used in Flutter web to describe whether a
+  /// hash (#) should be used at the beginning of your url path.
+  /// Read the [TheaterUrlStrategy] class documentation for more details.
+  static void ensureInitialized({
+    TheaterUrlStrategy theaterUrlStrategy = TheaterUrlStrategy.hash,
+  }) {
+    TheaterBrowser.maybeInitialize(theaterUrlStrategy: theaterUrlStrategy);
+  }
+
+  /// {@template theater.framework.defaultPageBuilder}
+  ///
+  /// A default implementation of [buildPage] which returns a [Page]
+  /// corresponding to the current platform:
+  ///   - On iOS [CupertinoPage]
+  ///   - On desktop [NoTransitionPage]
+  ///   - On android [MaterialPage]
+  ///
+  /// If a non-null [key] has been given to the constructor, it will be used as
+  /// the [Page]'s key
+  /// If no [key] where given, the [runtimeType] will be used as the [Page]
+  /// identifier instead
+  ///
+  ///
+  /// You can override this implementation if you want to build a custom [Page].
+  /// In which case [build] will not be used and a dummy implementation will
+  /// suffice:
+  /// `Widget build(BuildContext context) => Container();`
+  ///
+  /// {@endtemplate}
+  static Page _defaultPageBuilder(BuildContext context, PageStackWithPage pageStack, Widget child,) {
+    final defaultKey = ValueKey(pageStack.key);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return CupertinoPage(
+          key: defaultKey,
+          child: child,
+        );
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        return NoTransitionPage(
+          key: defaultKey,
+          child: child,
+        );
+      case TargetPlatform.android:
+        return MaterialPage(
+          key: defaultKey,
+          child: child,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultPageBuilder(
+      builder: defaultPageBuilder,
+      child: _Theater(
+        initialPageStack: initialPageStack,
+        translatorsBuilder: translatorsBuilder,
+        builder: builder,
+        navigatorKey: navigatorKey,
+        navigatorObservers: navigatorObservers,
+        disableSendAppToBackground: disableSendAppToBackground,
+        disableUniversalTranslator: disableUniversalTranslator,
+      ),
+    );
+  }
+}
+
+/// An intermediary widget needed so that [Theater] can inject widgets above
+/// [TheaterState] context
+class _Theater extends StatefulWidget {
+  const _Theater({
+    Key? key,
+    required this.initialPageStack,
+    required this.translatorsBuilder,
+    required this.builder,
+    required this.navigatorKey,
+    required this.navigatorObservers,
+    required this.disableSendAppToBackground,
+    required this.disableUniversalTranslator,
+  }) : super(key: key);
+
+  /// See [Theater.initialPageStack]
+  final PageStackBase initialPageStack;
+
+  /// See [Theater.translatorsBuilder]
+  final List<Translator<PageElement, PageStackBase>> Function(
+      BuildContext context)? translatorsBuilder;
+
+  /// See [Theater.builder]
+  final Widget Function(BuildContext context, Widget child)? builder;
+
+  /// See [Theater.navigatorKey]
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  /// See [Theater.navigatorObservers]
+  final List<NavigatorObserver> navigatorObservers;
+
+  /// See [Theater.disableSendAppToBackground]
+  final bool disableSendAppToBackground;
+
+  /// See [Theater.disableUniversalTranslator]
+  final bool disableUniversalTranslator;
+
+  @override
+  State<_Theater> createState() => TheaterState();
 }
 
 /// The state for a [Theater] widget.
 ///
 /// A reference to this class can be obtained by calling [Theater.of] or
 /// [context.theater]
-class TheaterState extends State<Theater> implements TheaterInterface {
+class TheaterState extends State<_Theater> implements TheaterInterface {
   /// The translator associated with the [Theater] with is used to
   /// convert a [WebEntry] to a [PageStack] and vise versa
   ///
@@ -351,7 +452,7 @@ class TheaterState extends State<Theater> implements TheaterInterface {
       );
 
   /// The interface representing the browser in which this application run
-  late final SBrowserInterface _sBrowser = SBrowser.instance;
+  late final TheaterBrowserInterface _theaterBrowser = TheaterBrowser.instance;
 
   /// Whether this [Theater] is nested in another one
   ///
@@ -367,9 +468,9 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   /// (which likely does NOT exists for this [Theater])
   ///
   /// However this is only possible in nested [Theater] because
-  /// [SBrowser] updates do NOT cause widget rebuild by itself, therefore if
+  /// [TheaterBrowser] updates do NOT cause widget rebuild by itself, therefore if
   /// no parent [Theater] exist, this [Theater] will NOT be
-  /// rebuilt upon [SBrowser] updates
+  /// rebuilt upon [TheaterBrowser] updates
   late final bool _isNested =
       Theater.maybeOf(context, listen: false, ignoreSelf: true) != null;
 
@@ -385,7 +486,7 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   IMap<int, HistoryEntry> get history => _history;
 
   /// An helper to get the current web entry using [history] and the history
-  /// index from [SBrowserInterface]
+  /// index from [TheaterBrowserInterface]
   ///
   ///
   /// Watch out for edge cases:
@@ -396,8 +497,8 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   ///   ^ stack it pushed until the update happens.
   ///
   /// This is particularly important to keep in mind when implementing
-  /// [STranslator]s as using the context in [STranslator.webEntryToPageStack] and
-  /// [STranslator.pageElementToWebEntry] to get this Theater will be in the
+  /// [Translator]s as using the context in [Translator.webEntryToPageStack] and
+  /// [Translator.pageElementToWebEntry] to get this Theater will be in the
   /// in-between state described above
   HistoryEntry? _currentHistoryEntry;
 
@@ -408,7 +509,7 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   ///
   ///
   /// This is needed because the first url is handled differently since we have
-  /// to use the [widget.initialPageStack] (if we are not deep-linking)
+  /// to use the [Theater.initialPageStack] (if we are not deep-linking)
   bool _initialUrlHandled = false;
 
   /// The [PageElement]s used to create the [Page]s
@@ -444,7 +545,8 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   /// This should be called when a [PageElement] updates its state internally
   void update() {
     final _currentPageStack = currentHistoryEntry?.pageStack;
-    assert(_currentPageStack != null, 'Tried to update while no PageStack was ever created');
+    assert(_currentPageStack != null,
+        'Tried to update while no PageStack was ever created');
 
     to(_currentPageStack!);
   }
@@ -459,14 +561,15 @@ class TheaterState extends State<Theater> implements TheaterInterface {
     bool isReplacement = false,
   }) {
     final _toCallback =
-        isReplacement ? _replaceSHistoryEntry : _pushSHistoryEntry;
+        isReplacement ? _replaceHistoryEntry : _pushHistoryEntry;
 
     return _toCallback(
       HistoryEntry(
         webEntry: _translatorsHandler.getWebEntryFromPageElement(
                 context, pageElements.last) ??
             (throw UnknownPageStackError(
-                pageStack: pageElements.last.pageWidget.pageStack)),
+              pageStack: pageElements.last.pageWidget.pageStack,
+            )),
         pageStack: pageElements.last.pageWidget.pageStack,
       ),
     );
@@ -482,10 +585,10 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   /// Set [isReplacement] to true if you want the current history entry to
   /// be replaced by the newly created one
   void toWebEntry(WebEntry webEntry, {bool isReplacement = false}) {
-    // We must call [to] instead of just calling [_sBrowser.push/replace]
-    // because calling [_sBrowser.push/replace] will not cause
+    // We must call [to] instead of just calling [_theaterBrowser.push/replace]
+    // because calling [_theaterBrowser.push/replace] will not cause
     // [_updateHistoryWithCurrentWebEntry] to be triggered since
-    // [_sBrowser] only notify its listener when the browser changes its
+    // [_theaterBrowser] only notify its listener when the browser changes its
     // state (contrary to when itself changes the state of the browser)
     return to(
       _translatorsHandler.getPageStackFromWebEntry(context, webEntry) ??
@@ -498,21 +601,21 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   ///
   ///
   /// This will also push in the browser
-  void _pushSHistoryEntry(HistoryEntry sHistoryEntry) {
-    final newHistoryIndex = _sBrowser.historyIndex + 1;
+  void _pushHistoryEntry(HistoryEntry historyEntry) {
+    final newHistoryIndex = _theaterBrowser.historyIndex + 1;
     // Update the history by:
-    //  - Adding the given [sHistoryEntry] with a key corresponding to the next
+    //  - Adding the given [historyEntry] with a key corresponding to the next
     //    history index
     //  - Remote all key associated with [sHistoryEntries] which are after the
     //    next history index
     setState(() {
-      _currentHistoryEntry = sHistoryEntry;
+      _currentHistoryEntry = historyEntry;
       _history = history
-          .add(newHistoryIndex, sHistoryEntry)
+          .add(newHistoryIndex, historyEntry)
           .removeWhere((key, value) => key > newHistoryIndex);
     });
 
-    _sBrowser.push(sHistoryEntry.webEntry);
+    _theaterBrowser.push(historyEntry.webEntry);
   }
 
   /// Replaces the current entry
@@ -522,14 +625,14 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   ///
   ///
   /// See "Optimization Remarks" to learn why we update [history] while we
-  /// could simply react to [SBrowserInterface] notifications
-  void _replaceSHistoryEntry(HistoryEntry sHistoryEntry) {
+  /// could simply react to [TheaterBrowserInterface] notifications
+  void _replaceHistoryEntry(HistoryEntry historyEntry) {
     setState(() {
-      _currentHistoryEntry = sHistoryEntry;
-      _history = history.add(_sBrowser.historyIndex, sHistoryEntry);
+      _currentHistoryEntry = historyEntry;
+      _history = history.add(_theaterBrowser.historyIndex, historyEntry);
     });
 
-    _sBrowser.replace(sHistoryEntry.webEntry);
+    _theaterBrowser.replace(historyEntry.webEntry);
   }
 
   /// Modifies the history index of [delta]
@@ -538,51 +641,51 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   /// Throws an exception if this is not possible
   ///
   ///
-  /// This will only delegate the work to the [SBrowserInterface] since
+  /// This will only delegate the work to the [TheaterBrowserInterface] since
   /// this only changes the history index which is handled by the
-  /// [SBrowserInterface]
+  /// [TheaterBrowserInterface]
   ///
   ///
   /// NOT calling [setState] is NOT an error, it will be called during
-  /// [_updateHistoryWithCurrentWebEntry] when [SBrowserInterface] will have
+  /// [_updateHistoryWithCurrentWebEntry] when [TheaterBrowserInterface] will have
   /// processed this method and updated its current history index
-  void go(int delta) => _sBrowser.go(delta);
+  void go(int delta) => _theaterBrowser.go(delta);
 
   /// Whether it is possible to ask the navigator to change the history index
   /// of [delta]
   ///
   ///
-  /// We delegate the work to the [SBrowserInterface] since it implements this
+  /// We delegate the work to the [TheaterBrowserInterface] since it implements this
   /// method anyway
   ///
   ///
   /// Always returns null on web
   /// Always returns true or false on non web platforms
-  bool? canGo(int delta) => _sBrowser.canGo(delta);
+  bool? canGo(int delta) => _theaterBrowser.canGo(delta);
 
-  /// Converts the current [WebEntry] from [_sBrowser] to a [PageStack]
+  /// Converts the current [WebEntry] from [_theaterBrowser] to a [PageStack]
   ///
   ///
-  /// This must be called when [_sBrowser] notify its listeners
+  /// This must be called when [_theaterBrowser] notify its listeners
   void _updateHistoryWithCurrentWebEntry() {
-    // Grab the current webEntry using [SBrowserInterface]
-    final webEntry = _sBrowser.webEntry;
+    // Grab the current webEntry using [TheaterBrowserInterface]
+    final webEntry = _theaterBrowser.webEntry;
 
     // Grab the current history index
-    final historyIndex = _sBrowser.historyIndex;
+    final historyIndex = _theaterBrowser.historyIndex;
 
     // If [initialUrlHandled] is false and we are NOT deep-linking, report
     // the url with [widget.initialPageStack]
     if (!_initialUrlHandled) {
       _initialUrlHandled = true;
 
-      if (webEntry == _sBrowser.initialWebEntry && historyIndex == 0) {
+      if (webEntry == _theaterBrowser.initialWebEntry && historyIndex == 0) {
         return to(widget.initialPageStack, isReplacement: true);
       }
     }
 
     // Call replace with the webEntry instead of directly storing the
-    // corresponding [SHistoryEntry] because the title might need to be set and
+    // corresponding [HistoryEntry] because the title might need to be set and
     // this is only accessible by converting the page stack to a [WebEntry]
     toWebEntry(webEntry, isReplacement: true);
   }
@@ -627,7 +730,7 @@ class TheaterState extends State<Theater> implements TheaterInterface {
       },
       done: () {
         // We navigate to the current [PageStack] since the changes where internal
-        _pushSHistoryEntry(
+        _pushHistoryEntry(
           HistoryEntry(
             webEntry: _translatorsHandler.getWebEntryFromPageElement(
                     context, _pageElements.last) ??
@@ -644,9 +747,20 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   void initState() {
     super.initState();
 
-    // If we have not nested, initialize with the given [SUrlStrategy]
+    // If we have not nested, initialize with the given [TheaterUrlStrategy]
     if (!_isNested) {
-      SBrowser.maybeInitialize(sUrlStrategy: widget.sUrlStrategy);
+      try {
+        // This fails when Flutter already called setUrlStrategy
+        Theater.ensureInitialized();
+
+        // ignore: avoid_catching_errors
+      } on AssertionError {
+        throw '''
+On Flutter web, you must either:
+  - Use [Theater.ensureInitialized] in [runApp] 
+  - Or put Theater in MaterialApp.build (or WidgetsApp.build)
+''';
+      }
     }
 
     // If we are nested, the update should only happen during the [build] phase
@@ -655,19 +769,19 @@ class TheaterState extends State<Theater> implements TheaterInterface {
     // We avoid the initialization as well since this would just be a duplicate
     // of the first build call
     if (!_isNested) {
-      // Initialize [_history] by syncing it with [SBrowserInterface]
+      // Initialize [_history] by syncing it with [TheaterBrowserInterface]
       _updateHistoryWithCurrentWebEntry();
 
-      _sBrowser.addListener(_updateHistoryWithCurrentWebEntry);
+      _theaterBrowser.addListener(_updateHistoryWithCurrentWebEntry);
     }
   }
 
   @override
-  void didUpdateWidget(covariant Theater oldWidget) {
+  void didUpdateWidget(covariant _Theater oldWidget) {
     // If we are nested, the update should only happen during the [build] phase
     if (!_isNested) {
-      _sBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
-      _sBrowser.addListener(_updateHistoryWithCurrentWebEntry);
+      _theaterBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
+      _theaterBrowser.addListener(_updateHistoryWithCurrentWebEntry);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -675,7 +789,7 @@ class TheaterState extends State<Theater> implements TheaterInterface {
   @override
   void dispose() {
     if (!_isNested) {
-      _sBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
+      _theaterBrowser.removeListener(_updateHistoryWithCurrentWebEntry);
     }
     super.dispose();
   }

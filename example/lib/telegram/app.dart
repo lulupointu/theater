@@ -16,6 +16,8 @@ import 'src/page_stacks.dart';
 /// This app is optimized for big screen (i.e. desktop screens) only
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(MyApp());
 }
 
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(subtitle1: TextStyle(color: Colors.white.withOpacity(0.9))),
         scaffoldBackgroundColor: Colors.black87,
       ),
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: TabsWrapperPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi3TabsTranslator<TabsWrapperPageStack>(

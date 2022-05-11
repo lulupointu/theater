@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(BooksApp());
 }
 
@@ -72,7 +74,7 @@ class _BooksAppState extends State<BooksApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: SignInPageStack(onSignedIn: authState.signIn),
         builder: (_, child) => AuthStateUpdateHandler(child: child, authState: authState),
         translatorsBuilder: (_) => [
@@ -119,7 +121,7 @@ class AuthStateUpdateHandler extends StatefulWidget {
 
 class _AuthStateUpdateHandlerState extends State<AuthStateUpdateHandler> {
   void _onAuthStateChange() {
-    context.theater.to(
+    context.to(
       widget.authState.isSignedIn
           ? HomePageStack(onSignOut: widget.authState.signOut)
           : SignInPageStack(onSignedIn: widget.authState.signIn),
@@ -186,7 +188,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () => context.theater.to(BooksListPageStack(onSignOut: onSignOut)),
+              onPressed: () => context.to(BooksListPageStack(onSignOut: onSignOut)),
               child: Text('View my bookshelf'),
             ),
             ElevatedButton(

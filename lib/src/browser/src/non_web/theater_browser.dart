@@ -3,22 +3,22 @@ import 'dart:ui';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../s_browser.dart';
-import '../../s_url_strategy.dart';
+import '../../theater_browser.dart';
+import '../../theater_url_strategy.dart';
 import '../../web_entry.dart';
 
-/// A non web implementation of [SBrowserInterface]
+/// A non web implementation of [TheaterBrowserInterface]
 ///
 ///
 /// It basically does nothing apart from keeping track of the history
 /// length and index since it does not need to interact with the system
-class SBrowser extends SBrowserInterface {
+class TheaterBrowser extends TheaterBrowserInterface {
   /// Prevent direct instantiation;
-  SBrowser._({required SUrlStrategy sUrlStrategy})
+  TheaterBrowser._({required TheaterUrlStrategy theaterUrlStrategy})
       : _webEntries = [
           WebEntry.fromUri(uri: Uri.parse(PlatformDispatcher.instance.defaultRouteName)),
         ].lock,
-        super(sUrlStrategy);
+        super(theaterUrlStrategy);
 
   @override
   int get historyIndex => _historyIndex;
@@ -56,7 +56,7 @@ class SBrowser extends SBrowserInterface {
   @override
   void go(int delta) {
     assert(
-      canGo(delta)!, // Can't be true on non-web browser
+      canGo(delta)!, // Can't be null on non-web browser
       '''
 [go] was called with delta=$delta but this is not possible considering the current browser state.
 
@@ -76,18 +76,18 @@ Use [canGo($delta)] to check if it is actually possible to change the history in
     return 0 <= newHistoryIndex && newHistoryIndex < _webEntries.length;
   }
 
-  /// The current (and unique) instance of [SBrowser]
-  static SBrowserInterface? _instance;
+  /// The current (and unique) instance of [TheaterBrowser]
+  static TheaterBrowserInterface? _instance;
 
-  /// Gets the current (and unique) instance of [SBrowser]
+  /// Gets the current (and unique) instance of [TheaterBrowser]
   ///
   ///
   /// DO make sure that you called [maybeInitialize] before
-  static SBrowserInterface get instance {
+  static TheaterBrowserInterface get instance {
     if (_instance == null) {
       throw AssertionError('''
-Tried to get [SBrowser.instance] but [SBrowser] has never been initialized. 
-You must call [SBrowser.initialize] before using [SBrowser.instance]
+Tried to get [TheaterBrowser.instance] but [TheaterBrowser] has never been initialized. 
+You must call [TheaterBrowser.initialize] before using [TheaterBrowser.instance]
 ''');
     }
 
@@ -98,17 +98,9 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   ///
   ///
   /// If an instance has already been created, does nothing
-  static void maybeInitialize({required SUrlStrategy sUrlStrategy}) {
+  static void maybeInitialize({required TheaterUrlStrategy theaterUrlStrategy}) {
     if (_instance == null) {
-      _instance = SBrowser._(sUrlStrategy: sUrlStrategy);
-    } else {
-      assert(
-        sUrlStrategy == _instance!.sUrlStrategy,
-        '[SBrowser] was first initialized with the [SUrlStrategy] '
-        '"${_instance!.sUrlStrategy}" and is now trying to be initialized with '
-        '"$sUrlStrategy".\n'
-        'You must always use the same [SUrlStrategy]',
-      );
+      _instance = TheaterBrowser._(theaterUrlStrategy: theaterUrlStrategy);
     }
   }
 
@@ -119,7 +111,7 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   @visibleForTesting
   static void reset() {
     if (_instance != null) {
-      _instance = SBrowser._(sUrlStrategy: _instance!.sUrlStrategy);
+      _instance = TheaterBrowser._(theaterUrlStrategy: _instance!.theaterUrlStrategy);
     }
   }
 }

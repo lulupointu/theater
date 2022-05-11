@@ -4,18 +4,19 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import '../../s_browser.dart';
-import '../../s_url_strategy.dart';
+import '../../theater_browser.dart';
+import '../../theater_url_strategy.dart';
 import '../../web_entry.dart';
 
-/// A web implementation of [SBrowserInterface]
+/// A web implementation of [TheaterBrowserInterface]
 ///
 ///
 /// It report new web entries to the browser and update itself if the browser
 /// reports a new route
-class SBrowser extends SBrowserInterface {
+class TheaterBrowser extends TheaterBrowserInterface {
   /// Prevent direct instantiation;
-  SBrowser._({required SUrlStrategy sUrlStrategy}) : super(sUrlStrategy) {
+  TheaterBrowser._({required TheaterUrlStrategy theaterUrlStrategy})
+      : super(theaterUrlStrategy) {
     _onBrowserUpdateListener = html.window.onPopState.listen((_) {
       notifyListeners();
     });
@@ -63,20 +64,23 @@ class SBrowser extends SBrowserInterface {
     required WebEntry webEntry,
   }) {
     // Either push or replace depending on [isReplacement]
-    final historyMethod =
-        isReplacement ? html.window.history.replaceState : html.window.history.pushState;
+    final historyMethod = isReplacement
+        ? html.window.history.replaceState
+        : html.window.history.pushState;
 
     final url = Uri(
       path: webEntry.path,
-      queryParameters: webEntry.queryParams.isEmpty ? null : webEntry.queryParams,
+      queryParameters:
+          webEntry.queryParams.isEmpty ? null : webEntry.queryParams,
       fragment: webEntry.fragment.isEmpty ? null : webEntry.fragment,
     ).toString();
 
     historyMethod(
-      _wrapHistoryState(historyState: webEntry.historyState, title: webEntry.title),
+      _wrapHistoryState(
+          historyState: webEntry.historyState, title: webEntry.title),
       webEntry.title, // This is not actually used by browsers apart from Safari
       _getBasePath() +
-          ((sUrlStrategy == SUrlStrategy.hash) ? '#/' : '') +
+          ((theaterUrlStrategy == TheaterUrlStrategy.hash) ? '#/' : '') +
           (url.startsWith('/') ? url.substring(1) : url),
     );
 
@@ -100,7 +104,8 @@ class SBrowser extends SBrowserInterface {
   }
 
   @override
-  WebEntry get webEntry => _getCurrentWebEntry(sUrlStrategy: sUrlStrategy);
+  WebEntry get webEntry =>
+      _getCurrentWebEntry(theaterUrlStrategy: theaterUrlStrategy);
 
   @override
   WebEntry get initialWebEntry => WebEntry(path: '/');
@@ -128,17 +133,21 @@ class SBrowser extends SBrowserInterface {
 
   /// Get the current web entry by takings the url and the history state from
   /// the browser
-  static WebEntry _getCurrentWebEntry({required SUrlStrategy sUrlStrategy}) {
-    final uri = Uri.parse(_getAppUrl(sUrlStrategy: sUrlStrategy));
+  static WebEntry _getCurrentWebEntry(
+      {required TheaterUrlStrategy theaterUrlStrategy}) {
+    final uri = Uri.parse(_getAppUrl(theaterUrlStrategy: theaterUrlStrategy));
 
     final historyState = _getHistoryState();
 
-    return WebEntry.fromUri(uri: uri, historyState: historyState, title: _getTabTitle());
+    return WebEntry.fromUri(
+        uri: uri, historyState: historyState, title: _getTabTitle());
   }
 
   /// Get the history state
   static Map<String, String> _getHistoryState() {
-    return (html.window.history.state?['historyState'] as Map?)?.cast<String, String>() ?? {};
+    return (html.window.history.state?['historyState'] as Map?)
+            ?.cast<String, String>() ??
+        {};
   }
 
   /// Returns the title of the current browser tab
@@ -155,10 +164,12 @@ class SBrowser extends SBrowserInterface {
   /// protocol + '//' + host + "uri from the first <base> tag" + appUrl
   ///                                                              ^
   ///                                                    This is what we fetch
-  static String _getAppUrl({required SUrlStrategy sUrlStrategy}) {
+  static String _getAppUrl({required TheaterUrlStrategy theaterUrlStrategy}) {
     // If the mode is fragment, it's easy we just take whatever is after the fragment
-    if (sUrlStrategy == SUrlStrategy.hash) {
-      return html.window.location.hash.isEmpty ? '' : html.window.location.hash.substring(1);
+    if (theaterUrlStrategy == TheaterUrlStrategy.hash) {
+      return html.window.location.hash.isEmpty
+          ? ''
+          : html.window.location.hash.substring(1);
     }
 
     // else, we have to be careful with the basePath
@@ -168,10 +179,10 @@ class SBrowser extends SBrowserInterface {
 
     // Remove the basePath
     final basePath = _getBasePath();
-    final pathAndQuery =
-        (basePath.length < entireUrl.length) // This might happen during first app startup
-            ? entireUrl.substring(basePath.length)
-            : '';
+    final pathAndQuery = (basePath.length <
+            entireUrl.length) // This might happen during first app startup
+        ? entireUrl.substring(basePath.length)
+        : '';
 
     return pathAndQuery.startsWith('/') ? pathAndQuery : '/$pathAndQuery';
   }
@@ -201,18 +212,18 @@ class SBrowser extends SBrowserInterface {
     super.dispose();
   }
 
-  /// The current (and unique) instance of [SBrowser]
-  static SBrowserInterface? _instance;
+  /// The current (and unique) instance of [TheaterBrowser]
+  static TheaterBrowserInterface? _instance;
 
-  /// Gets the current (and unique) instance of [SBrowser]
+  /// Gets the current (and unique) instance of [TheaterBrowser]
   ///
   ///
   /// DO make sure that you called [maybeInitialize] before
-  static SBrowserInterface get instance {
+  static TheaterBrowserInterface get instance {
     if (_instance == null) {
       throw AssertionError('''
-Tried to get [SBrowser.instance] but [SBrowser] has never been initialized. 
-You must call [SBrowser.initialize] before using [SBrowser.instance]
+Tried to get [TheaterBrowser.instance] but [TheaterBrowser] has never been initialized. 
+You must call [TheaterBrowser.initialize] before using [TheaterBrowser.instance]
 ''');
     }
 
@@ -223,15 +234,17 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   ///
   ///
   /// This must only be called once
-  static void maybeInitialize({required SUrlStrategy sUrlStrategy}) {
+  static void maybeInitialize({
+    required TheaterUrlStrategy theaterUrlStrategy,
+  }) {
     if (_instance != null) {
-      throw 'initialize can only be called once';
+      return;
     }
 
-    // Remote url handling from flutter
+    // Remove url handling from flutter
     setUrlStrategy(null);
 
-    _instance = SBrowser._(sUrlStrategy: sUrlStrategy);
+    _instance = TheaterBrowser._(theaterUrlStrategy: theaterUrlStrategy);
   }
 
   /// Reset this singleton instance
@@ -241,7 +254,8 @@ You must call [SBrowser.initialize] before using [SBrowser.instance]
   @visibleForTesting
   static void reset() {
     if (_instance != null) {
-      _instance = SBrowser._(sUrlStrategy: _instance!.sUrlStrategy);
+      _instance =
+          TheaterBrowser._(theaterUrlStrategy: _instance!.theaterUrlStrategy);
     }
   }
 }

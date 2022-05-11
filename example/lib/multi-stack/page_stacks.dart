@@ -69,7 +69,7 @@ abstract class ColoredListPageStack extends PageStack {
       tabItem: tabItem,
       color: currentTabColor[tabItem]!,
       title: tabName[tabItem]!,
-      onPush: (materialIndex) => context.theater.to(
+      onPush: (materialIndex) => context.to(
         AppPageStack(
           (state) => state.copyWith(
             currentIndex: TabItem.values.indexOf(tabItem),

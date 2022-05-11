@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(BooksApp());
 }
 
@@ -26,7 +28,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: BooksListPageStack(
           books: books,
           onFilterChanged: onFilterChanged,
@@ -51,7 +53,7 @@ class BooksApp extends StatelessWidget {
   }
 
   void onFilterChanged(BuildContext context, String filter) {
-    context.theater.to(BooksListPageStack(
+    context.to(BooksListPageStack(
       books: books,
       onFilterChanged: onFilterChanged,
       filter: filter.isEmpty ? null : filter,

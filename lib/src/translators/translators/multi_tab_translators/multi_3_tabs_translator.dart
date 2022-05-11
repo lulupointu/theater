@@ -22,14 +22,14 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     required PS Function(StateBuilder<Multi3TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matchToPageStack =
   ((_, stateBuilder) => stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -54,14 +54,14 @@ class Multi3TabsTranslator<PS extends Multi3TabsPageStack>
     final bool Function(Map<String, String> historyState)? validateHistoryState,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi3TabsPageStack>>>
     tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi3TabsPageStack>>>
     tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi3TabsPageStack>>>
+    required List<Translator<PageElement, Tab3In<Multi3TabsPageStack>>>
     tab3Translators,
   })  : matcher = WebEntryMatcher(
     path: path,

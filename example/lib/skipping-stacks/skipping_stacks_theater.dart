@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(BooksApp());
 }
 
@@ -32,23 +34,23 @@ class BooksApp extends StatelessWidget {
   List<Author> get authors => books.map<Author>((e) => e.author).toList();
 
   void toBooks(BuildContext context) {
-    context.theater.to(BooksListPageStack(books: books, toBook: toBook));
+    context.to(BooksListPageStack(books: books, toBook: toBook));
   }
 
   void toBook(BuildContext context, Book book) {
-    context.theater.to(
+    context.to(
       BookDetailsPageStack(books: books, book: book, toBook: toBook, toAuthor: toAuthor),
     );
   }
 
   void toAuthors(BuildContext context) {
-    context.theater.to(
+    context.to(
       AuthorsListPageStack(authors: authors, toAuthor: toAuthor, toBooks: toBooks),
     );
   }
 
   void toAuthor(BuildContext context, Author author) {
-    context.theater.to(
+    context.to(
       AuthorDetailsPageStack(
           authors: authors, author: author, toBooks: toBooks, toAuthor: toAuthor),
     );
@@ -57,7 +59,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: BooksListPageStack(books: books, toBook: toBook),
         translatorsBuilder: (_) => [
           PathTranslator<BooksListPageStack>(

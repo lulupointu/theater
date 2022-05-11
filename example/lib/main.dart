@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized(theaterUrlStrategy: TheaterUrlStrategy.history);
+
   runApp(MyApp());
 }
 
@@ -11,17 +13,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: LogInPageStack(),
-        sUrlStrategy: SUrlStrategy.history,
+        defaultPageBuilder: (context, pageStack, child) {
+          return PageBuilder(
+            child: child,
+            transitionsBuilder: (context, animation, _, child) =>
+                FadeTransition(opacity: animation, child: child),
+          );
+        },
         translatorsBuilder: (_) => [
           PathTranslator<LogInPageStack>(
-              path: '/', pageStack: LogInPageStack()),
+            path: '/',
+            pageStack: LogInPageStack(),
+          ),
           Multi2TabsTranslator<MainPageStack>(
             pageStack: MainPageStack.new,
             tab1Translators: [
               PathTranslator<UserPageStack>(
-                  path: '/user', pageStack: UserPageStack()),
+                path: '/user',
+                pageStack: UserPageStack(),
+              ),
             ],
             tab2Translators: [
               PathTranslator<SettingsPageStack>(
@@ -85,7 +97,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        onPressed: () => context.theater.to(MainPageStack((state) => state)),
+        onPressed: () => context.to(MainPageStack((state) => state)),
         child: Text('Click to log in'),
       ),
     );
@@ -110,11 +122,11 @@ class MainScreen extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: (index) {
           if (index == 0) {
-            context.theater.to(
+            context.to(
               MainPageStack((state) => state.withCurrentIndex(0)),
             );
           } else {
-            context.theater.to(
+            context.to(
               MainPageStack((state) => state.withCurrentIndex(1)),
             );
           }
@@ -136,7 +148,7 @@ class UserScreen extends StatelessWidget {
       appBar: AppBar(title: Text('User')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => context.theater.to(
+          onPressed: () => context.to(
             MainPageStack((state) => state.withCurrentIndex(1)),
           ),
           child: Text('Go to settings'),
@@ -153,7 +165,7 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Settings')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => context.theater.to(
+          onPressed: () => context.to(
             MainPageStack((state) => state.withCurrentIndex(0)),
           ),
           child: Text('Go to user'),

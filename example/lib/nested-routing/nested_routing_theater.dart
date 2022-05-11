@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(BooksApp());
 }
 
@@ -13,7 +15,7 @@ class BooksApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: ScaffoldPageStack((state) => state),
         translatorsBuilder: (_) => [
           Multi2TabsTranslator<ScaffoldPageStack>(
@@ -124,7 +126,7 @@ class ScaffoldScreen extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (idx) => context.theater.to(
+        onTap: (idx) => context.to(
           ScaffoldPageStack((state) => state.withCurrentIndex(idx)),
         ),
         items: [
@@ -188,7 +190,7 @@ class _BooksScreenState extends State<BooksScreen>
       children: [
         TabBar(
           controller: _tabController,
-          onTap: (index) => context.theater.to(
+          onTap: (index) => context.to(
             ScaffoldPageStack(
               (state) => state.withCurrentStack(
                 BooksViewPageStack((state) => state.withCurrentIndex(index)),

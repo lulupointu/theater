@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
 
-/// An SHistoryEntry is simply a tuple containing a [WebEntry] and a
+/// An HistoryEntry is simply a tuple containing a [WebEntry] and a
 /// [PageStack]
 class HistoryEntry extends Equatable {
   /// The [WebEntry] of this history entry

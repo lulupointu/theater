@@ -80,7 +80,7 @@ class StackedChatsPageStack extends PageStack
   }
 
   void _onPop(BuildContext context) {
-    context.theater.to(
+    context.to(
       TabsWrapperPageStack.from(
         context,
         selectedChats: List.from(chats)..removeLast(),

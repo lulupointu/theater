@@ -32,7 +32,7 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   /// [pageStack] builds the associated [MultiTabsPageStack] from a [StateBuilder],
   /// Use MySTabsRoute.new
   ///
-  /// There are also one list of [STranslator] per tab, which you should use to
+  /// There are also one list of [Translator] per tab, which you should use to
   /// map the different possible [PageStack]s of each tab to a url
   ///
   ///
@@ -58,12 +58,12 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     required PS Function(StateBuilder<Multi2TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi2TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi2TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
   })  : matchToPageStack = ((_, stateBuilder) =>
             stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -104,7 +104,7 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
   /// [validateHistoryState] are optional parameters and can be used to further
   /// precise which [WebEntry] to match
   ///
-  /// There are also one list of [STranslator] per tab, which you should use to
+  /// There are also one list of [Translator] per tab, which you should use to
   /// map the different possible [PageStack]s of each tab to a url
   ///
   ///
@@ -129,12 +129,12 @@ class Multi2TabsTranslator<PS extends Multi2TabsPageStack>
     final bool Function(Map<String, String> historyState)? validateHistoryState,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi2TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi2TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi2TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi2TabsPageStack>>>
         tab2Translators,
   })  : matcher = WebEntryMatcher(
           path: path,

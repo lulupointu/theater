@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:theater/theater.dart';
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(PushNoPush());
 }
 
@@ -12,7 +14,7 @@ class PushNoPush extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: ProfilesPageStack(profiles: [Faker().person.name()]),
         translatorsBuilder: (_) => [
           PathTranslator<ProfilesPageStack>.parse(
@@ -29,7 +31,10 @@ class PushNoPush extends StatelessWidget {
 class ProfilesPageStack extends PageStack {
   final List<String> profiles;
 
-  ProfilesPageStack({required this.profiles}) : super(key: ValueKey(profiles.length));
+  ProfilesPageStack({required this.profiles});
+
+  @override
+  LocalKey? get key => ValueKey(profiles.length);
 
   @override
   Widget build(BuildContext context) {

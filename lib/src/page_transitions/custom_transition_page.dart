@@ -4,12 +4,12 @@ import 'package:flutter/widgets.dart';
 ///
 /// To be used instead of MaterialPage or CupertinoPage, which provide
 /// their own transitions.
-class CustomTransitionPage<T> extends Page<T> {
+class PageBuilder<T> extends Page<T> {
   /// Constructor for a page with custom transition functionality.
   ///
   /// To be used instead of MaterialPage or CupertinoPage, which provide
   /// their own transitions.
-  const CustomTransitionPage({
+  const PageBuilder({
     required this.child,
     required this.transitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
@@ -102,10 +102,10 @@ class CustomTransitionPage<T> extends Page<T> {
 }
 
 class _CustomTransitionPageRoute<T> extends PageRoute<T> {
-  _CustomTransitionPageRoute(CustomTransitionPage<T> page)
+  _CustomTransitionPageRoute(PageBuilder<T> page)
       : super(settings: page);
 
-  CustomTransitionPage<T> get _page => settings as CustomTransitionPage<T>;
+  PageBuilder<T> get _page => settings as PageBuilder<T>;
 
   @override
   Color? get barrierColor => _page.barrierColor;

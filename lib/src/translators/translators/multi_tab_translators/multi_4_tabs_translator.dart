@@ -22,16 +22,16 @@ class Multi4TabsTranslator<PS extends Multi4TabsPageStack>
     required PS Function(StateBuilder<Multi4TabsState> stateBuilder) pageStack,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi4TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi4TabsPageStack>>>
         tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab3In<Multi4TabsPageStack>>>
         tab3Translators,
-    required List<STranslator<PageElement, Tab4In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab4In<Multi4TabsPageStack>>>
         tab4Translators,
   })  : matchToPageStack = ((_, stateBuilder) =>
             stateBuilder == null ? null : pageStack(stateBuilder)),
@@ -57,16 +57,16 @@ class Multi4TabsTranslator<PS extends Multi4TabsPageStack>
     final bool Function(Map<String, String> historyState)? validateHistoryState,
 
     // Translators for each tabs
-    // The type seem quite complex but what it means is that the [STranslator]
+    // The type seem quite complex but what it means is that the [Translator]
     // used in the lists must translated [SNested] sRoutes (since sRoutes
     // inside a STabsRoute are [SNested] page_stack)
-    required List<STranslator<PageElement, Tab1In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab1In<Multi4TabsPageStack>>>
         tab1Translators,
-    required List<STranslator<PageElement, Tab2In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab2In<Multi4TabsPageStack>>>
         tab2Translators,
-    required List<STranslator<PageElement, Tab3In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab3In<Multi4TabsPageStack>>>
         tab3Translators,
-    required List<STranslator<PageElement, Tab4In<Multi4TabsPageStack>>>
+    required List<Translator<PageElement, Tab4In<Multi4TabsPageStack>>>
         tab4Translators,
   })  : matcher = WebEntryMatcher(
           path: path,

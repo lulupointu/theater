@@ -5,6 +5,8 @@ import 'page_stacks.dart';
 
 
 void main() {
+  Theater.ensureInitialized();
+  
   runApp(MyApp());
 }
 
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      builder: Theater.build(
+      home: Theater(
         initialPageStack: HomePageStack(),
         translatorsBuilder: (_) => [
           PathTranslator<HomePageStack>(
@@ -90,7 +92,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => context.theater.to(BooksPageStack(books: books)),
+              onPressed: () => context.to(BooksPageStack(books: books)),
               child: Text('See all books'),
             ),
             SizedBox(height: 15),
@@ -102,12 +104,12 @@ class HomeScreen extends StatelessWidget {
                   hintText: 'Search book by title...',
                   suffixIcon: IconButton(
                     icon: Icon(Icons.search),
-                    onPressed: () => context.theater.to(
+                    onPressed: () => context.to(
                       BooksPageStack(books: books, searchedGenre: booksQueryController.text),
                     ),
                   ),
                 ),
-                onSubmitted: (title) => context.theater.to(
+                onSubmitted: (title) => context.to(
                   BooksPageStack(books: books, searchedName: title),
                 ),
               ),
@@ -137,7 +139,7 @@ class BooksScreen extends StatelessWidget {
               (book) => ListTile(
                 title: Text(book.title),
                 subtitle: Text(book.author),
-                onTap: () => context.theater.to(BookDetailsPageStack(books: books, book: book)),
+                onTap: () => context.to(BookDetailsPageStack(books: books, book: book)),
               ),
             )
             .toList(),
@@ -166,12 +168,12 @@ class BookDetailsScreen extends StatelessWidget {
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () =>
-                  context.theater.to(BookGenresPageStack(books: books, book: book)),
+                  context.to(BookGenresPageStack(books: books, book: book)),
               child: Text('See genres'),
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () => context.theater.to(BookBuyPageStack(books: books, book: book)),
+              onPressed: () => context.to(BookBuyPageStack(books: books, book: book)),
               child: Text('Buy'),
             ),
           ],
@@ -220,7 +222,7 @@ class BookGenresScreen extends StatelessWidget {
           children: List<Widget>.from(
             book.genres.map(
               (genre) => ListTile(
-                onTap: () => context.theater.to(
+                onTap: () => context.to(
                   BooksPageStack(books: books, searchedGenre: genre),
                 ),
                 title: Text(genre),

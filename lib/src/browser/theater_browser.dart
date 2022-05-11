@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 's_url_strategy.dart';
+import 'theater_url_strategy.dart';
 
 import 'web_entry.dart';
 
-export 'src/non_web/s_browser.dart' if (dart.library.html) 'src/web/s_browser.dart' show SBrowser;
+export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/web/theater_browser.dart' show TheaterBrowser;
 
 /// A class which interacts with the browser i.e.:
 ///   - Passes information to update the browser
@@ -12,11 +12,11 @@ export 'src/non_web/s_browser.dart' if (dart.library.html) 'src/web/s_browser.da
 ///
 ///
 /// The implementation is different on the web than on other platform, see:
-///   - [WebSBrowser] for the web implementation
-///   - [NonWebSBrowser] for the non web implementation
-abstract class SBrowserInterface extends ChangeNotifier {
-  /// Instantiate [SBrowserInterface] with the given [sUrlStrategy]
-  SBrowserInterface(this.sUrlStrategy);
+///   - [WebTheaterBrowser] for the web implementation
+///   - [NonWebTheaterBrowser] for the non web implementation
+abstract class TheaterBrowserInterface extends ChangeNotifier {
+  /// Instantiate [TheaterBrowserInterface] with the given [theaterUrlStrategy]
+  TheaterBrowserInterface(this.theaterUrlStrategy);
 
   /// The current index on which we are in the browser history
   int get historyIndex;
@@ -32,8 +32,8 @@ abstract class SBrowserInterface extends ChangeNotifier {
   /// url or not
   ///
   ///
-  /// See [SUrlStrategy] for more details
-  final SUrlStrategy sUrlStrategy;
+  /// See [TheaterUrlStrategy] for more details
+  final TheaterUrlStrategy theaterUrlStrategy;
 
   /// Pushes a new history entry
   void push(WebEntry webEntry);

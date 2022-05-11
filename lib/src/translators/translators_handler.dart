@@ -4,13 +4,13 @@ import '../browser/web_entry.dart';
 import '../page_stack/framework.dart';
 import 'translator.dart';
 
-/// This will use the given [STranslator]s to convert a web entry
+/// This will use the given [Translator]s to convert a web entry
 /// to a [PageStack] and vise versa
 @immutable
 class TranslatorsHandler {
-  /// The list of [STranslator]s which will be used to convert a web
+  /// The list of [Translator]s which will be used to convert a web
   /// to a [PageStack] and vise versa
-  final List<STranslator<PageElement, PageStackBase>> translators;
+  final List<Translator<PageElement, PageStackBase>> translators;
 
   // ignore: public_member_api_docs
   const TranslatorsHandler({required this.translators});
