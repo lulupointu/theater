@@ -1,0 +1,22 @@
+{
+    "name": "flutter-theater",
+    "displayName": "Flutter Theater",
+    "description": "Code snippet for the Theater package",
+    "repository": "https://github.com/lulupointu/theater",
+    "publisher": "Lulupointu",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.67.0"
+    },
+    "categories": [
+        "Snippets"
+    ],
+    "contributes": {
+        "snippets": [
+            {
+                "language": "dart",
+                "path": "./snippets/snippets.code-snippets"
+            }
+        ]
+    }
+}

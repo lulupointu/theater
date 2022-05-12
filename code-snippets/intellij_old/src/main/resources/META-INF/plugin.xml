@@ -1,0 +1,100 @@
+<idea-plugin>
+    <id>com.theater.intellij</id>
+    <name>Flutter Theater</name>
+    <vendor>Lulupointu</vendor>
+
+    <description>
+        <![CDATA[
+<h1 id="-theater">🎭 Theater</h1>
+<p>Snippets for the <a href="https://github.com/lulupointu/theater">theater</a> package.</p>
+<h2 id="features">Features</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Snippet</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>pstack</code></td>
+<td style="text-align:center">Creates a class which extends <code>PageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m2tabspagestack</code></td>
+<td style="text-align:center">Creates a class which extends <code>Multi2TabsPageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m3tabspagestack</code></td>
+<td style="text-align:center">Creates a class which extends <code>Multi3TabsPageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m4tabspagestack</code></td>
+<td style="text-align:center">Creates a class which extends <code>Multi4TabsPageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m5tabspagestack</code></td>
+<td style="text-align:center">Creates a class which extends <code>Multi5TabsPageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m6tabspagestack</code></td>
+<td style="text-align:center">Creates a class which extends <code>Multi6TabsPageStack</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>ptrans</code></td>
+<td style="text-align:center">Creates a <code>PathTranslator</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>ptransparse</code></td>
+<td style="text-align:center">Creates a <code>PathTranslator.parse</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>ptransparse</code></td>
+<td style="text-align:center">Creates a <code>PathTranslator.parse</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m2tabspagetrans</code></td>
+<td style="text-align:center">Creates a <code>Multi2TabsTranslator</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m3tabspagetrans</code></td>
+<td style="text-align:center">Creates a <code>Multi3TabsTranslator</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m4tabspagetrans</code></td>
+<td style="text-align:center">Creates a <code>Multi4TabsTranslator</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m5tabspagetrans</code></td>
+<td style="text-align:center">Creates a <code>Multi5TabsTranslator</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>m6tabspagetrans</code></td>
+<td style="text-align:center">Creates a <code>Multi6TabsTranslator</code></td>
+</tr>
+</tbody>
+</table>
+        ]]>
+    </description>
+
+    <change-notes><![CDATA[
+        <ul>
+          <li>v1.0 - Initial release</li>
+        </ul>
+        ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <defaultLiveTemplatesProvider
+                implementation="com.theater.intellij.live_templates.TheaterTemplateProvider"/>
+        <liveTemplateContext implementation="com.theater.intellij.live_templates.TheaterContext"/>
+    </extensions>
+</idea-plugin>

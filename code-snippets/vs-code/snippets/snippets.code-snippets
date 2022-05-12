@@ -1,0 +1,260 @@
+{
+    "Creates a new Multi2TabsPageStack": {
+            "prefix": "m2tabspagestack",
+            "body": [
+                    "class $1PageStack extends Multi2TabsPageStack {",
+                    "  $1PageStack(super.stateBuilder);",
+                    "",
+                    "  @override",
+                    "  Widget build(BuildContext context, MultiTabPageState<Multi2TabsState> state) {",
+                    "    return Container();",
+                    "  }",
+                    "",
+                    "  @override",
+                    "  Multi2TabsState get initialState => Multi2TabsState(",
+                    "        currentIndex: $2,",
+                    "        tab1PageStack: $3,",
+                    "        tab2PageStack: $4,",
+                    "      );",
+                    "}"
+            ],
+            "description": "Creates a new Multi2TabsPageStack"
+    },
+    "Creates a new Multi2TabsTranslator": {
+            "prefix": "m2tabspagetrans",
+            "body": [
+                    "Multi2TabsTranslator<$1>(",
+                    "  pageStack: $1.new,",
+                    "  tab1Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab2Translators: [",
+                    "    ",
+                    "  ],",
+                    "),"
+            ],
+            "description": "Creates a new Multi2TabsTranslator"
+    },
+    "Creates a new Multi3TabsPageStack": {
+            "prefix": "m3tabspagestack",
+            "body": [
+                    "class $1PageStack extends Multi3TabsPageStack {",
+                    "  $2PageStack(super.stateBuilder);",
+                    "",
+                    "  @override",
+                    "  Widget build(BuildContext context, MultiTabPageState<Multi3TabsState> state) {",
+                    "    return Container();",
+                    "  }",
+                    "",
+                    "  @override",
+                    "  Multi3TabsState get initialState => Multi3TabsState(",
+                    "        currentIndex: $3,",
+                    "        tab1PageStack: $4,",
+                    "        tab2PageStack: $5,",
+                    "        tab3PageStack: $6,",
+                    "      );",
+                    "}"
+            ],
+            "description": "Creates a new Multi3TabsPageStack"
+    },
+    "Creates a new Multi3TabsTranslator": {
+            "prefix": "m3tabspagetrans",
+            "body": [
+                    "Multi3TabsTranslator<$1>(",
+                    "  pageStack: $1.new,",
+                    "  tab1Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab2Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab3Translators: [",
+                    "    ",
+                    "  ],",
+                    "),"
+            ],
+            "description": "Creates a new Multi3TabsTranslator"
+    },
+    "Creates a new Multi4TabsPageStack": {
+            "prefix": "m4tabspagestack",
+            "body": [
+                    "class $1PageStack extends Multi4TabsPageStack {",
+                    "  $2PageStack(super.stateBuilder);",
+                    "",
+                    "  @override",
+                    "  Widget build(BuildContext context, MultiTabPageState<Multi4TabsState> state) {",
+                    "    return Container();",
+                    "  }",
+                    "",
+                    "  @override",
+                    "  Multi4TabsState get initialState => Multi4TabsState(",
+                    "        currentIndex: $3,",
+                    "        tab1PageStack: $4,",
+                    "        tab2PageStack: $5,",
+                    "        tab3PageStack: $6,",
+                    "        tab4PageStack: $7,",
+                    "      );",
+                    "}"
+            ],
+            "description": "Creates a new Multi4TabsPageStack"
+    },
+    "Creates a new Multi4TabsTranslator": {
+            "prefix": "m4tabspagetrans",
+            "body": [
+                    "Multi4TabsTranslator<$1>(",
+                    "  pageStack: $1.new,",
+                    "  tab1Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab2Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab3Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab4Translators: [",
+                    "    ",
+                    "  ],",
+                    "),"
+            ],
+            "description": "Creates a new Multi4TabsTranslator"
+    },
+    "Creates a new Multi5TabsPageStack": {
+            "prefix": "m5tabspagestack",
+            "body": [
+                    "class $1PageStack extends Multi5TabsPageStack {",
+                    "  $2PageStack(super.stateBuilder);",
+                    "",
+                    "  @override",
+                    "  Widget build(BuildContext context, MultiTabPageState<Multi5TabsState> state) {",
+                    "    return Container();",
+                    "  }",
+                    "",
+                    "  @override",
+                    "  Multi5TabsState get initialState => Multi5TabsState(",
+                    "        currentIndex: $3,",
+                    "        tab1PageStack: $4,",
+                    "        tab2PageStack: $5,",
+                    "        tab3PageStack: $6,",
+                    "        tab4PageStack: $7,",
+                    "        tab5PageStack: $8,",
+                    "      );",
+                    "}"
+            ],
+            "description": "Creates a new Multi5TabsPageStack"
+    },
+    "Creates a new Multi5TabsTranslator": {
+            "prefix": "m5tabspagetrans",
+            "body": [
+                    "Multi5TabsTranslator<$1>(",
+                    "  pageStack: $1.new,",
+                    "  tab1Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab2Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab3Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab4Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab5Translators: [",
+                    "    ",
+                    "  ],",
+                    "),"
+            ],
+            "description": "Creates a new Multi5TabsTranslator"
+    },
+    "Creates a new Multi6TabsPageStack": {
+            "prefix": "m6tabspagestack",
+            "body": [
+                    "class $1PageStack extends Multi6TabsPageStack {",
+                    "  $2PageStack(super.stateBuilder);",
+                    "",
+                    "  @override",
+                    "  Widget build(BuildContext context, MultiTabPageState<Multi6TabsState> state) {",
+                    "    return Container();",
+                    "  }",
+                    "",
+                    "  @override",
+                    "  Multi6TabsState get initialState => Multi6TabsState(",
+                    "        currentIndex: $3,",
+                    "        tab1PageStack: $4,",
+                    "        tab2PageStack: $5,",
+                    "        tab3PageStack: $6,",
+                    "        tab4PageStack: $7,",
+                    "        tab5PageStack: $8,",
+                    "        tab6PageStack: $9,",
+                    "      );",
+                    "}"
+            ],
+            "description": "Creates a new Multi6TabsPageStack"
+    },
+    "Creates a new Multi6TabsTranslator": {
+            "prefix": "m6tabspagetrans",
+            "body": [
+                    "Multi6TabsTranslator<$1>(",
+                    "  pageStack: $1.new,",
+                    "  tab1Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab2Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab3Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab4Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab5Translators: [",
+                    "    ",
+                    "  ],",
+                    "  tab6Translators: [",
+                    "    ",
+                    "  ],",
+                    "),"
+            ],
+            "description": "Creates a new Multi6TabsTranslator"
+    },
+    "Creates a new PageStack": {
+            "prefix": "pstack",
+            "body": [
+                    "class $1PageStack extends PageStack {",
+                    "  @override",
+                    "  Widget build(BuildContext context) {",
+                    "    return ;",
+                    "  }",
+                    "}"
+            ],
+            "description": "Creates a new PageStack"
+    },
+    "Creates a new PathTranslator": {
+            "prefix": "ptrans",
+            "body": [
+                    "PathTranslator<$1>(",
+                    "  path: '/$2',",
+                    "  pageStack: $1(),",
+                    "),"
+            ],
+            "description": "Creates a new PathTranslator"
+    },
+    "Creates a new PathTranslator.parse": {
+            "prefix": "ptransparse",
+            "body": [
+                    "PathTranslator<$1>.parse(",
+                    "  path: '/$2',",
+                    "  pageStackToWebEntry: (pageStack) {",
+                    "    ",
+                    "  },",
+                    "  matchToPageStack: (match) {",
+                    "",
+                    "    return $1();",
+                    "  },",
+                    "),"
+            ],
+            "description": "Creates a new PathTranslator.parse"
+    }
+}

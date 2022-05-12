@@ -1,0 +1,111 @@
+<templateSet group="Theater">
+  <template name="pstack" value="class $Name$PageStack extends PageStack {&#10;  @override&#10;  Widget build(BuildContext context) {&#10;    return $END$;&#10;  }&#10;}" description="Creates a new PageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="m2tabspagestack" value="class $Name$PageStack extends Multi2TabsPageStack {&#10;  $Name$PageStack(super.stateBuilder);&#10;&#10;  @override&#10;  Widget build(BuildContext context, MultiTabPageState&lt;Multi2TabsState&gt; state) {&#10;    return Container();&#10;  }&#10;&#10;  @override&#10;  Multi2TabsState get initialState =&gt; Multi2TabsState(&#10;        currentIndex: $currentIndex$,&#10;        tab1PageStack: $tab1PageStack$,&#10;        tab2PageStack: $tab2PageStack$,&#10;      );&#10;}" description="Creates a new Multi2TabsPageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="currentIndex" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab1PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab2PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="m6tabspagestack" value="class $NAME$PageStack extends Multi6TabsPageStack {&#10;  $Name$PageStack(super.stateBuilder);&#10;&#10;  @override&#10;  Widget build(BuildContext context, MultiTabPageState&lt;Multi6TabsState&gt; state) {&#10;    return Container();&#10;  }&#10;&#10;  @override&#10;  Multi6TabsState get initialState =&gt; Multi6TabsState(&#10;        currentIndex: $currentIndex$,&#10;        tab1PageStack: $tab1PageStack$,&#10;        tab2PageStack: $tab2PageStack$,&#10;        tab3PageStack: $tab3PageStack$,&#10;        tab4PageStack: $tab4PageStack$,&#10;        tab5PageStack: $tab5PageStack$,&#10;        tab6PageStack: $tab6PageStack$,&#10;      );&#10;}" description="Creates a new Multi6TabsPageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="currentIndex" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab1PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab2PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab3PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab4PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab5PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab6PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="m3tabspagestack" value="class $NAME$PageStack extends Multi3TabsPageStack {&#10;  $Name$PageStack(super.stateBuilder);&#10;&#10;  @override&#10;  Widget build(BuildContext context, MultiTabPageState&lt;Multi3TabsState&gt; state) {&#10;    return Container();&#10;  }&#10;&#10;  @override&#10;  Multi3TabsState get initialState =&gt; Multi3TabsState(&#10;        currentIndex: $currentIndex$,&#10;        tab1PageStack: $tab1PageStack$,&#10;        tab2PageStack: $tab2PageStack$,&#10;        tab3PageStack: $tab3PageStack$,&#10;      );&#10;}" description="Creates a new Multi3TabsPageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="currentIndex" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab1PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab2PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab3PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="m4tabspagestack" value="class $NAME$PageStack extends Multi4TabsPageStack {&#10;  $Name$PageStack(super.stateBuilder);&#10;&#10;  @override&#10;  Widget build(BuildContext context, MultiTabPageState&lt;Multi4TabsState&gt; state) {&#10;    return Container();&#10;  }&#10;&#10;  @override&#10;  Multi4TabsState get initialState =&gt; Multi4TabsState(&#10;        currentIndex: $currentIndex$,&#10;        tab1PageStack: $tab1PageStack$,&#10;        tab2PageStack: $tab2PageStack$,&#10;        tab3PageStack: $tab3PageStack$,&#10;        tab4PageStack: $tab4PageStack$,&#10;      );&#10;}" description="Creates a new Multi4TabsPageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="currentIndex" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab1PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab2PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab3PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab4PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="m5tabspagestack" value="class $NAME$PageStack extends Multi5TabsPageStack {&#10;  $Name$PageStack(super.stateBuilder);&#10;&#10;  @override&#10;  Widget build(BuildContext context, MultiTabPageState&lt;Multi5TabsState&gt; state) {&#10;    return Container();&#10;  }&#10;&#10;  @override&#10;  Multi5TabsState get initialState =&gt; Multi5TabsState(&#10;        currentIndex: $currentIndex$,&#10;        tab1PageStack: $tab1PageStack$,&#10;        tab2PageStack: $tab2PageStack$,&#10;        tab3PageStack: $tab3PageStack$,&#10;        tab4PageStack: $tab4PageStack$,&#10;        tab5PageStack: $tab5PageStack$,&#10;      );&#10;}" description="Creates a new Multi5TabsPageStack" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="currentIndex" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab1PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab2PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab3PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab4PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="tab5PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_TOPLEVEL" value="true" />
+    </context>
+  </template>
+  <template name="ptrans" value="PathTranslator&lt;$PageStack$&gt;(&#10;  path: '/$Path$',&#10;  pageStack: $PageStack$($END$),&#10;)," description="Creates a new PathTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Path" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="ptransparse" value="PathTranslator&lt;$PageStack$&gt;.parse(&#10;  path: '/$Path$',&#10;  pageStackToWebEntry: (pageStack) {&#10;    $END$&#10;  },&#10;  matchToPageStack: (match) {&#10;&#10;    return $PageStack$();&#10;  },&#10;)," description="Creates a new PathTranslator.parse" toReformat="false" toShortenFQNames="true">
+    <variable name="PageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Path" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="m6tabspagetrans" value="Multi6TabsTranslator&lt;$Multi6TabsPageStack$&gt;(&#10;  pageStack: $Multi6TabsPageStack$.new,&#10;  tab1Translators: [&#10;    $END$&#10;  ],&#10;  tab2Translators: [&#10;    &#10;  ],&#10;  tab3Translators: [&#10;    &#10;  ],&#10;  tab4Translators: [&#10;    &#10;  ],&#10;  tab5Translators: [&#10;    &#10;  ],&#10;  tab6Translators: [&#10;    &#10;  ],&#10;)," description="Creates a new Multi6TabsTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="Multi6TabsPageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="m5tabspagetrans" value="Multi5TabsTranslator&lt;$Multi5TabsPageStack$&gt;(&#10;  pageStack: $Multi5TabsPageStack$.new,&#10;  tab1Translators: [&#10;    $END$&#10;  ],&#10;  tab2Translators: [&#10;    &#10;  ],&#10;  tab3Translators: [&#10;    &#10;  ],&#10;  tab4Translators: [&#10;    &#10;  ],&#10;  tab5Translators: [&#10;    &#10;  ],&#10;)," description="Creates a new Multi5TabsTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="Multi5TabsPageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="m3tabspagetrans" value="Multi3TabsTranslator&lt;$Multi3TabsPageStack$&gt;(&#10;  pageStack: $Multi3TabsPageStack$.new,&#10;  tab1Translators: [&#10;    $END$&#10;  ],&#10;  tab2Translators: [&#10;    &#10;  ],&#10;  tab3Translators: [&#10;    &#10;  ],&#10;)," description="Creates a new Multi3TabsTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="Multi3TabsPageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="m4tabspagetrans" value="Multi4TabsTranslator&lt;$Multi4TabsPageStack$&gt;(&#10;  pageStack: $Multi4TabsPageStack$.new,&#10;  tab1Translators: [&#10;    $END$&#10;  ],&#10;  tab2Translators: [&#10;    &#10;  ],&#10;  tab3Translators: [&#10;    &#10;  ],&#10;  tab4Translators: [&#10;    &#10;  ],&#10;)," description="Creates a new Multi4TabsTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="Multi4TabsPageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+  <template name="m2tabspagetrans" value="Multi2TabsTranslator&lt;$Multi2TabsPageStack$&gt;(&#10;  pageStack: $Multi2TabsPageStack$.new,&#10;  tab1Translators: [&#10;    $END$&#10;  ],&#10;  tab2Translators: [&#10;    &#10;  ],&#10;)," description="Creates a new Multi2TabsTranslator" toReformat="false" toShortenFQNames="true">
+    <variable name="Multi2TabsPageStack" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="DART_STATEMENT" value="true" />
+    </context>
+  </template>
+</templateSet>
