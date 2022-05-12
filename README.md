@@ -373,3 +373,4 @@ class _MyScreenState extends State<MyScreen> {
 ```
 
 This will cause your widget to rebuild when `isCurrent` changes.# theater-tutorial
+# theater_tutorial
