@@ -26,7 +26,6 @@ Navigation/routing package which is:
   - [Override the default transition for a specific page stack](#override-the-default-transition-for-a-specific-page-stack)
   - [Keys and transitions](#keys-and-transitions)
 - [React to visibility change](#react-to-visibility-change)
-- [theater_tutorial](#theater_tutorial)
 
 # Getting started
 
@@ -382,5 +381,4 @@ class _MyScreenState extends State<MyScreen> {
 }
 ```
 
-This will cause your widget to rebuild when `isCurrent` changes.# theater-tutorial
-# theater_tutorial
+This will cause your widget to rebuild when `isCurrent` changes.
