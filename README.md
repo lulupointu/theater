@@ -26,6 +26,7 @@ Navigation/routing package which is:
   - [Override the default transition for a specific page stack](#override-the-default-transition-for-a-specific-page-stack)
   - [Keys and transitions](#keys-and-transitions)
 - [React to visibility change](#react-to-visibility-change)
+- [theater_tutorial](#theater_tutorial)
 
 # Getting started
 
@@ -101,6 +102,15 @@ PathTranslator<HomePageStack>(...)
 
 // DON'T
 PathTranslator(...)
+```
+
+You also need to add `ensureInitialized` before `runApp`
+```dart
+void main{
+  Theater.ensureInitialized();
+
+  runApp(...)
+}
 ```
 
 ## Parsing path params, query params, etc.
