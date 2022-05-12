@@ -106,7 +106,7 @@ PathTranslator(...)
 
 You also need to add `ensureInitialized` before `runApp`
 ```dart
-void main{
+void main() {
   Theater.ensureInitialized();
 
   runApp(...)
