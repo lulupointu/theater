@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       home: Theater(
         initialPageStack: LogInPageStack(),
         defaultPageBuilder: (context, pageStack, child) {
-          return PageBuilder(
+          return CustomTransitionPage(
             child: child,
             transitionsBuilder: (context, animation, _, child) =>
                 FadeTransition(opacity: animation, child: child),
@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
 }
 
 class LogInPageStack extends PageStack {
+
   @override
   Widget build(BuildContext context) => LoginScreen();
 }

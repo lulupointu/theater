@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'custom_transition_page.dart';
 
 /// Custom transition page with no transition.
-class NoTransitionPage<T> extends PageBuilder<T> {
+class NoTransitionPage<T> extends CustomTransitionPage<T> {
   /// Constructor for a page with no transition functionality.
   const NoTransitionPage({
     required Widget child,

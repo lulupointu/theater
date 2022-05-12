@@ -3,7 +3,7 @@ import 'theater_url_strategy.dart';
 
 import 'web_entry.dart';
 
-export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/docs/theater_browser.dart' show TheaterBrowser;
+export 'src/non_web/theater_browser.dart' if (dart.library.html) 'src/web/theater_browser.dart' show TheaterBrowser;
 
 /// A class which interacts with the browser i.e.:
 ///   - Passes information to update the browser

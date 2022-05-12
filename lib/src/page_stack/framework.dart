@@ -5,14 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../browser/web_entry.dart';
+import '../../theater.dart';
 import '../navigator/theater_navigator.dart';
-import '../theater/theater.dart';
-import '../translators/translator.dart';
 import '../translators/translators/web_entry_matcher/web_entry_match.dart';
 import '../translators/translators/web_entry_matcher/web_entry_matcher.dart';
 import '../translators/translators_handler.dart';
-import 'system_pop_result/system_pop_result.dart';
 
 /// This is the base objects which constitute Theater.
 ///
@@ -476,7 +473,7 @@ mixin PageStackWithPage<State extends PageState> on PageStackBase {
 ///
 ///
 /// You can override [buildPage] if you want to build a custom [Page].
-abstract class PageStack extends PageStackBase with PageStackWithPage {
+abstract class PageStack extends PageStackBase with PageStackWithPage<PageState> {
   /// Allow subclasses to be const
   const PageStack();
 
@@ -890,7 +887,7 @@ class _MultiTabsPageWidget<TabsState extends MultiTabState> extends PageWidget {
 ///
 /// {@endtemplate}
 abstract class MultiTabsPageStack<S extends MultiTabState> extends PageStackBase
-    with PageStackWithPage {
+    with PageStackWithPage<MultiTabPageState<S>> {
   /// A const constructor initializing different attributes with the given
   /// values
   ///

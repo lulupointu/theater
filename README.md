@@ -4,9 +4,32 @@ Navigation/routing package which is:
   * Comes with a powerful nested navigator pattern
   * No codegen
 
-## Getting started
+# Index
 
-### 1. Create stacks of pages:
+- [Index](#index)
+- [Getting started](#getting-started)
+  - [1. Create stacks of pages](#1-create-stacks-of-pages)
+  - [2. Use the `Theater` widget](#2-use-the-theater-widget)
+  - [3. Navigate](#3-navigate)
+- [Web/Deep linking](#webdeep-linking)
+  - [Parsing path params, query params, etc.](#parsing-path-params-query-params-etc)
+  - [Redirect](#redirect)
+  - [Update translators](#update-translators)
+- [Create tabbed page stack](#create-tabbed-page-stack)
+  - [Create the page stacks](#create-the-page-stacks)
+  - [Navigate](#navigate)
+  - [Web/Deep linking](#webdeep-linking-1)
+- [Handle pop](#handle-pop)
+- [Handle back button](#handle-back-button)
+- [Custom transitions](#custom-transitions)
+  - [Override the default transition for every page stacks](#override-the-default-transition-for-every-page-stacks)
+  - [Override the default transition for a specific page stack](#override-the-default-transition-for-a-specific-page-stack)
+  - [Keys and transitions](#keys-and-transitions)
+- [React to visibility change](#react-to-visibility-change)
+
+# Getting started
+
+## 1. Create stacks of pages
 
 ```dart
 class HomePageStack extends PageStack {
@@ -26,8 +49,9 @@ class SettingsPageStack extends PageStack {
   PageStackBase? get pageStackBellow => HomePageStack();
 }
 ```
+💡 Tip: use `pstack` in your IDE to easily create a `PageStack`
 
-### 2. Use the `Theater` widget
+## 2. Use the `Theater` widget
 
 ```dart
 MaterialApp(
@@ -38,7 +62,7 @@ MaterialApp(
 ```
 
 
-### 3. Navigate:
+## 3. Navigate
 
 ```dart
 // Navigate to Home
@@ -49,7 +73,7 @@ context.to(SettingsPageStack());
 ```
 
 
-## Web/Deep linking
+# Web/Deep linking
 
 If you need deep-linking, or are on the web, use translators to translate you `PageStack`s to url and back
 
@@ -68,6 +92,18 @@ Theater(
   ],
 )
 ```
+💡 Tip: use `ptrans` in your IDE to easily create a `PathTranslator`
+
+⚠️ Warning: Don't forget to give the generic parameter:
+```dart
+// DO
+PathTranslator<HomePageStack>(...)
+
+// DON'T
+PathTranslator(...)
+```
+
+## Parsing path params, query params, etc.
 
 Use the `.parse` constructor to add and extract arguments from the url:
 ```dart
@@ -77,13 +113,14 @@ PathTranslator<HomePageStack>.parse(
   pageStackToWebEntry: (pageStack) => WebEntry(path: '/${pageStack.userId}'),
 ),
 ```
+💡 Tip: use `ptransparse` in your IDE to easily create a `PathTranslator.parse`
 
-Use RedirectorTranslator to redirect:
+## Redirect
 ```dart
 RedirectorTranslator(path: '*', pageStack: HomePageStack())
 ```
 
-
+## Update translators
 The translators can be added/removed dynamically:
 ```dart
 Theater(
@@ -101,9 +138,9 @@ Theater(
   ],
 )
 ```
-## Create tabbed page stack
+# Create tabbed page stack
 
-### Create the page stacks
+## Create the page stacks
 
 Page stacks of the tabs:
 ```dart
@@ -155,7 +192,11 @@ class MyScaffoldPageStack extends Multi2TabsPageStack {
 }
 ```
 
-### Navigate
+💡 Tip: use `m2tabspagestack` in your IDE to easily create a `Multi2TabsPageStack`
+
+
+
+## Navigate
 ```dart
 // To the Profile tab
 context.theater.to(
@@ -168,7 +209,28 @@ context.theater.to(
 )
 ```
 
-## Handle pop
+
+## Web/Deep linking
+```dart
+Multi2TabsTranslator<MyScaffoldPageStack>(
+  pageStack: MyScaffoldPageStack.new,
+  tab1Translators: [
+    PathTranslator<HomePageStack>(
+      path: '/home',
+      pageStack: HomePageStack(),
+    ),
+  ],
+  tab2Translators: [
+    PathTranslator<ProfilePageStack>(
+      path: '/profile',
+      pageStack: ProfilePageStack(),
+    ),
+  ],
+)
+```
+💡 Tip: use `m2tabspagetrans` in your IDE to easily create a `Multi2TabsTranslator`
+
+# Handle pop
 
 Use the `WillPopScope` provided by flutter:
 
@@ -182,7 +244,7 @@ WillPopScope(
 );
 ```
 
-## Handle back button
+# Handle back button
 
 Use the `BackButtonListener` provided by flutter:
 
@@ -196,7 +258,94 @@ BackButtonListener(
 );
 ```
 
-## React to visibility change
+
+# Custom transitions
+
+Transitions are provided by the [Page] object created by each of your page stack. You can use a 
+custom page to create a custom transition.
+
+Theater provides an helpful page for this: [CustomTransitionPage].
+
+## Override the default transition for every page stacks
+
+```dart
+// Create a FadeTransition as the default transition
+Theater(
+  defaultPageBuilder: (context, pageStack, child) {
+    return CustomTransitionPage(
+      key: pageStack.key, // DO use pageStack.key
+      child: child,
+      transitionsBuilder: (context, animation, _, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+  },
+  ...
+),
+```
+
+## Override the default transition for a specific page stack
+
+```dart
+class HomePageStack extends PageStack with {
+  @override
+  Page buildPage(BuildContext context, PageState state, Widget child) {
+    return CustomTransitionPage(
+      child: child,
+      // Create a slide transition from left to right
+      transitionsBuilder: (context, animation, _, child) => SlideTransition(
+        position: animation.drive(
+          Tween<Offset>(begin: const Offset(-1, 0.0), end: Offset.zero),
+        ),
+        child: child,
+      ),
+    );
+  }
+  
+  @override
+  Widget build(BuildContext context) => HomeScreen();
+}
+```
+
+## Keys and transitions
+
+Keys are used by Flutter navigator to know if two pages are the same. Transitions only play, when pages are siblings, when their type or keys are different.
+
+For example, with the following `PageStack`:
+```dart
+class UserPageStack extends PageStack {
+  final String userId;
+  UserPageStack({required this.userId});
+ 
+  @override
+  Widget build(BuildContext context) {
+    return UserScreen(userId: userId);
+  }
+}
+```
+
+If you are in the `UserScreen` and use:
+```dart
+context.to(UserPageStack(userId: 'anotherUserId'))
+```
+You won't see any transition.
+
+To see a transition, **specify a key in you `PageStack`**:
+```dart
+class UserPageStack extends PageStack {
+  final String userId;
+  UserPageStack({required this.userId});
+  
+  // Use userId, which differentiate the UserPageStacks
+  LocalKey get key => ValueKey(userId);
+
+  @override
+  Widget build(BuildContext context) {
+    return UserScreen(userId: userId);
+  }
+}
+```
+
+# React to visibility change
 
 If you need to know if you widget is currently visible, use `PageState.of(context).isCurrent`:
 
@@ -211,6 +360,7 @@ class _MyScreenState extends State<MyScreen> {
 
   @override
   void didChangeDependencies() {
+    // Use [PageState.of] in [didChangeDependencies] or directly in your [build] method
     _isCurrent = PageState.of(context).isCurrent;
     super.didChangeDependencies();
   }
@@ -222,4 +372,4 @@ class _MyScreenState extends State<MyScreen> {
 }
 ```
 
-This will cause your widget to rebuild when `isActive` changes.
+This will cause your widget to rebuild when `isCurrent` changes.
