@@ -55,7 +55,7 @@ class SettingsPageStack extends PageStack {
 
 ```dart
 MaterialApp(
-  builder: Theater.build(
+  home: Theater(
     initialPageStack: HomePageStack(),
   ),
 );
