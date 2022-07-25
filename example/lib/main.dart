@@ -49,7 +49,6 @@ class MyApp extends StatelessWidget {
 }
 
 class LogInPageStack extends PageStack {
-
   @override
   Widget build(BuildContext context) => LoginScreen();
 }
