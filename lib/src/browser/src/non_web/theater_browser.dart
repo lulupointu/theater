@@ -16,6 +16,7 @@ class TheaterBrowser extends TheaterBrowserInterface {
   /// Prevent direct instantiation;
   TheaterBrowser._({required TheaterUrlStrategy theaterUrlStrategy})
       : _webEntries = [
+        // TODO: use WidgetObserver to listen to pushRoutes while the app is running
           WebEntry.fromUri(uri: Uri.parse(PlatformDispatcher.instance.defaultRouteName)),
         ].lock,
         super(theaterUrlStrategy);
