@@ -64,7 +64,10 @@ class Theater extends StatelessWidget {
   })  : assert(!kIsWeb || translatorsBuilder != null, '''
 You must define [translators] when you are on the docs, otherwise Theater can't know which [PageStack] correspond to which url
 '''),
-        super(key: key);
+        _theaterKey = key is GlobalKey<TheaterState> ? key : null,
+        // Don't set the key if it is a GlobalKey<TheaterState> since it will be
+        // pass to the child _Theater widget
+        super(key: key is GlobalKey<TheaterState> ? null : key);
 
   /// The initial [PageStack] to display
   ///
@@ -80,8 +83,8 @@ You must define [translators] when you are on the docs, otherwise Theater can't 
   /// might be null since the conversion from page stack to docs entry or vise
   /// versa is not done
   final List<Translator<PageElement, PageStackBase>> Function(
-      BuildContext context)? translatorsBuilder;
-
+    BuildContext context,
+  )? translatorsBuilder;
 
   /// The default builder which will be used if [PageStack] does not implement
   /// buildPage. Use it to create default page transition for every page at
@@ -110,7 +113,11 @@ You must define [translators] when you are on the docs, otherwise Theater can't 
   ///
   ///
   /// Defaults to [_defaultPageBuilder]
-  final Page Function(BuildContext context, PageStackWithPage pageStack, Widget child,) defaultPageBuilder;
+  final Page Function(
+    BuildContext context,
+    PageStackWithPage pageStack,
+    Widget child,
+  ) defaultPageBuilder;
 
   /// A callback to build a widget around the [Navigator] created by this
   /// widget
@@ -156,6 +163,12 @@ You must define [translators] when you are on the docs, otherwise Theater can't 
   ///
   /// Defaults to false
   final bool disableUniversalTranslator;
+
+  /// A key to access the [Theater] state from anywhere
+  ///
+  /// This will be registered if the given [key] is of [GlobalKey<TheaterState>]
+  /// type
+  final GlobalKey<TheaterState>? _theaterKey;
 
   /// A method to access the [Theater] of the given [context]
   ///
@@ -340,7 +353,11 @@ You must define [translators] when you are on the docs, otherwise Theater can't 
   /// `Widget build(BuildContext context) => Container();`
   ///
   /// {@endtemplate}
-  static Page _defaultPageBuilder(BuildContext context, PageStackWithPage pageStack, Widget child,) {
+  static Page _defaultPageBuilder(
+    BuildContext context,
+    PageStackWithPage pageStack,
+    Widget child,
+  ) {
     final defaultKey = ValueKey(pageStack.key);
 
     switch (defaultTargetPlatform) {
@@ -370,6 +387,7 @@ You must define [translators] when you are on the docs, otherwise Theater can't 
     return DefaultPageBuilder(
       builder: defaultPageBuilder,
       child: _Theater(
+        key: _theaterKey,
         initialPageStack: initialPageStack,
         translatorsBuilder: translatorsBuilder,
         builder: builder,
