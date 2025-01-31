@@ -248,7 +248,7 @@ class BookDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(book.title, style: Theme.of(context).textTheme.headline6),
+            Text(book.title, style: Theme.of(context).textTheme.titleLarge),
             ElevatedButton(
               onPressed: () => toAuthor(context, book.author),
               child: Text(book.author.name),
@@ -274,7 +274,7 @@ class AuthorDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(author.name, style: Theme.of(context).textTheme.headline6),
+            Text(author.name, style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
       ),

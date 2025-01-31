@@ -94,10 +94,12 @@ class StackedChatsPageStack extends PageStack
         _onPop(context);
         return true;
       },
-      child: WillPopScope(
-        onWillPop: () async {
-          _onPop(context);
-          return false;
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (!didPop) {
+            _onPop(context);
+          }
         },
         child: child,
       ),

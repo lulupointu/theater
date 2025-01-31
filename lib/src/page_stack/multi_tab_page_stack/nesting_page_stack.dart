@@ -52,7 +52,6 @@ class NestedState extends MultiTabState {
 /// TODO: more doc
 abstract class NestingPageStack extends MultiTabsPageStack<NestedState> {
   /// TODO: more doc
-  @mustCallSuper
   const NestingPageStack(StateBuilder<NestedState> stateBuilder)
       : super(stateBuilder, NestedState._fromMultiTabState);
 }

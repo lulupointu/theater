@@ -48,7 +48,7 @@ class UsersScreen extends StatelessWidget {
         children: [
           Text(
             'All users:',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           SizedBox(height: 16),
           Expanded(
@@ -120,7 +120,7 @@ class UserDetailsScreen extends StatelessWidget {
         children: [
           Text(
             'User:',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           SizedBox(height: 16),
           Text('Name: ${user.name}'),
@@ -130,7 +130,7 @@ class UserDetailsScreen extends StatelessWidget {
           Center(
             child: Text(
               'User\'s friends:',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           SizedBox(height: 16),

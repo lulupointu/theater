@@ -148,7 +148,7 @@ class WishlistScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ID: ${wishlist.id}', style: Theme.of(context).textTheme.headline6),
+            Text('ID: ${wishlist.id}', style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
       ),

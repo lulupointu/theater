@@ -60,7 +60,7 @@ class ChatsListScreen extends StatelessWidget {
               onTap: () => navigator.showChat(context, chat: chats[index]),
               title: RichText(
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.titleMedium,
                   children: [
                     TextSpan(
                       text: chats[index].members.length > 1 ? '[Group] ' : '',

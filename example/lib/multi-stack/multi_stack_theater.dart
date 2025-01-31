@@ -150,7 +150,7 @@ class ColorDetailScreen extends StatelessWidget {
     required this.tabItem,
     required this.color,
     required this.title,
-    this.materialIndex: 500,
+    this.materialIndex = 500,
   });
 
   final TabItem tabItem;

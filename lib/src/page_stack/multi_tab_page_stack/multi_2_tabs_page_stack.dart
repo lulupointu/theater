@@ -109,7 +109,6 @@ class Multi2TabsState extends MultiTabState {
 /// {@macro theater.framework.STabsRoute}
 abstract class Multi2TabsPageStack extends MultiTabsPageStack<Multi2TabsState> {
   /// {@macro theater.framework.STabsRoute.constructor}
-  @mustCallSuper
   const Multi2TabsPageStack(StateBuilder<Multi2TabsState> stateBuilder)
       : super(stateBuilder, Multi2TabsState._fromMultiTabState);
 }
